@@ -7,7 +7,7 @@ A full-stack technical discussion forum built with React, Node.js (Express), and
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or higher)
-- [pnpm](https://pnpm.io/) (v8 or higher)
+- [npm](https://www.npmjs.com/) (v10 or higher)
 
 ### Installation
 
@@ -19,7 +19,7 @@ A full-stack technical discussion forum built with React, Node.js (Express), and
 
 2. Install dependencies:
    ```bash
-   pnpm install
+   npm install
    ```
 
 ## 🛠️ Development
@@ -27,7 +27,7 @@ A full-stack technical discussion forum built with React, Node.js (Express), and
 Start the development server (both frontend and backend):
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 The app will be available at `http://localhost:8080`.
@@ -36,12 +36,12 @@ The app will be available at `http://localhost:8080`.
 
 1. Build both the client and server:
    ```bash
-   pnpm build
+   npm run build
    ```
 
 2. Start the production server:
    ```bash
-   pnpm start
+   npm start
    ```
 
 The production server runs on port 3000 by default (configurable via `PORT` environment variable).
@@ -55,12 +55,12 @@ The production server runs on port 3000 by default (configurable via `PORT` envi
 
 ## 🧪 Testing & Quality
 
-- **Run tests**: `pnpm test`
-- **Type check**: `pnpm typecheck`
+- **Run tests**: `npm test`
+- **Type check**: `npm run typecheck`
 
 ## 🎨 Tech Stack
 
 - **Frontend**: React 18, React Router 6, TailwindCSS 3, Lucide Icons, Sonner (Toasts)
 - **Backend**: Express.js
 - **Tooling**: Vite, TypeScript, Vitest
-- **Package Manager**: pnpm
+- **Package Manager**: npm

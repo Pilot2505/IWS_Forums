@@ -6,7 +6,7 @@ While the starter comes with a express server, only create endpoint when strictl
 
 ## Tech Stack
 
-- **PNPM**: Prefer pnpm
+- **NPM**: Prefer npm
 - **Frontend**: React 18 + React Router 6 (spa) + TypeScript + Vite + TailwindCSS 3
 - **Backend**: Express server integrated with Vite dev server
 - **Testing**: Vitest
@@ -90,11 +90,11 @@ Path aliases:
 ## Development Commands
 
 ```bash
-pnpm dev        # Start dev server (client + server)
-pnpm build      # Production build
-pnpm start      # Start production server
-pnpm typecheck  # TypeScript validation
-pnpm test          # Run Vitest tests
+npm run dev        # Start dev server (client + server)
+npm run build      # Production build
+npm start          # Start production server
+npm run typecheck  # TypeScript validation
+npm test           # Run Vitest tests
 ```
 
 ## Adding Features
