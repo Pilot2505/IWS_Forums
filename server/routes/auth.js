@@ -1,9 +1,7 @@
-import { RequestHandler } from "express";
-
 // Mock database for users
-const users: any[] = [];
+const users = [];
 
-export const handleRegister: RequestHandler = (req, res) => {
+export const handleRegister = (req, res) => {
   const { email, username, password } = req.body;
 
   if (!email || !username || !password) {
@@ -28,7 +26,7 @@ export const handleRegister: RequestHandler = (req, res) => {
   });
 };
 
-export const handleLogin: RequestHandler = (req, res) => {
+export const handleLogin = (req, res) => {
   const { username, password } = req.body;
 
   const user = users.find(u => u.username === username && u.password === password);

@@ -5,7 +5,7 @@ import path from "path";
 export default defineConfig({
   build: {
     lib: {
-      entry: path.resolve(__dirname, "server/node-build.ts"),
+      entry: path.resolve(import.meta.dirname, "server/node-build.js"),
       name: "server",
       fileName: "production",
       formats: ["es"],
@@ -15,7 +15,6 @@ export default defineConfig({
     ssr: true,
     rollupOptions: {
       external: [
-        // Node.js built-ins
         "fs",
         "path",
         "url",
@@ -29,7 +28,6 @@ export default defineConfig({
         "buffer",
         "querystring",
         "child_process",
-        // External dependencies that should not be bundled
         "express",
         "cors",
       ],
@@ -38,13 +36,13 @@ export default defineConfig({
         entryFileNames: "[name].mjs",
       },
     },
-    minify: false, // Keep readable for debugging
+    minify: false,
     sourcemap: true,
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./client"),
-      "@shared": path.resolve(__dirname, "./shared"),
+      "@": path.resolve(import.meta.dirname, "./client"),
+      "@shared": path.resolve(import.meta.dirname, "./shared"),
     },
   },
   define: {

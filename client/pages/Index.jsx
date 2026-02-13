@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 
 export default function Index() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
