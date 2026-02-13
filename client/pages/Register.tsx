@@ -1,15 +1,39 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function Register() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement registration logic
-    console.log("Register:", { email, username, password });
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Account created successfully!");
+        navigate("/login");
+      } else {
+        toast.error(data.error || "Registration failed");
+      }
+    } catch (error) {
+      toast.error("An error occurred during registration");
+      console.error("Register error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -94,9 +118,10 @@ export default function Register() {
               {/* Register Button */}
               <button
                 type="submit"
-                className="w-full bg-[#2b5a8a] hover:bg-[#1e4167] text-white font-semibold py-3 rounded-md transition-colors mt-6"
+                disabled={loading}
+                className="w-full bg-[#2b5a8a] hover:bg-[#1e4167] disabled:bg-gray-400 text-white font-semibold py-3 rounded-md transition-colors mt-6"
               >
-                Register
+                {loading ? "Creating account..." : "Register"}
               </button>
             </form>
 

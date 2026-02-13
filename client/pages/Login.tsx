@@ -1,14 +1,40 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement login logic
-    console.log("Login:", { username, password });
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Login successful!");
+        // Store user in local storage or state management
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/");
+      } else {
+        toast.error(data.error || "Login failed");
+      }
+    } catch (error) {
+      toast.error("An error occurred during login");
+      console.error("Login error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -74,9 +100,10 @@ export default function Login() {
               {/* Login Button */}
               <button
                 type="submit"
-                className="w-full bg-[#2b5a8a] hover:bg-[#1e4167] text-white font-semibold py-3 rounded-md transition-colors mt-6"
+                disabled={loading}
+                className="w-full bg-[#2b5a8a] hover:bg-[#1e4167] disabled:bg-gray-400 text-white font-semibold py-3 rounded-md transition-colors mt-6"
               >
-                Login
+                {loading ? "Logging in..." : "Login"}
               </button>
             </form>
 
