@@ -4,6 +4,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
+import PostDetail from "./pages/PostDetail";
+import CreatePost from "./pages/CreatePost";
 import NotFound from "./pages/NotFound";
 
 const App = () => (
@@ -14,6 +17,9 @@ const App = () => (
         <Route path="/" element={<Index />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/post/:id" element={<PostDetail />} />
+        <Route path="/create-post" element={<CreatePost />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
