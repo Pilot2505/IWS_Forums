@@ -14,7 +14,8 @@ export default function PostDetail() {
   const post = {
     id: 1,
     title: "How To Learn Java",
-    author: "Minh Quan",
+    author: "An Nguyen",
+    authorUsername: "@annguyen",
     timeAgo: "1 day ago",
     content: `Java is one of the most popular programming languages. It is widely used in web, mobile, and enterprise development.
 
@@ -37,7 +38,26 @@ Practice coding by building simple projects or replicating existing ones. Hands-
 3. Learn Core Java APIs`
   };
 
-  const comments = [];
+  const [comments, setComments] = useState([
+    {
+      id: 1,
+      author: "An Nguyen",
+      timeAgo: "1 day ago",
+      content: "Feel free to ask any questions about Java!"
+    },
+    {
+      id: 2,
+      author: "Rachel",
+      timeAgo: "1 day ago",
+      content: "Great article. I'm just starting with Java and your guide was very helpful."
+    },
+    {
+      id: 3,
+      author: "Alan",
+      timeAgo: "1 day ago",
+      content: "I recommend building small projects, that's what really helped me"
+    }
+  ]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -101,10 +121,15 @@ Practice coding by building simple projects or replicating existing ones. Hands-
             <div className="w-12 h-12 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center">
               <User className="w-6 h-6" />
             </div>
-            <div>
-              <p className="text-black text-xl font-medium">By {post.author}</p>
+            <div className="flex-1">
+              <p className="text-black text-xl">
+                By <Link to={`/profile/${post.authorUsername}`} className="text-[#1E56A0] font-medium">{post.author}</Link>
+              </p>
               <p className="text-gray-600 text-sm">{post.timeAgo}</p>
             </div>
+            <button className="bg-[#1E56A0] text-white px-6 py-2 rounded-md font-medium">
+              Follow
+            </button>
           </div>
 
           <div className="text-black text-lg leading-relaxed whitespace-pre-line">
@@ -134,10 +159,26 @@ Practice coding by building simple projects or replicating existing ones. Hands-
               </button>
             </form>
 
-            <div className="clear-both">
-              {comments.length === 0 && (
-                <p className="text-gray-500 text-center py-8">No comments yet</p>
-              )}
+            <div className="clear-both space-y-4">
+              {comments.map((c) => (
+                <div key={c.id} className="border-t pt-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#21005D]/10 border-2 border-[#D6E4F0] flex items-center justify-center flex-shrink-0">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-black">{c.author}</span>
+                        <span className="text-sm text-gray-500">• {c.timeAgo}</span>
+                      </div>
+                      <p className="text-gray-700 text-sm">{c.content}</p>
+                      <button className="text-[#1E56A0] text-sm font-medium mt-2">
+                        Reply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

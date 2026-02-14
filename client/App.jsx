@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import PostDetail from "./pages/PostDetail";
 import CreatePost from "./pages/CreatePost";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const App = () => (
@@ -20,6 +21,8 @@ const App = () => (
         <Route path="/home" element={<Home />} />
         <Route path="/post/:id" element={<PostDetail />} />
         <Route path="/create-post" element={<CreatePost />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:username" element={<Profile />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
