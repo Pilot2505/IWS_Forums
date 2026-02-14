@@ -49,14 +49,30 @@ The production server runs on port 3000 by default (configurable via `PORT` envi
 ## 📁 Project Structure
 
 - `client/`: React SPA frontend
-- `server/`: Express API backend
+- `server/`: Express API backend (currently uses mock in-memory storage)
 - `shared/`: Shared types and utilities
 - `dist/`: Compiled production files (after building)
+- `schema.sql`: MySQL database initialization script
 
 ## 🧪 Testing & Quality
 
 - **Run tests**: `npm test`
 - **Type check**: `npm run typecheck`
+
+## 🗄️ Database Setup
+
+The project includes a `schema.sql` file to initialize your MySQL database.
+
+1. Create a new MySQL database.
+2. Run the script:
+   ```bash
+   mysql -u your_username -p your_database_name < schema.sql
+   ```
+
+The schema includes:
+- `users`: User accounts and credentials
+- `posts`: Forum discussion threads
+- `comments`: Replies to posts
 
 ## 🎨 Tech Stack
 
