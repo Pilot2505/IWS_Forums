@@ -1,42 +1,80 @@
-// Mock database for users
-const users = [];
+import pool from "../db.js";
+import bcrypt from "bcrypt";
 
-export const handleRegister = (req, res) => {
+export const handleRegister = async (req, res) => {
   const { email, username, password } = req.body;
 
   if (!email || !username || !password) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  // Check if user already exists
-  const existingUser = users.find(u => u.email === email || u.username === username);
-  if (existingUser) {
-    return res.status(409).json({ error: "User already exists" });
+  try {
+    // Check if user already exists
+    const [existingUsers] = await pool.execute(
+      "SELECT id FROM users WHERE email = ? OR username = ?",
+      [email, username]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({ error: "User already exists" });
+    }
+
+    // Hash the password for security
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create new user in the database
+    const [result] = await pool.execute(
+      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+      [username, email, hashedPassword]
+    );
+
+    const userId = result.insertId;
+    console.log(`New user registered in DB: ${username} (${email})`);
+
+    res.status(201).json({ 
+      message: "User registered successfully",
+      user: { id: userId, email, username } 
+    });
+  } catch (error) {
+    console.error("Database registration error:", error);
+    res.status(500).json({ error: "Internal server error during registration" });
   }
-
-  // Create new user
-  const newUser = { id: Date.now().toString(), email, username, password };
-  users.push(newUser);
-
-  console.log(`New user registered: ${username} (${email})`);
-
-  res.status(201).json({ 
-    message: "User registered successfully",
-    user: { id: newUser.id, email, username } 
-  });
 };
 
-export const handleLogin = (req, res) => {
+export const handleLogin = async (req, res) => {
   const { username, password } = req.body;
 
-  const user = users.find(u => u.username === username && u.password === password);
-
-  if (!user) {
-    return res.status(401).json({ error: "Invalid username or password" });
+  if (!username || !password) {
+    return res.status(400).json({ error: "Missing username or password" });
   }
 
-  res.json({ 
-    message: "Login successful",
-    user: { id: user.id, email: user.email, username: user.username } 
-  });
+  try {
+    // Find the user by username
+    const [users] = await pool.execute(
+      "SELECT id, email, username, password FROM users WHERE username = ?",
+      [username]
+    );
+
+    if (users.length === 0) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    const user = users[0];
+
+    // Compare the provided password with the hashed password in the DB
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    res.json({ 
+      message: "Login successful",
+      user: { id: user.id, email: user.email, username: user.username } 
+    });
+  } catch (error) {
+    console.error("Database login error:", error);
+    res.status(500).json({ error: "Internal server error during login" });
+  }
 };

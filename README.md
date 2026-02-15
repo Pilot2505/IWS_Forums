@@ -69,6 +69,15 @@ The project includes a `schema.sql` file to initialize your MySQL database.
    mysql -u your_username -p your_database_name < schema.sql
    ```
 
+3. Update your `.env` file with your MySQL credentials:
+   ```env
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=your_password
+   DB_NAME=technical_forum
+   ```
+
 The schema includes:
 - `users`: User accounts and credentials
 - `posts`: Forum discussion threads
