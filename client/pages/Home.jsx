@@ -61,9 +61,9 @@ export default function Home() {
           <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
             Create Post
           </Link>
-          <div className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center">
+          <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
             <User className="w-5 h-5" />
-          </div>
+          </Link>
           <button
             onClick={() => setShowLogoutDialog(true)}
             className="text-[#1E56A0] text-2xl font-medium"
@@ -121,9 +121,12 @@ export default function Home() {
             {following.map((person, index) => (
               <div key={index}>
                 <div className="flex items-center gap-4">
-                  <div className={`w-[60px] h-[60px] rounded-full ${person.hasNew ? 'bg-[#21005D]/10 border-4 border-[#006EFF]' : 'bg-[#21005D]/10 border-4 border-[#D6E4F0]'} flex items-center justify-center`}>
+                  <Link
+                    to={`/profile/${person.name.toLowerCase().replace(' ', '')}`}
+                    className={`w-[60px] h-[60px] rounded-full flex items-center justify-center hover:scale-105 transition-transform ${person.hasNew ? 'bg-[#21005D]/10 border-4 border-[#006EFF]' : 'bg-[#21005D]/10 border-4 border-[#D6E4F0]'}`}
+                  >
                     <User className="w-8 h-8" />
-                  </div>
+                  </Link>
                   <div>
                     <p className="text-black text-2xl capitalize">{person.name}</p>
                     {person.newPosts > 0 && (

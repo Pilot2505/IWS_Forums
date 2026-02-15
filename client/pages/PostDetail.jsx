@@ -94,9 +94,9 @@ Practice coding by building simple projects or replicating existing ones. Hands-
           <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
             Create Post
           </Link>
-          <div className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center">
+          <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
             <User className="w-5 h-5" />
-          </div>
+          </Link>
           <button
             onClick={() => setShowLogoutDialog(true)}
             className="text-[#1E56A0] text-2xl font-medium"
@@ -118,9 +118,12 @@ Practice coding by building simple projects or replicating existing ones. Hands-
           </div>
 
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center">
+            <Link
+              to={`/profile/${post.authorUsername}`}
+              className="w-12 h-12 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform"
+            >
               <User className="w-6 h-6" />
-            </div>
+            </Link>
             <div className="flex-1">
               <p className="text-black text-xl">
                 By <Link to={`/profile/${post.authorUsername}`} className="text-[#1E56A0] font-medium">{post.author}</Link>
@@ -163,9 +166,12 @@ Practice coding by building simple projects or replicating existing ones. Hands-
               {comments.map((c) => (
                 <div key={c.id} className="border-t pt-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#21005D]/10 border-2 border-[#D6E4F0] flex items-center justify-center flex-shrink-0">
+                    <Link
+                      to={`/profile/${c.author.toLowerCase().replace(' ', '')}`}
+                      className="w-8 h-8 rounded-full bg-[#21005D]/10 border-2 border-[#D6E4F0] flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform"
+                    >
                       <User className="w-4 h-4" />
-                    </div>
+                    </Link>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium text-black">{c.author}</span>

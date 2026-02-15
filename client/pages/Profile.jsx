@@ -80,7 +80,7 @@ export default function Profile() {
           <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
             Create Post
           </Link>
-          <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center">
+          <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
             <User className="w-5 h-5" />
           </Link>
           <button
@@ -100,9 +100,12 @@ export default function Profile() {
         <div className="bg-[#ACB8C9] rounded-t-lg p-8">
           <div className="flex items-start justify-between">
             <div className="flex gap-6">
-              <div className="w-24 h-24 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center">
+              <Link
+                to={isOwnProfile ? "/profile" : `/profile/${username}`}
+                className="w-24 h-24 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform"
+              >
                 <User className="w-12 h-12" />
-              </div>
+              </Link>
               <div>
                 <h1 className="text-3xl font-semibold text-black">{profileData.fullname}</h1>
                 <p className="text-lg text-gray-700">{profileData.username}</p>

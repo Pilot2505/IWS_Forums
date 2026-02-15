@@ -38,9 +38,9 @@ export default function CreatePost() {
           Technical Forum
         </Link>
         <div className="flex items-center gap-8">
-          <div className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center">
+          <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
             <User className="w-5 h-5" />
-          </div>
+          </Link>
           <button
             onClick={() => navigate("/home")}
             className="text-[#1E56A0] text-2xl font-medium"
