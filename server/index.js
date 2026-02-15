@@ -1,7 +1,6 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { handleDemo } from "./routes/demo";
 import { handleRegister, handleLogin } from "./routes/auth";
 
 export function createServer() {
@@ -17,8 +16,6 @@ export function createServer() {
     const ping = process.env.PING_MESSAGE ?? "ping";
     res.json({ message: ping });
   });
-
-  app.get("/api/demo", handleDemo);
 
   // Auth routes
   app.post("/api/register", handleRegister);
