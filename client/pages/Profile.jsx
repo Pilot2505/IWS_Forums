@@ -17,38 +17,15 @@ export default function Profile() {
     bio: "Computer Science undergraduate"
   });
 
-  // Mock user data
-  const profileData = {
-    fullname: "Minh Quan",
-    username: "@mquan2505",
-    posts: 2,
-    followers: 235,
-    following: 7,
-    bio: "Computer Science undergraduate",
-    userPosts: [
-      {
-        id: 1,
-        title: "Understanding Java exceptions",
-        content: "Handling exceptions properly is crucial in Java programming. This post explains different types of exceptions and how to try-catch...",
-        timeAgo: "1 day ago"
-      },
-      {
-        id: 2,
-        title: "Tips for React",
-        content: "React is a powerful library, but beginners often struggle with structure and best practices. In this post, I share practical tips on organizing...",
-        timeAgo: "2 days ago"
-      }
-    ]
-  };
-
-  const [posts, setPosts] = useState(profileData.userPosts);
+  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       navigate("/register");
     } else {
-      setUser(JSON.parse(storedUser));
+      const loggedUser = JSON.parse(storedUser);
+      setUser(loggedUser);
     }
   }, [navigate]);
 
@@ -67,7 +44,25 @@ export default function Profile() {
 
   if (!user) return null;
 
-  const isOwnProfile = !username || username === user.username;
+  const isOwnProfile = username === user.username;
+
+  const displayUser = isOwnProfile
+    ? {
+        fullname: user.fullname,
+        username: user.username,
+        bio: user.bio || "No bio yet",
+        posts: posts.length,
+        followers: 235,
+        following: 7
+      }
+    : {
+        fullname: username,
+        username: username,
+        bio: "This is another user's profile",
+        posts: posts.length,
+        followers: 100,
+        following: 50
+      };
 
   return (
     <div className="min-h-screen bg-[#C8CFD8]">
@@ -80,7 +75,7 @@ export default function Profile() {
           <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
             Create Post
           </Link>
-          <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
+          <Link to={`/profile/${user.username}`} className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
             <User className="w-5 h-5" />
           </Link>
           <button
@@ -107,19 +102,19 @@ export default function Profile() {
                 <User className="w-12 h-12" />
               </Link>
               <div>
-                <h1 className="text-3xl font-semibold text-black">{profileData.fullname}</h1>
-                <p className="text-lg text-gray-700">{profileData.username}</p>
+                <h1 className="text-3xl font-semibold text-black">{displayUser.fullname}</h1>
+                <p className="text-lg text-gray-700">{displayUser.username}</p>
                 <div className="flex gap-8 mt-3">
                   <div className="text-center">
-                    <div className="text-2xl font-semibold">{profileData.posts}</div>
+                    <div className="text-2xl font-semibold">{displayUser.posts}</div>
                     <div className="text-sm text-gray-700">Posts</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-semibold">{profileData.followers}</div>
+                    <div className="text-2xl font-semibold">{displayUser.followers}</div>
                     <div className="text-sm text-gray-700">Followers</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-semibold">{profileData.following}</div>
+                    <div className="text-2xl font-semibold">{displayUser.following}</div>
                     <div className="text-sm text-gray-700">Following</div>
                   </div>
                 </div>
@@ -138,7 +133,7 @@ export default function Profile() {
               </button>
             )}
           </div>
-          <p className="mt-4 text-black">{profileData.bio}</p>
+          <p className="mt-4 text-black">{displayUser.bio}</p>
         </div>
 
         {/* Posts Section */}

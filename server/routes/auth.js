@@ -62,7 +62,6 @@ export const handleLogin = async (req, res) => {
 
     const user = users[0];
 
-    // Compare the provided password with the hashed password in the DB
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {

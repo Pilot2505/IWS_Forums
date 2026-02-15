@@ -65,7 +65,7 @@ export default function Home() {
           <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
             Create Post
           </Link>
-          <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
+          <Link to={`/profile/${user.username}`} className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
             <User className="w-5 h-5" />
           </Link>
           <button
@@ -95,7 +95,13 @@ export default function Home() {
                 <div className="flex justify-between items-start mb-5">
                   <h3 className="text-black text-4xl font-semibold">{post.title}</h3>
                   <p className="text-black text-2xl">
-                    By <span className="text-[#1E56A0] font-medium">{post.author}</span>
+                      By{" "}
+                      <Link
+                        to={`/profile/${encodeURIComponent(post.username)}`}
+                        className="text-[#1E56A0] font-medium hover:underline"
+                      >
+                        {post.username}
+                      </Link>
                   </p>
                 </div>
                 <p className="text-black text-2xl leading-relaxed mb-8 line-clamp-3">
@@ -132,7 +138,12 @@ export default function Home() {
                     <User className="w-8 h-8" />
                   </Link>
                   <div>
-                    <p className="text-black text-2xl capitalize">{person.name}</p>
+                    <Link
+                      to={`/profile/${encodeURIComponent(person.name.toLowerCase().replace(/\s+/g, ""))}`}
+                      className="text-black text-2xl capitalize hover:text-[#1E56A0] transition-colors"
+                    >
+                      {person.name}
+                    </Link>
                     {person.newPosts > 0 && (
                       <p className="text-[#0C245E]/70 text-base font-light">
                         {person.newPosts} new post{person.newPosts > 1 ? 's' : ''}
