@@ -10,68 +10,43 @@ export default function PostDetail() {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [comment, setComment] = useState("");
 
-  // Mock post data
-  const post = {
-    id: 1,
-    title: "How To Learn Java",
-    author: "An Nguyen",
-    authorUsername: "@annguyen",
-    timeAgo: "1 day ago",
-    content: `Java is one of the most popular programming languages. It is widely used in web, mobile, and enterprise development.
+  const [post, setPost] = useState(null);
 
-Developers like it for its stability, security, and scalability. In this post, I'll share tips on how to begin your journey learning Java efficiently.
-
-1. Understand the Basics
-Before writing complex programs, you need to know the core concepts of Java. This include:
-• Java syntax and structure
-• Variables and data types
-• Conditional statements (if-else, switch)
-• Loops (for, while, do-while)
-• Functions (methods)
-• Basic input and output
-
-Online tutorials and interactive courses are helpful resources for beginners.
-
-2. Get Hands-On Practice
-Practice coding by building simple projects or replicating existing ones. Hands-on experience helps you understand how Java works in real applications.
-
-3. Learn Core Java APIs`
-  };
-
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      author: "An Nguyen",
-      timeAgo: "1 day ago",
-      content: "Feel free to ask any questions about Java!"
-    },
-    {
-      id: 2,
-      author: "Rachel",
-      timeAgo: "1 day ago",
-      content: "Great article. I'm just starting with Java and your guide was very helpful."
-    },
-    {
-      id: 3,
-      author: "Alan",
-      timeAgo: "1 day ago",
-      content: "I recommend building small projects, that's what really helped me"
-    }
-  ]);
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+
     if (!storedUser) {
       navigate("/register");
-    } else {
-      setUser(JSON.parse(storedUser));
+      return;
     }
-  }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
+    setUser(JSON.parse(storedUser));
+
+    // Fetch post
+    fetch(`/api/posts/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Post not found");
+        return res.json();
+      })
+      .then((data) => {
+        setPost(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        navigate("/");
+      });
+
+    // Fetch comments
+    fetch(`/api/posts/${id}/comments`)
+      .then((res) => res.json())
+      .then((data) => {
+        setComments(data);
+      })
+      .catch((err) => console.error(err));
+
+  }, [id, navigate]);
 
   const handleSubmitComment = (e) => {
     e.preventDefault();
@@ -81,7 +56,7 @@ Practice coding by building simple projects or replicating existing ones. Hands-
     }
   };
 
-  if (!user) return null;
+  if (!user || !post) return null;
 
   return (
     <div className="min-h-screen bg-[#C8CFD8]">
@@ -119,16 +94,16 @@ Practice coding by building simple projects or replicating existing ones. Hands-
 
           <div className="flex items-center gap-4 mb-8">
             <Link
-              to={`/profile/${post.authorUsername}`}
+              to={`/profile/${post.username}`}
               className="w-12 h-12 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform"
             >
               <User className="w-6 h-6" />
             </Link>
             <div className="flex-1">
               <p className="text-black text-xl">
-                By <Link to={`/profile/${post.authorUsername}`} className="text-[#1E56A0] font-medium">{post.author}</Link>
+                By <Link to={`/profile/${post.username}`} className="text-[#1E56A0] font-medium">{post.username}</Link>
               </p>
-              <p className="text-gray-600 text-sm">{post.timeAgo}</p>
+              <p className="text-gray-600 text-sm">{new Date(post.created_at).toLocaleString()}</p>
             </div>
             <button className="bg-[#1E56A0] text-white px-6 py-2 rounded-md font-medium">
               Follow
@@ -174,8 +149,8 @@ Practice coding by building simple projects or replicating existing ones. Hands-
                     </Link>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-black">{c.author}</span>
-                        <span className="text-sm text-gray-500">• {c.timeAgo}</span>
+                        <span className="font-medium text-black">{c.username}</span>
+                        <span className="text-sm text-gray-500">• {new Date(c.created_at).toLocaleString()}</span>
                       </div>
                       <p className="text-gray-700 text-sm">{c.content}</p>
                       <button className="text-[#1E56A0] text-sm font-medium mt-2">

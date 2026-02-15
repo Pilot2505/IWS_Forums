@@ -7,23 +7,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-  // Mock posts data
-  const posts = [
-    {
-      id: 1,
-      title: "How to learn Java",
-      content: "Java is one of the most popular programming languages used for web, mobile, and enterprise apps. Developers like it for its stability, security...",
-      author: "An",
-      timeAgo: "1 day ago"
-    },
-    {
-      id: 2,
-      title: "Tips for React",
-      content: "React is a powerful library, but beginners often struggle with structure and best practices. In this post, I share practical tips on organizing...",
-      author: "Kien",
-      timeAgo: "2 days ago"
-    }
-  ];
+  const [posts, setPosts] = useState([]);
 
   // Mock following users
   const following = [
@@ -36,19 +20,39 @@ export default function Home() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+
     if (!storedUser) {
       navigate("/register");
     } else {
       setUser(JSON.parse(storedUser));
     }
+
+    // Fetch posts from backend
+    fetch("/api/posts")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch posts");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setPosts(data);
+      })
+      .catch((err) => {
+        console.error("Error loading posts:", err);
+      });
+
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
 
   if (!user) return null;
+
+  const truncateText = (text, maxLength) => {
+    if (!text) return "";
+    return text.length > maxLength
+      ? text.substring(0, maxLength) + "..."
+      : text;
+  };
 
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
@@ -94,11 +98,11 @@ export default function Home() {
                     By <span className="text-[#1E56A0] font-medium">{post.author}</span>
                   </p>
                 </div>
-                <p className="text-black text-2xl leading-relaxed mb-8">
-                  {post.content}
+                <p className="text-black text-2xl leading-relaxed mb-8 line-clamp-3">
+                  {truncateText(post.content, 120)}
                 </p>
                 <div className="flex justify-between items-center">
-                  <p className="text-black text-xl font-light">{post.timeAgo}</p>
+                  <p className="text-black text-xl font-light">{new Date(post.created_at).toLocaleString()}</p>
                   <Link
                     to={`/post/${post.id}`}
                     className="text-[#1E56A0] text-[22px] font-medium"
