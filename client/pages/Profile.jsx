@@ -2,12 +2,24 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { User, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { updatePost, deletePost } from "../services/postService";
 
 export default function Profile() {
   const { username } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const isOwnProfile = user && username === user.username;
   const [showEditProfile, setShowEditProfile] = useState(false);
+
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [targetUserId, setTargetUserId] = useState(null);
+
+  const [editingPost, setEditingPost] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletePostId, setDeletePostId] = useState(null);
   const [editFormData, setEditFormData] = useState({
@@ -19,6 +31,7 @@ export default function Profile() {
 
   const [posts, setPosts] = useState([]);
 
+  // Load current user
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -29,12 +42,103 @@ export default function Profile() {
     }
   }, [navigate]);
 
-  const handleDeletePost = () => {
-    setPosts(posts.filter(p => p.id !== deletePostId));
-    toast.success("Post deleted!");
-    setShowDeleteDialog(false);
-    setDeletePostId(null);
-  };
+  // Fetch profile user ID based on username
+  useEffect(() => {
+    if (!username) return;
+
+    const fetchProfileUser = async () => {
+      const res = await fetch(`/api/users/${username}`);
+      const data = await res.json();
+      setTargetUserId(data.id);
+    };
+
+    fetchProfileUser();
+  }, [username]);
+
+  // Fetch followers/following counts
+  useEffect(() => {
+    if (!targetUserId) return;
+
+    const fetchFollowCounts = async () => {
+      const res = await fetch(`/api/follow/follow-count/${targetUserId}`);
+      const data = await res.json();
+      setFollowersCount(data.followers);
+      setFollowingCount(data.following);
+    };
+
+    fetchFollowCounts();
+  }, [targetUserId]);
+
+  // Check if current user is following this profile
+  useEffect(() => {
+    if (!user || !targetUserId || isOwnProfile) return;
+
+    const checkFollowing = async () => {
+      const res = await fetch(
+        `/api/follow/is-following?followerId=${user.id}&followingId=${targetUserId}`
+      );
+      const data = await res.json();
+      setIsFollowing(data.isFollowing);
+    };
+
+    checkFollowing();
+  }, [user, targetUserId, isOwnProfile]);
+
+  // Load posts for this profile
+  useEffect(() => {
+    if (!username) return;
+
+    const fetchPosts = async () => {
+      const res = await fetch(`/api/posts/user/${username}`);
+      const data = await res.json();
+      setPosts(data);
+    };
+
+    fetchPosts();
+  }, [username]);
+
+  // Mark posts as seen when visiting profile
+  useEffect(() => {
+    if (!user || !targetUserId || isOwnProfile) return;
+
+    fetch("/api/follow/seen", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        followerId: user.id,
+        followingId: targetUserId
+      })
+    }).catch(err => console.error("Failed to mark as seen:", err));
+
+  }, [user, targetUserId, isOwnProfile]);
+
+  const handleFollowToggle = async () => {
+    try {
+      const endpoint = isFollowing ? "/api/follow/unfollow" : "/api/follow/follow";
+      const method = isFollowing ? "DELETE" : "POST";
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          followerId: user.id,
+          followingId: targetUserId
+        })
+      });
+
+      if (!res.ok) throw new Error("Request failed");
+
+      // re-fetch real counts
+      const countRes = await fetch(`/api/follow/follow-count/${targetUserId}`);
+      const countData = await countRes.json();
+      setFollowersCount(countData.followers);
+      setFollowingCount(countData.following);
+
+      setIsFollowing(!isFollowing);
+    } catch (err) {
+      toast.error("Something went wrong");
+    }
+  };  
 
   const handleSaveProfile = (e) => {
     e.preventDefault();
@@ -42,9 +146,51 @@ export default function Profile() {
     setShowEditProfile(false);
   };
 
-  if (!user) return null;
+  const handleDeletePost = async () => {
+    if (!deletePostId) return;
 
-  const isOwnProfile = username === user.username;
+    try {
+      await deletePost(deletePostId);
+
+      toast.success("Post deleted successfully");
+
+      setPosts(prev => prev.filter(p => p.id !== deletePostId));
+
+      setShowDeleteDialog(false);
+      setDeletePostId(null);
+
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message);
+    }
+  };
+
+  const handleUpdatePost = async () => {
+    if (!editingPost) return;
+
+    try {
+      await updatePost(editingPost, editTitle, editContent);
+
+      setPosts(prev =>
+        prev.map(p =>
+          p.id === editingPost
+            ? { ...p, title: editTitle, content: editContent }
+            : p
+        )
+      );
+
+      setEditingPost(null);
+      setEditTitle("");
+      setEditContent("");
+
+      toast.success("Post updated");
+
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  if (!user) return null;
 
   const displayUser = isOwnProfile
     ? {
@@ -52,16 +198,16 @@ export default function Profile() {
         username: user.username,
         bio: user.bio || "No bio yet",
         posts: posts.length,
-        followers: 235,
-        following: 7
+        followers: followersCount,
+        following: followingCount
       }
     : {
         fullname: username,
         username: username,
         bio: "This is another user's profile",
         posts: posts.length,
-        followers: 100,
-        following: 50
+        followers: followersCount,
+        following: followingCount
       };
 
   return (
@@ -128,8 +274,15 @@ export default function Profile() {
                 Edit Profile
               </button>
             ) : (
-              <button className="bg-[#1E56A0] text-white px-8 py-2 rounded-md font-medium">
-                Follow
+              <button
+                onClick={handleFollowToggle}
+                className={`px-8 py-2 rounded-md font-medium ${
+                  isFollowing
+                    ? "bg-gray-300 text-black"
+                    : "bg-[#1E56A0] text-white"
+                }`}
+              >
+                {isFollowing ? "Following" : "Follow"}
               </button>
             )}
           </div>
@@ -139,14 +292,50 @@ export default function Profile() {
         {/* Posts Section */}
         <div className="bg-white rounded-b-lg p-8">
           <h2 className="text-3xl font-semibold text-[#0C245E] mb-6">
-            {isOwnProfile ? "Your Posts" : "My Posts"}
+            {isOwnProfile ? "Your Posts" : `${username}'s Posts`}
           </h2>
 
           <div className="space-y-6">
             {posts.map((post) => (
               <div key={post.id} className="border border-gray-200 rounded-lg p-6">
-                <h3 className="text-2xl font-semibold text-black mb-3">{post.title}</h3>
-                <p className="text-gray-700 mb-4">{post.content}</p>
+                {editingPost === post.id ? (
+                  <>
+                    <input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full border p-2 mb-2 rounded"
+                    />
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      className="w-full border p-2 mb-2 rounded"
+                      rows="4"
+                    />
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleUpdatePost}
+                        className="bg-[#1E56A0] text-white px-4 py-1 rounded"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingPost(null)}
+                        className="border px-4 py-1 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-2xl font-semibold text-black mb-3">
+                      {post.title}
+                    </h3>
+                    <p className="text-gray-700 mb-4">
+                      {post.content}
+                    </p>
+                  </>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">{post.timeAgo}</span>
                   <div className="flex gap-4">
@@ -158,7 +347,13 @@ export default function Profile() {
                     </Link>
                     {isOwnProfile && (
                       <>
-                        <button className="text-[#1E56A0] font-medium">
+                        <button
+                        className="text-[#1E56A0] font-medium"
+                        onClick={() => {
+                          setEditingPost(post.id);
+                          setEditTitle(post.title);
+                          setEditContent(post.content);
+                        }}>
                           Edit
                         </button>
                         <button

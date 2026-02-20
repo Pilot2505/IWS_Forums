@@ -23,7 +23,7 @@ const App = () => (
         <Route path="/create-post" element={<CreatePost />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:username" element={<Profile />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

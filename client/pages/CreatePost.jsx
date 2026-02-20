@@ -18,15 +18,42 @@ export default function CreatePost() {
     }
   }, [navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (title.trim() && content.trim()) {
-      toast.success("Post created successfully!");
-      navigate("/home");
-    } else {
+
+    if (!title.trim() || !content.trim()) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          content,
+          userId: user.id,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to create post");
+      }
+
+      const data = await res.json();
+
+      toast.success("Post created successfully!");
+      navigate(`/post/${data.id}`);
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
     }
   };
+
 
   if (!user) return null;
 

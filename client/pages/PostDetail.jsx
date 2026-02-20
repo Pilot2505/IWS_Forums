@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { User } from "lucide-react";
 import { toast } from "sonner";
+import LogoutButton from "./LogoutButton";
+import { updatePost, deletePost } from "../services/postService";
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -13,6 +15,10 @@ export default function PostDetail() {
   const [post, setPost] = useState(null);
 
   const [comments, setComments] = useState([]);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -32,6 +38,8 @@ export default function PostDetail() {
       })
       .then((data) => {
         setPost(data);
+        setEditTitle(data.title);
+        setEditContent(data.content);
       })
       .catch((err) => {
         console.error(err);
@@ -48,11 +56,68 @@ export default function PostDetail() {
 
   }, [id, navigate]);
 
-  const handleSubmitComment = (e) => {
+  const handleSubmitComment = async (e) => {
     e.preventDefault();
-    if (comment.trim()) {
-      toast.success("Comment added!");
+
+    if (!comment.trim()) return;
+
+    try {
+      const res = await fetch(`/api/posts/${id}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: comment,
+          userId: user.id,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to comment");
+
+      const newComment = await res.json();
+
+      setComments((prev) => [...prev, newComment]);
       setComment("");
+      toast.success("Comment added!");
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!window.confirm("Are you sure?")) return;
+
+    try {
+      await deletePost(id);
+
+      toast.success("Post deleted successfully");
+      navigate("/");
+
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message);
+    }
+  };
+
+  const handleUpdatePost = async () => {
+    try {
+      await updatePost(id, editTitle, editContent);
+
+      setPost({
+        ...post,
+        title: editTitle,
+        content: editContent,
+      });
+
+      setIsEditing(false);
+      toast.success("Post updated successfully");
+
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message);
     }
   };
 
@@ -72,12 +137,7 @@ export default function PostDetail() {
           <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
             <User className="w-5 h-5" />
           </Link>
-          <button
-            onClick={() => setShowLogoutDialog(true)}
-            className="text-[#1E56A0] text-2xl font-medium"
-          >
-            Logout
-          </button>
+          <LogoutButton />
         </div>
       </header>
 
@@ -85,10 +145,58 @@ export default function PostDetail() {
         {/* Post Content */}
         <div className="flex-1 bg-white rounded-lg p-12">
           <div className="flex items-start justify-between mb-4">
-            <h1 className="text-5xl font-bold text-black">{post.title}</h1>
+            {isEditing ? (
+              <div className="space-y-4">
+                <input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full border p-3 rounded text-2xl font-bold"
+                />
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="w-full border p-3 rounded"
+                  rows="8"
+                />
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleUpdatePost}
+                    className="bg-[#1E56A0] text-white px-6 py-2 rounded"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="border px-6 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-5xl font-bold text-black mb-6">
+                  {post.title}
+                </h1>
+              </>
+            )}
             <div className="flex gap-4">
-              <button className="text-[#1E56A0] text-xl font-medium">Edit</button>
-              <button className="text-red-600 text-xl font-medium">Delete</button>
+              {post.user_id === user.id && (
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="text-[#1E56A0] text-xl font-medium"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleDeletePost}
+                    className="text-red-600 text-xl font-medium"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

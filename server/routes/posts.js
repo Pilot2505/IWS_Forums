@@ -20,6 +20,29 @@ router.get("/", async (req, res) => {
   }
 });
 
+//GET ALL POSTS BY USERNAME
+router.get("/user/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const [rows] = await db.execute(
+      `
+      SELECT posts.*, users.username
+      FROM posts
+      JOIN users ON posts.user_id = users.id
+      WHERE users.username = ?
+      ORDER BY posts.created_at DESC
+      `,
+      [username]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //GET SINGLE POST
 router.get("/:id", async (req, res) => {
   try {
@@ -65,6 +88,28 @@ router.get("/:id/comments", async (req, res) => {
   }
 });
 
+//CREATE POST
+router.post("/", async (req, res) => {
+  const { title, content, userId } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      "INSERT INTO posts (title, content, user_id, created_at) VALUES (?, ?, ?, NOW())",
+      [title, content, userId]
+    );
+
+    res.status(201).json({
+      id: result.insertId,  
+      title,
+      content,
+      user_id: userId,
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 //CREATE COMMENT
 router.post("/:id/comments", async (req, res) => {
   try {
@@ -94,5 +139,46 @@ router.post("/:id/comments", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+//DELETE POST
+router.delete("/:id", async (req, res) => {
+  try {
+    const [result] = await db.execute(
+      "DELETE FROM posts WHERE id = ?",
+      [req.params.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json({ message: "Post deleted successfully" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//UPDATE POST
+router.put("/:id", async (req, res) => {
+  const { title, content } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      "UPDATE posts SET title = ?, content = ? WHERE id = ?",
+      [title, content, req.params.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.json({ message: "Post updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+})
 
 export default router;

@@ -23,6 +23,10 @@ export default function Login() {
 
       if (response.ok) {
         toast.success("Login successful!");
+        await db.query(
+          "UPDATE users SET last_login = NOW() WHERE id = ?",
+          [user.id]
+        );
         // Store user in local storage or state management
         localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/");
