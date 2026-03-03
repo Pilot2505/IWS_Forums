@@ -2,9 +2,10 @@ import pool from "../db.js";
 import bcrypt from "bcrypt";
 
 export const handleRegister = async (req, res) => {
-  const { email, username, password } = req.body;
+  const { email, username, password, fullname } = req.body;
+  const avatar = req.file ? `/avatars/${req.file.filename}` : null;
 
-  if (!email || !username || !password) {
+  if (!email || !username || !password || !fullname) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -25,8 +26,8 @@ export const handleRegister = async (req, res) => {
 
     // Create new user in the database
     const [result] = await pool.execute(
-      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-      [username, email, hashedPassword]
+      "INSERT INTO users (username, email, password, fullname, avatar) VALUES (?, ?, ?, ?, ?)",
+      [username, email, hashedPassword, fullname, avatar]
     );
 
     const userId = result.insertId;
@@ -34,7 +35,7 @@ export const handleRegister = async (req, res) => {
 
     res.status(201).json({ 
       message: "User registered successfully",
-      user: { id: userId, email, username } 
+      user: { id: userId, email, username, fullname } 
     });
   } catch (error) {
     console.error("Database registration error:", error);
@@ -43,17 +44,17 @@ export const handleRegister = async (req, res) => {
 };
 
 export const handleLogin = async (req, res) => {
-  const { username, password } = req.body;
+  const { identifier, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ error: "Missing username or password" });
+  if (!identifier || !password) {
+    return res.status(400).json({ error: "Missing username/email or password" });
   }
 
   try {
     // Find the user by username
     const [users] = await pool.execute(
-      "SELECT id, email, username, password FROM users WHERE username = ?",
-      [username]
+      "SELECT id, email, username, fullname, avatar, password FROM users WHERE email = ? OR username = ?",
+      [identifier, identifier]
     );
 
     if (users.length === 0) {
@@ -70,7 +71,13 @@ export const handleLogin = async (req, res) => {
 
     res.json({ 
       message: "Login successful",
-      user: { id: user.id, email: user.email, username: user.username } 
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        fullname: user.fullname,
+        avatar: user.avatar || null
+      } 
     });
   } catch (error) {
     console.error("Database login error:", error);
