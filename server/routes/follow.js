@@ -1,42 +1,45 @@
 import express from "express";
-import db from "../db.js";
+import pool from "../db.js";
 
 const router = express.Router();
 
 // Follow
-router.post("/follow", async (req, res) => {
+router.post("/", async (req, res) => {
   const { followerId, followingId } = req.body;
 
-  if (followerId === followingId) {
+  if (!followerId || !followingId)
+    return res.status(400).json({ message: "Missing data" });
+
+  if (followerId === followingId)
     return res.status(400).json({ message: "Cannot follow yourself" });
-  }
 
   try {
-    await db.query(
-      `INSERT INTO followers (follower_id, following_id, last_seen) VALUES (?, ?, NOW())`,
+    await pool.execute(
+      `INSERT INTO followers (follower_id, following_id, last_seen)
+       VALUES (?, ?, NOW())`,
       [followerId, followingId]
     );
 
-    res.json({ message: "Followed" });
+    res.json({ isFollowing: true });
   } catch (err) {
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.json({ isFollowing: true });
+    }
     res.status(500).json({ error: err.message });
   }
 });
 
 // Unfollow
-router.delete("/unfollow", async (req, res) => {
+router.delete("/", async (req, res) => {
   const { followerId, followingId } = req.body;
 
-  try {
-    await db.query(
-      "DELETE FROM followers WHERE follower_id = ? AND following_id = ?",
-      [followerId, followingId]
-    );
+  await pool.execute(
+    `DELETE FROM followers
+     WHERE follower_id = ? AND following_id = ?`,
+    [followerId, followingId]
+  );
 
-    res.json({ message: "Unfollowed" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  res.json({ isFollowing: false });
 });
 
 // Follow count
@@ -44,12 +47,12 @@ router.get("/follow-count/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const [followers] = await db.query(
+    const [followers] = await pool.execute(
       "SELECT COUNT(*) AS count FROM followers WHERE following_id = ?",
       [userId]
     );
 
-    const [following] = await db.query(
+    const [following] = await pool.execute(
       "SELECT COUNT(*) AS count FROM followers WHERE follower_id = ?",
       [userId]
     );
@@ -67,7 +70,7 @@ router.get("/follow-count/:userId", async (req, res) => {
 router.get("/is-following", async (req, res) => {
   const { followerId, followingId } = req.query;
 
-  const [rows] = await db.query(
+  const [rows] = await pool.execute(
     "SELECT * FROM followers WHERE follower_id = ? AND following_id = ?",
     [followerId, followingId]
   );
@@ -80,11 +83,13 @@ router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const [rows] = await db.query(
+    const [rows] = await pool.execute(
       `
       SELECT 
           u.id,
           u.username,
+          u.fullname,
+          u.avatar,
           COUNT(p.id) AS newPosts
       FROM followers f
       JOIN users u 
@@ -110,7 +115,7 @@ router.put("/seen", async (req, res) => {
   const { followerId, followingId } = req.body;
 
   try {
-    await db.query(
+    await pool.execute(
       `
       UPDATE followers
       SET last_seen = NOW()

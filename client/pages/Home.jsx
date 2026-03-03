@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { User } from "lucide-react";
-import LogoutButton from "./LogoutButton";
+import LogoutButton from "../components/LogoutButton";
 
 export default function Home() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [following, setFollowing] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -34,19 +36,19 @@ export default function Home() {
       });
 
     // Fetch posts
-    fetch("/api/posts")
+    fetch(`/api/posts?page=${currentPage}&limit=5`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch posts");
         return res.json();
       })
       .then((data) => {
-        setPosts(data);
+        setPosts(data.posts);
+        setTotalPages(data.totalPages);
       })
       .catch((err) => {
         console.error("Error loading posts:", err);
       });
-
-  }, [navigate]);
+  }, [currentPage]);
 
   const handleOpenProfile = (person) => {
     setFollowing(prev =>
@@ -80,8 +82,15 @@ export default function Home() {
           <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
             Create Post
           </Link>
-          <Link to={`/profile/${user.username}`} className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
-            <User className="w-5 h-5" />
+          <Link to={`/profile/${user.username}`} className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-5 h-5" />
+            )}
           </Link>
           <LogoutButton />
         </div>
@@ -129,10 +138,29 @@ export default function Home() {
               </div>
             ))}
           </div>
+
+          <div className="flex justify-center gap-3 mt-8">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  setCurrentPage(index + 1);
+                }}
+                className={`px-4 py-2 rounded-md ${
+                  currentPage === index + 1
+                    ? "bg-[#1E56A0] text-white"
+                    : "bg-gray-200"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Sidebar */}
-        <div className="w-[332px] bg-[#F6F6F6] rounded-lg h-[650px] p-8">
+        <div className="w-[332px] bg-[#F6F6F6] rounded-lg max-h-[80vh] overflow-y-auto p-8">
           <h3 className="text-[#0C245E]/70 text-4xl font-medium capitalize mb-8">
             Following
           </h3>
@@ -143,19 +171,26 @@ export default function Home() {
                 <div className="flex items-center gap-4">
                   <div
                     onClick={() => handleOpenProfile(person)}
-                    className={`w-[60px] h-[60px] rounded-full flex items-center justify-center cursor-pointer hover:scale-105 transition-transform
-                      ${person.newPosts > 0 
-                        ? "bg-[#21005D]/10 border-4 border-[#006EFF]" 
-                        : "bg-[#21005D]/10 border-4 border-[#D6E4F0]"}
+                    className={`w-[60px] h-[60px] rounded-full p-[3px] cursor-pointer hover:scale-105 transition-transform
+                      ${person.newPosts > 0 ? "bg-gradient-to-tr from-blue-500 to-cyan-400" : "border-[#D6E4F0]"}
                     `}
                   >
-                    <User className="w-8 h-8" />
+                    <div className="w-full h-full rounded-full overflow-hidden bg-[#21005D]/10 flex items-center justify-center">
+                      {person.avatar ? (
+                        <img
+                          src={person.avatar}
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      ) : (
+                        <User className="w-8 h-8" />
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p
                       onClick={() => handleOpenProfile(person)}
                       className="text-black text-2xl hover:text-[#1E56A0] transition-colors cursor-pointer">
-                      {person.username}
+                      {person.fullname || person.username}
                     </p>
                     {person.newPosts > 0 && (
                         <p className="text-[#0C245E]/70 text-base">

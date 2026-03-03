@@ -5,7 +5,9 @@ import { toast } from "sonner";
 export default function Register() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [fullname, setFullname] = useState("");
   const [password, setPassword] = useState("");
+  const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -13,11 +15,20 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
 
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("username", username);
+    formData.append("fullname", fullname);
+    formData.append("password", password);
+
+    if (avatar) {
+      formData.append("avatar", avatar);
+    }
+
     try {
       const response = await fetch("/api/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, password }),
+        body: formData,
       });
 
       const data = await response.json();
@@ -96,6 +107,25 @@ export default function Register() {
                 />
               </div>
 
+              {/* Full Name Field */}
+              <div>
+                <label 
+                  htmlFor="fullname" 
+                  className="block text-sm font-semibold text-[#0a0a0a] mb-2"
+                >
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="fullname"
+                  value={fullname}
+                  onChange={(e) => setFullname(e.target.value)}
+                  placeholder="Your full name"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
+                  required
+                />
+              </div>
+
               {/* Password Field */}
               <div>
                 <label 
@@ -112,6 +142,19 @@ export default function Register() {
                   placeholder="Password"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
                   required
+                />
+              </div>
+
+              {/* Avatar Upload */}
+              <div>
+                <label className="block text-sm font-semibold text-[#0a0a0a] mb-2">
+                  Profile Picture (optional)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setAvatar(e.target.files[0])}
+                  className="w-full"
                 />
               </div>
 

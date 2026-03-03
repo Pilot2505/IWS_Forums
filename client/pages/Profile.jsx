@@ -3,31 +3,33 @@ import { useNavigate, Link, useParams } from "react-router-dom";
 import { User, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { updatePost, deletePost } from "../services/postService";
+import LogoutButton from "../components/LogoutButton";
+import FollowButton from "../components/FollowButton";
 
 export default function Profile() {
   const { username } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const isOwnProfile = user && username === user.username;
+  const isOwnProfile = user && (!username || username === user.username);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const [profileUser, setProfileUser] = useState(null);
+  const targetUserId = profileUser?.id;
 
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [targetUserId, setTargetUserId] = useState(null);
 
   const [editingPost, setEditingPost] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletePostId, setDeletePostId] = useState(null);
-  const [editFormData, setEditFormData] = useState({
-    fullname: "Minh Quan",
-    email: "email@emai.com",
-    username: "mquan2505",
-    bio: "Computer Science undergraduate"
-  });
+  const [editFormData, setEditFormData] = useState("");
 
   const [posts, setPosts] = useState([]);
 
@@ -49,7 +51,8 @@ export default function Profile() {
     const fetchProfileUser = async () => {
       const res = await fetch(`/api/users/${username}`);
       const data = await res.json();
-      setTargetUserId(data.id);
+
+      setProfileUser(data);
     };
 
     fetchProfileUser();
@@ -69,27 +72,19 @@ export default function Profile() {
     fetchFollowCounts();
   }, [targetUserId]);
 
-  // Check if current user is following this profile
-  useEffect(() => {
-    if (!user || !targetUserId || isOwnProfile) return;
-
-    const checkFollowing = async () => {
-      const res = await fetch(
-        `/api/follow/is-following?followerId=${user.id}&followingId=${targetUserId}`
-      );
-      const data = await res.json();
-      setIsFollowing(data.isFollowing);
-    };
-
-    checkFollowing();
-  }, [user, targetUserId, isOwnProfile]);
-
   // Load posts for this profile
   useEffect(() => {
     if (!username) return;
 
     const fetchPosts = async () => {
       const res = await fetch(`/api/posts/user/${username}`);
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Server error:", text);
+        return;
+      }
+      
       const data = await res.json();
       setPosts(data);
     };
@@ -112,38 +107,102 @@ export default function Profile() {
 
   }, [user, targetUserId, isOwnProfile]);
 
-  const handleFollowToggle = async () => {
-    try {
-      const endpoint = isFollowing ? "/api/follow/unfollow" : "/api/follow/follow";
-      const method = isFollowing ? "DELETE" : "POST";
-
-      const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          followerId: user.id,
-          followingId: targetUserId
-        })
+  useEffect(() => {
+    if (showEditProfile && user) {
+      setEditFormData({
+        fullname: user.fullname || "",
+        email: user.email || "",
+        username: user.username || "",
+        bio: user.bio || ""
       });
 
-      if (!res.ok) throw new Error("Request failed");
-
-      // re-fetch real counts
-      const countRes = await fetch(`/api/follow/follow-count/${targetUserId}`);
-      const countData = await countRes.json();
-      setFollowersCount(countData.followers);
-      setFollowingCount(countData.following);
-
-      setIsFollowing(!isFollowing);
-    } catch (err) {
-      toast.error("Something went wrong");
+      setErrors({});
     }
-  };  
+  }, [showEditProfile, user]);
 
-  const handleSaveProfile = (e) => {
+  const refetchFollowCounts = async () => {
+    if (!targetUserId) return;
+
+    const res = await fetch(`/api/follow/follow-count/${targetUserId}`);
+    const data = await res.json();
+    setFollowersCount(data.followers);
+    setFollowingCount(data.following);
+  };
+
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    toast.success("Profile updated successfully!");
-    setShowEditProfile(false);
+
+    if (!validateForm()) return;
+
+    try {
+      let avatarUrl = user.avatar;
+
+      if (selectedImage) {
+        const formData = new FormData();
+        formData.append("avatar", selectedImage);
+        formData.append("userId", user.id);
+
+        const uploadRes = await fetch("/api/users/upload-avatar", {
+          method: "POST",
+          body: formData,
+        });
+
+        const uploadData = await uploadRes.json();
+        avatarUrl = uploadData.avatar;
+      }
+
+      const res = await fetch("/api/users/update-profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: user.id,
+          ...editFormData,
+          avatar: avatarUrl
+        }),
+      });
+
+      const updatedUser = await res.json();
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      setProfileUser(updatedUser);
+      navigate(`/profile/${updatedUser.username}`);
+
+      toast.success("Profile updated successfully!");
+      setShowEditProfile(false);
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Update failed");
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!editFormData.fullname.trim()) {
+      newErrors.fullname = "Fullname is required";
+    }
+
+    if (!editFormData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(editFormData.email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    if (!editFormData.username.trim()) {
+      newErrors.username = "Username is required";
+    } else if (editFormData.username.length < 3) {
+      newErrors.username = "Username must be at least 3 characters";
+    }
+
+    if (editFormData.bio.length > 150) {
+      newErrors.bio = "Bio must be less than 150 characters";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleDeletePost = async () => {
@@ -192,23 +251,8 @@ export default function Profile() {
 
   if (!user) return null;
 
-  const displayUser = isOwnProfile
-    ? {
-        fullname: user.fullname,
-        username: user.username,
-        bio: user.bio || "No bio yet",
-        posts: posts.length,
-        followers: followersCount,
-        following: followingCount
-      }
-    : {
-        fullname: username,
-        username: username,
-        bio: "This is another user's profile",
-        posts: posts.length,
-        followers: followersCount,
-        following: followingCount
-      };
+  const displayUser = isOwnProfile ? profileUser || user : profileUser;
+  if (!displayUser) return null;
 
   return (
     <div className="min-h-screen bg-[#C8CFD8]">
@@ -221,18 +265,17 @@ export default function Profile() {
           <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
             Create Post
           </Link>
-          <Link to={`/profile/${user.username}`} className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
-            <User className="w-5 h-5" />
+          <Link to={`/profile/${user.username}`} className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-5 h-5" />
+            )}
           </Link>
-          <button
-            onClick={() => {
-              localStorage.removeItem("user");
-              navigate("/login");
-            }}
-            className="text-[#1E56A0] text-2xl font-medium"
-          >
-            Logout
-          </button>
+          <LogoutButton />
         </div>
       </header>
 
@@ -241,26 +284,33 @@ export default function Profile() {
         <div className="bg-[#ACB8C9] rounded-t-lg p-8">
           <div className="flex items-start justify-between">
             <div className="flex gap-6">
-              <Link
+              <div
                 to={isOwnProfile ? "/profile" : `/profile/${username}`}
-                className="w-24 h-24 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform"
+                className="w-24 h-24 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] overflow-hidden flex items-center justify-center"
               >
-                <User className="w-12 h-12" />
-              </Link>
+                  {displayUser?.avatar ? (
+                  <img
+                    src={displayUser.avatar}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-12 h-12" />
+                )}
+              </div>
               <div>
-                <h1 className="text-3xl font-semibold text-black">{displayUser.fullname}</h1>
-                <p className="text-lg text-gray-700">{displayUser.username}</p>
+                <h1 className="text-3xl font-semibold text-black">{displayUser?.fullname}</h1>
+                <p className="text-lg text-gray-700">{displayUser?.username}</p>
                 <div className="flex gap-8 mt-3">
                   <div className="text-center">
-                    <div className="text-2xl font-semibold">{displayUser.posts}</div>
+                    <div className="text-2xl font-semibold">{posts.length}</div>
                     <div className="text-sm text-gray-700">Posts</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-semibold">{displayUser.followers}</div>
+                    <div className="text-2xl font-semibold">{followersCount}</div>
                     <div className="text-sm text-gray-700">Followers</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-semibold">{displayUser.following}</div>
+                    <div className="text-2xl font-semibold">{followingCount}</div>
                     <div className="text-sm text-gray-700">Following</div>
                   </div>
                 </div>
@@ -274,19 +324,14 @@ export default function Profile() {
                 Edit Profile
               </button>
             ) : (
-              <button
-                onClick={handleFollowToggle}
-                className={`px-8 py-2 rounded-md font-medium ${
-                  isFollowing
-                    ? "bg-gray-300 text-black"
-                    : "bg-[#1E56A0] text-white"
-                }`}
-              >
-                {isFollowing ? "Following" : "Follow"}
-              </button>
+              <FollowButton
+                currentUserId={user.id}
+                targetUserId={profileUser?.id}
+                onChange={() => refetchFollowCounts()}
+              />
             )}
           </div>
-          <p className="mt-4 text-black">{displayUser.bio}</p>
+          <p className="mt-4 text-black">{displayUser?.bio || "No bio yet"}</p>
         </div>
 
         {/* Posts Section */}
@@ -296,81 +341,87 @@ export default function Profile() {
           </h2>
 
           <div className="space-y-6">
-            {posts.map((post) => (
-              <div key={post.id} className="border border-gray-200 rounded-lg p-6">
-                {editingPost === post.id ? (
-                  <>
-                    <input
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full border p-2 mb-2 rounded"
-                    />
-                    <textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      className="w-full border p-2 mb-2 rounded"
-                      rows="4"
-                    />
-                    <div className="flex gap-3">
-                      <button
-                        onClick={handleUpdatePost}
-                        className="bg-[#1E56A0] text-white px-4 py-1 rounded"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setEditingPost(null)}
-                        className="border px-4 py-1 rounded"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="text-2xl font-semibold text-black mb-3">
-                      {post.title}
-                    </h3>
-                    <p className="text-gray-700 mb-4">
-                      {post.content}
-                    </p>
-                  </>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">{post.timeAgo}</span>
-                  <div className="flex gap-4">
-                    <Link
-                      to={`/post/${post.id}`}
-                      className="text-[#1E56A0] font-medium"
-                    >
-                      Read More
-                    </Link>
-                    {isOwnProfile && (
-                      <>
+            {posts.length === 0 ? (
+              <div className="text-center text-gray-500 py-10 text-lg">
+                No posts yet.
+              </div>
+            ) : (
+              posts.map((post) => (
+                <div key={post.id} className="border border-gray-200 rounded-lg p-6">
+                  {editingPost === post.id ? (
+                    <>
+                      <input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="w-full border p-2 mb-2 rounded"
+                      />
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="w-full border p-2 mb-2 rounded"
+                        rows="4"
+                      />
+                      <div className="flex gap-3">
                         <button
-                        className="text-[#1E56A0] font-medium"
-                        onClick={() => {
-                          setEditingPost(post.id);
-                          setEditTitle(post.title);
-                          setEditContent(post.content);
-                        }}>
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDeletePostId(post.id);
-                            setShowDeleteDialog(true);
-                          }}
-                          className="text-red-600 font-medium"
+                          onClick={handleUpdatePost}
+                          className="bg-[#1E56A0] text-white px-4 py-1 rounded"
                         >
-                          Delete
+                          Save
                         </button>
-                      </>
-                    )}
+                        <button
+                          onClick={() => setEditingPost(null)}
+                          className="border px-4 py-1 rounded"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-2xl font-semibold text-black mb-3">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-700 mb-4">
+                        {post.content}
+                      </p>
+                    </>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">{post.timeAgo}</span>
+                    <div className="flex gap-4">
+                      <Link
+                        to={`/post/${post.id}`}
+                        className="text-[#1E56A0] font-medium"
+                      >
+                        Read More
+                      </Link>
+                      {isOwnProfile && (
+                        <>
+                          <button
+                          className="text-[#1E56A0] font-medium"
+                          onClick={() => {
+                            setEditingPost(post.id);
+                            setEditTitle(post.title);
+                            setEditContent(post.content);
+                          }}>
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => {
+                              setDeletePostId(post.id);
+                              setShowDeleteDialog(true);
+                            }}
+                            className="text-red-600 font-medium"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -388,53 +439,125 @@ export default function Profile() {
 
             <div className="text-center mb-8">
               <div className="inline-flex flex-col items-center">
-                <div className="w-24 h-24 rounded-full bg-[#D6E4F0] flex items-center justify-center mb-4">
-                  <User className="w-12 h-12" />
+                <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border">
+                  {previewImage ? (
+                    <img
+                      src={previewImage}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-12 h-12 m-auto" />
+                  )}
                 </div>
-                <button className="text-[#1E56A0] font-medium">Change</button>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="avatarUpload"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setSelectedImage(file);
+                      setPreviewImage(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+
+                <label
+                  htmlFor="avatarUpload"
+                  className="text-[#1E56A0] font-medium cursor-pointer"
+                >
+                  Change Image
+                </label>
               </div>
               <h2 className="text-3xl font-semibold mt-4">Edit Profile</h2>
             </div>
 
             <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div className="grid grid-cols-[120px,1fr] items-center gap-4">
-                <label className="text-right font-medium">Fullname:</label>
-                <input
-                  type="text"
-                  value={editFormData.fullname}
-                  onChange={(e) => setEditFormData({ ...editFormData, fullname: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 rounded-md"
-                />
+              <div className="grid grid-cols-[120px,1fr] items-start gap-4">
+                <label className="text-right font-medium pt-2">Fullname:</label>
+                <div className="w-full">
+                  <input
+                    type="text"
+                    value={editFormData.fullname}
+                    onChange={(e) =>{
+                      setEditFormData({ ...editFormData, fullname: e.target.value });
+                      setErrors({ ...errors, fullname: "" });
+                    }}
+                    className={`px-4 py-2 border rounded-md w-full ${
+                      errors.fullname ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.fullname && (
+                    <p className="text-red-500 text-sm mt-1">{errors.fullname}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="grid grid-cols-[120px,1fr] items-center gap-4">
-                <label className="text-right font-medium">Email:</label>
-                <input
-                  type="email"
-                  value={editFormData.email}
-                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 rounded-md"
-                />
+              <div className="grid grid-cols-[120px,1fr] items-start gap-4">
+                <label className="text-right font-medium pt-2">Email:</label>
+                <div className="w-full">
+                  <input
+                    type="email"
+                    value={editFormData.email}
+                    onChange={(e) =>{
+                      setEditFormData({ ...editFormData, email: e.target.value });
+                      setErrors({ ...errors, email: "" });
+                    }}
+                    className={`px-4 py-2 border rounded-md w-full ${
+                      errors.email ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="grid grid-cols-[120px,1fr] items-center gap-4">
-                <label className="text-right font-medium">Username:</label>
-                <input
-                  type="text"
-                  value={editFormData.username}
-                  onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 rounded-md"
-                />
+              <div className="grid grid-cols-[120px,1fr] items-start gap-4">
+                <label className="text-right font-medium pt-2">Username:</label>
+                <div className="w-full">
+                  <input
+                    type="text"
+                    value={editFormData.username}
+                    onChange={(e) =>{
+                      setEditFormData({ ...editFormData, username: e.target.value });
+                      setErrors({ ...errors, username:""})
+                    }}
+                    className={`px-4 py-2 border rounded-md w-full ${
+                      errors.username ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.username && (
+                    <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-[120px,1fr] items-start gap-4">
                 <label className="text-right font-medium pt-2">Bio:</label>
-                <textarea
-                  value={editFormData.bio}
-                  onChange={(e) => setEditFormData({ ...editFormData, bio: e.target.value })}
-                  rows="4"
-                  className="px-4 py-2 border border-gray-300 rounded-md resize-none"
-                />
+                <div className="w-full">
+                  <textarea
+                    value={editFormData.bio}
+                    onChange={(e) =>{
+                      setEditFormData({ ...editFormData, bio: e.target.value });
+                      setErrors({ ...errors, bio:""})
+                    }}
+                    rows="4"
+                    className={`px-4 py-2 border rounded-md w-full resize-none ${
+                      errors.bio ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {errors.bio && (
+                    <p className="text-red-500 text-sm mt-1">{errors.bio}</p>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-4 justify-center pt-6">

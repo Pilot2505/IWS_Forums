@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -16,18 +16,14 @@ export default function Login() {
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ identifier, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         toast.success("Login successful!");
-        await db.query(
-          "UPDATE users SET last_login = NOW() WHERE id = ?",
-          [user.id]
-        );
-        // Store user in local storage or state management
+       // Store user in local storage or state management
         localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/");
       } else {
@@ -66,17 +62,17 @@ export default function Login() {
               {/* Username Field */}
               <div>
                 <label 
-                  htmlFor="username" 
+                  htmlFor="identifier" 
                   className="block text-sm font-semibold text-[#0a0a0a] mb-2"
                 >
-                  Username
+                  Email or Username
                 </label>
                 <input
                   type="text"
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Username"
+                  id="identifier"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="Email or Username"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
                   required
                 />
