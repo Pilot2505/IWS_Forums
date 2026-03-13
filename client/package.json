@@ -12,14 +12,8 @@
     "format.fix": "prettier --write ."
   },
   "dependencies": {
-    "bcrypt": "^6.0.0",
     "clsx": "^2.1.1",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0",
     "lucide-react": "^0.539.0",
-    "multer": "^2.0.2",
-    "mysql2": "^3.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.1",
