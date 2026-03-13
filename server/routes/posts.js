@@ -24,10 +24,8 @@ router.get("/", async (req, res) => {
       FROM posts
       JOIN users ON posts.user_id = users.id
       ORDER BY posts.created_at DESC
-      LIMIT ? OFFSET ?
-      `,
-      [limit, offset]
-    );
+      LIMIT ${limit} OFFSET ${offset}
+      `);
 
     res.json({
       posts: rows,
