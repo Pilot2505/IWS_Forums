@@ -2,33 +2,40 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: sqa-mysql
+    container_name: iws-mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: SQA
+      MYSQL_DATABASE: IWS
     ports:
       - "3306:3306"
     volumes:
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
 
   server:
     build: ./server
-    container_name: sqa-server
+    container_name: iws-server
     ports:
       - "3000:3000"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       DB_HOST: mysql
+      DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: root
-      DB_NAME: SQA
+      DB_NAME: IWS
 
   client:
     build: ./client
-    container_name: sqa-client
+    container_name: iws-client
     ports:
       - "8080:8080"
     depends_on:
