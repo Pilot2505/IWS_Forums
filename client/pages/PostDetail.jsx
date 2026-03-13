@@ -101,7 +101,7 @@ export default function PostDetail() {
     try {
       await deletePost(deletePostId);
 
-      toast.success("Post deleted successfully");
+      toast.success("Post deleted successfully!");
 
       setShowDeleteDialog(false);
       setDeletePostId(null);
@@ -124,7 +124,7 @@ export default function PostDetail() {
       });
 
       setIsEditing(false);
-      toast.success("Post updated successfully");
+      toast.success("Post updated successfully!");
 
     } catch (err) {
       console.error(err);
@@ -150,7 +150,7 @@ export default function PostDetail() {
         prev.filter(c => c.id !== commentId && c.parent_id !== commentId)
       );
 
-      toast.success("Comment deleted");
+      toast.success("Comment deleted!");
 
     } catch (err) {
       toast.error("You cannot delete this comment");

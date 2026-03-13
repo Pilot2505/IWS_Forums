@@ -211,7 +211,7 @@ export default function Profile() {
     try {
       await deletePost(deletePostId);
 
-      toast.success("Post deleted successfully");
+      toast.success("Post deleted successfully!");
 
       setPosts(prev => prev.filter(p => p.id !== deletePostId));
 
@@ -242,7 +242,7 @@ export default function Profile() {
       setEditTitle("");
       setEditContent("");
 
-      toast.success("Post updated");
+      toast.success("Post updated!");
 
     } catch (err) {
       toast.error(err.message);
