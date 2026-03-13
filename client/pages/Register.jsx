@@ -61,7 +61,7 @@ export default function Register() {
       </header>
 
       {/* Register Form */}
-      <div className="flex items-center justify-center px-4 pt-8">
+      <div className="flex items-center justify-center px-4 pt-4 pb-12">
         <div className="w-full max-w-md">
           <h2 className="text-4xl font-bold text-center text-[#0a0a0a] mb-8">
             Register

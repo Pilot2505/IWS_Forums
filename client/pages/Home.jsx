@@ -124,7 +124,7 @@ export default function Home() {
                   </p>
                 </div>
                 <p className="text-black text-2xl leading-relaxed mb-8 line-clamp-3">
-                  {truncateText(post.content, 120)}
+                  {truncateText(post.content, 140)}
                 </p>
                 <div className="flex justify-between items-center">
                   <p className="text-black text-xl font-light">{new Date(post.created_at).toLocaleString()}</p>

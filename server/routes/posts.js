@@ -122,7 +122,7 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    res.json({ message: "Post deleted successfully" });
+    res.json({ message: "Post deleted successfully!" });
 
   } catch (err) {
     console.error(err);
@@ -234,7 +234,7 @@ router.delete("/comments/:id", async (req, res) => {
 
     await pool.execute("DELETE FROM comments WHERE id = ?", [commentId]);
 
-    res.json({ message: "Comment deleted successfully" });
+    res.json({ message: "Comment deleted successfully!" });
 
   } catch (err) {
     console.error(err);
