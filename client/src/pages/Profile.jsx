@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { updatePost, deletePost } from "../services/postService";
 import LogoutButton from "../components/LogoutButton";
 import FollowButton from "../components/FollowButton";
+import { Editor } from "@tinymce/tinymce-react";
 
 export default function Profile() {
   const { username } = useParams();
@@ -355,11 +356,20 @@ export default function Profile() {
                         onChange={(e) => setEditTitle(e.target.value)}
                         className="w-full border p-2 mb-2 rounded"
                       />
-                      <textarea
+                      <Editor
+                        tinymceScriptSrc="/tinymce/tinymce.min.js"
                         value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        className="w-full border p-2 mb-2 rounded"
-                        rows="4"
+                        onEditorChange={(newContent) => setEditContent(newContent)}
+                        init={{
+                          license_key: "gpl",
+                          promotion: false,
+                          branding: false,
+                          height: 300,
+                          menubar: false,
+                          plugins: ["lists", "link", "image", "code"],
+                          toolbar:
+                            "undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | code"
+                        }}
                       />
                       <div className="flex gap-3">
                         <button
@@ -381,9 +391,10 @@ export default function Profile() {
                       <h3 className="text-2xl font-semibold text-black mb-3">
                         {post.title}
                       </h3>
-                      <p className="text-gray-700 mb-4">
-                        {post.content}
-                      </p>
+                      <div
+                        className="text-gray-700 mb-4"
+                        dangerouslySetInnerHTML={{ __html: post.content }}
+                      />
                     </>
                   )}
                   <div className="flex items-center justify-between">

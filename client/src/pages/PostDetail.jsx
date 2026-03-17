@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import LogoutButton from "../components/LogoutButton";
 import { updatePost, deletePost } from "../services/postService";
 import FollowButton from "../components/FollowButton";
+import { Editor } from "@tinymce/tinymce-react";
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -309,11 +310,26 @@ export default function PostDetail() {
                   onChange={(e) => setEditTitle(e.target.value)}
                   className="w-full border p-3 rounded text-2xl font-bold"
                 />
-                <textarea
+                <Editor
+                  tinymceScriptSrc="/tinymce/tinymce.min.js"
                   value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="w-full border p-3 rounded"
-                  rows="8"
+                  onEditorChange={(newContent) => setEditContent(newContent)}
+                  init={{
+                    license_key: "gpl",
+                    promotion: false,
+                    branding: false,
+                    height: 400,
+                    menubar: true,
+                    plugins: [
+                      "lists",
+                      "link",
+                      "image",
+                      "code",
+                      "table"
+                    ],
+                    toolbar:
+                      "undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code"
+                  }}
                 />
                 <div className="flex gap-4">
                   <button
@@ -383,9 +399,9 @@ export default function PostDetail() {
             />
           </div>
 
-          <div className="text-black text-lg leading-relaxed whitespace-pre-line">
-            {post.content}
-          </div>
+          <div className="text-black text-lg leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
         </div>
 
         {/* Comments Sidebar */}
