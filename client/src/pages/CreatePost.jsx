@@ -115,9 +115,7 @@ export default function CreatePost() {
                 'lists', 'link', 'image', 'code', 'table', 'wordcount'
               ],
               toolbar:
-                'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | code',
-              skin_url: '/tinymce/skins/ui/oxide',
-              content_css: '/tinymce/skins/content/default/content.css'
+                'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | code'
             }}  
             />
           </div>
