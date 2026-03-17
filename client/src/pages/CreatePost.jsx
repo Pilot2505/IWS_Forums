@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { User } from "lucide-react";
 import { toast } from "sonner";
+import { Editor } from '@tinymce/tinymce-react';
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -100,14 +101,24 @@ export default function CreatePost() {
             <label htmlFor="content" className="block text-lg font-semibold text-black mb-3">
               Content
             </label>
-            <textarea
-              id="content"
+            <Editor
+              tinymceScriptSrc="tinymce/tinymce.min.js"
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Enter content"
-              rows="12"
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E56A0] text-base resize-none placeholder:text-gray-400"
-              required
+              onEditorChange={(newContent) => setContent(newContent)}
+              init={{
+              license_key: "gpl",
+              promotion: false,
+              branding: false,
+              height: 400,
+              menubar: true,
+              plugins: [
+                'lists', 'link', 'image', 'code', 'table', 'wordcount'
+              ],
+              toolbar:
+                'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | code',
+              skin_url: '/tinymce/skins/ui/oxide',
+              content_css: '/tinymce/skins/content/default/content.css'
+            }}  
             />
           </div>
 

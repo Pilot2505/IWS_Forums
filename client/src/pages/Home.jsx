@@ -64,12 +64,10 @@ export default function Home() {
 
   if (!user) return null;
 
-  const truncateText = (text, maxLength) => {
-    if (!text) return "";
-    return text.length > maxLength
-      ? text.substring(0, maxLength) + "..."
-      : text;
-  };
+  function stripHtml(html) {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return doc.body.textContent || "";
+  }
 
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
@@ -124,7 +122,7 @@ export default function Home() {
                   </p>
                 </div>
                 <p className="text-black text-2xl leading-relaxed mb-8 line-clamp-3">
-                  {truncateText(post.content, 140)}
+                  {stripHtml(post.content)}
                 </p>
                 <div className="flex justify-between items-center">
                   <p className="text-black text-xl font-light">{new Date(post.created_at).toLocaleString()}</p>
