@@ -158,8 +158,8 @@ export default function Home() {
         </div>
 
         {/* Sidebar */}
-        <div className="w-[332px] bg-[#F6F6F6] rounded-lg max-h-[80vh] overflow-y-auto p-8">
-          <h3 className="text-[#0C245E]/70 text-4xl font-medium capitalize mb-8">
+        <div className="w-[332px] bg-[#F6F6F6] rounded-lg max-h-[85vh] overflow-y-auto p-8">
+          <h3 className="sticky top-0 z-10 bg-[#F6F6F6] pb-2 text-[#0C245E]/70 text-4xl font-medium capitalize mb-8">
             Following
           </h3>
 
