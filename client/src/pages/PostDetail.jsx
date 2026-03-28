@@ -66,8 +66,11 @@ export default function PostDetail() {
   const handleSubmitComment = async (e) => {
     e.preventDefault();
 
-    if (!comment.trim()) return;
-
+    if (!comment.trim()) {
+      toast.erropr("Comment cannot be empty!");
+      return;
+    }
+    
     try {
       const res = await fetch(`/api/posts/${id}/comments`, {
         method: "POST",
