@@ -1,5 +1,6 @@
 import pool from "../db.js";
 import bcrypt from "bcrypt";
+import validator from "validator";
 
 export const handleRegister = async (req, res) => {
   const { email, username, password, fullname } = req.body;
@@ -10,15 +11,38 @@ export const handleRegister = async (req, res) => {
   }
 
   try {
+    // Validate email format
+    const normalizedEmail = validator.normalizeEmail(email);
+    if (!validator.isEmail(normalizedEmail)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate username (alphanumeric only)
+    const trimmedUsername = username.trim();
+    if (!validator.isAlphanumeric(trimmedUsername)) {
+      return res.status(400).json({ error: "Username must be alphanumeric" });
+    }
+
+    // Validate password length
+    if (!validator.isLength(password, { min: 6 })) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    // Normalize and clean inputs
+    const cleanEmail = normalizedEmail;
+    const cleanUsername = trimmedUsername;
+    const cleanFullname = fullname.trim();
+
     // Check if user already exists
     const [existingUsers] = await pool.execute(
       "SELECT id FROM users WHERE email = ? OR username = ?",
-      [email, username]
+      [cleanEmail, cleanUsername]
     );
 
     if (existingUsers.length > 0) {
-      return res.status(409).json({ error: "User already exists" });
+      return res.status(409).json({ error: "Username or email already exists" });
     }
+
 
     // Hash the password for security
     const saltRounds = 10;
@@ -27,15 +51,15 @@ export const handleRegister = async (req, res) => {
     // Create new user in the database
     const [result] = await pool.execute(
       "INSERT INTO users (username, email, password, fullname, avatar) VALUES (?, ?, ?, ?, ?)",
-      [username, email, hashedPassword, fullname, avatar]
+      [cleanUsername, cleanEmail, hashedPassword, cleanFullname, avatar]
     );
 
     const userId = result.insertId;
-    console.log(`New user registered in DB: ${username} (${email})`);
+    console.log(`New user registered in DB: ${cleanUsername} (${cleanEmail})`);
 
     res.status(201).json({ 
       message: "User registered successfully",
-      user: { id: userId, email, username, fullname } 
+      user: { id: userId, email: cleanEmail, username: cleanUsername, fullname: cleanFullname } 
     });
   } catch (error) {
     console.error("Database registration error:", error);
@@ -51,10 +75,13 @@ export const handleLogin = async (req, res) => {
   }
 
   try {
+    // Sanitize the identifier input
+    const cleanIdentifier = identifier.trim().toLowerCase();
+
     // Find the user by username
     const [users] = await pool.execute(
       "SELECT id, email, username, fullname, avatar, password FROM users WHERE email = ? OR username = ?",
-      [identifier, identifier]
+      [cleanIdentifier, cleanIdentifier]
     );
 
     if (users.length === 0) {
