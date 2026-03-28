@@ -115,6 +115,16 @@ export default function PostDetail() {
   };
 
   const handleUpdatePost = async () => {
+    // Validate title/content before sending update request
+    if (!editTitle.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    if (!editContent.trim() || editContent === "<p><br></p>") {
+      toast.error("Content is required");
+      return;
+    }
+
     try {
       await updatePost(id, editTitle, editContent);
 
@@ -334,7 +344,8 @@ export default function PostDetail() {
                 <div className="flex gap-4">
                   <button
                     onClick={handleUpdatePost}
-                    className="bg-[#1E56A0] text-white px-6 py-2 rounded"
+                    disabled={!editTitle.trim() || !editContent.trim()}
+                    className="bg-[#1E56A0] text-white px-6 py-2 rounded disabled:opacity-50"
                   >
                     Save
                   </button>
