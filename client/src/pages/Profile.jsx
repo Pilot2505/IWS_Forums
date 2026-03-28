@@ -226,6 +226,16 @@ export default function Profile() {
   };
 
   const handleUpdatePost = async () => {
+    // Validate title/content before sending update request
+    if (!editTitle.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    if (!editContent.trim() || editContent === "<p><br></p>") {
+      toast.error("Content is required");
+      return;
+    }
+
     if (!editingPost) return;
 
     try {
