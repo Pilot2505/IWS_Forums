@@ -132,6 +132,14 @@ router.delete("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const { title, content } = req.body;
 
+  // Validate title and content
+  if (!title || !title.trim()) {
+    return res.status(400).json({ message: "Title is required" });
+  }
+  if (!content || !content.trim() || content === "<p><br></p>") {
+    return res.status(400).json({ message: "Content is required" });
+  }
+
   try {
     const [result] = await pool.execute(
       "UPDATE posts SET title = ?, content = ? WHERE id = ?",
