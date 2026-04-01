@@ -1,5 +1,6 @@
 import pool from "../db.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import validator from "validator";
 
 export const handleRegister = async (req, res) => {
@@ -57,6 +58,19 @@ export const handleRegister = async (req, res) => {
     const userId = result.insertId;
     console.log(`New user registered in DB: ${cleanUsername} (${cleanEmail})`);
 
+    // create access token
+    const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+
+    // set httpOnly cookie
+    res.cookie("token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+    
     res.status(201).json({ 
       message: "User registered successfully",
       user: { id: userId, email: cleanEmail, username: cleanUsername, fullname: cleanFullname } 
@@ -95,6 +109,19 @@ export const handleLogin = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
+
+    // create access token
+    const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+
+    // set httpOnly cookie
+    res.cookie("token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000
+    });
 
     res.json({ 
       message: "Login successful",

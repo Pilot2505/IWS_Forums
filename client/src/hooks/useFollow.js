@@ -10,7 +10,8 @@ export default function useFollow(currentUserId, targetUserId) {
     const checkFollow = async () => {
       try {
         const res = await fetch(
-          `/api/follow/is-following?followerId=${currentUserId}&followingId=${targetUserId}`
+          `/api/follow/is-following?followerId=${currentUserId}&followingId=${targetUserId}`,
+          { credentials: 'include' }
         );
         
         if (!res.ok) throw new Error("Failed to check follow");
@@ -34,6 +35,7 @@ export default function useFollow(currentUserId, targetUserId) {
       const method = isFollowing ? "DELETE" : "POST";
 
       const res = await fetch("/api/follow", {
+        credentials: 'include',
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

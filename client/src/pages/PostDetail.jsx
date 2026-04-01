@@ -38,7 +38,7 @@ export default function PostDetail() {
     setUser(JSON.parse(storedUser));
 
     // Fetch post
-    fetch(`/api/posts/${id}`)
+    fetch(`/api/posts/${id}`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error("Post not found");
         return res.json();
@@ -54,7 +54,7 @@ export default function PostDetail() {
       });
 
     // Fetch comments
-    fetch(`/api/posts/${id}/comments`)
+    fetch(`/api/posts/${id}/comments`, { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         setComments(data);
@@ -73,6 +73,7 @@ export default function PostDetail() {
     
     try {
       const res = await fetch(`/api/posts/${id}/comments`, {
+        credentials: 'include',
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -153,6 +154,7 @@ export default function PostDetail() {
 
     try {
       const res = await fetch(`/api/posts/comments/${commentId}`, {
+        credentials: 'include',
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id }),
@@ -405,7 +407,7 @@ export default function PostDetail() {
               <p className="text-black text-xl">
                 By <Link to={`/profile/${post.username}`} className="text-[#1E56A0] font-medium">{post.username}</Link>
               </p>
-              <p className="text-gray-600 text-sm">{new Date(post.created_at).toLocaleString()}</p>
+              <p className="text-gray-600 text-sm">{new Date(post.created_at).toLocaleString("en-GB")}</p>
             </div>
             <FollowButton
               currentUserId={user.id}
