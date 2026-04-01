@@ -1,5 +1,6 @@
 export const updatePost = async (id, title, content) => {
   const res = await fetch(`/api/posts/${id}`, {
+    credentials: 'include',
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -17,6 +18,7 @@ export const updatePost = async (id, title, content) => {
 export const deletePost = async (id) => {
   const res = await fetch(`/api/posts/${id}`, {
     method: "DELETE",
+    credentials: 'include'
   });
 
   if (!res.ok) {
