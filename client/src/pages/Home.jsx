@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { User } from "lucide-react";
-import LogoutButton from "../components/LogoutButton";
+import Navbar from "../components/Navbar";
+import { authFetch } from "../services/api";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function Home() {
     setUser(parsedUser);
 
     // Fetch following + newPosts
-    fetch(`/api/follow/${parsedUser.id}`, { credentials: 'include' })
+    authFetch(`/api/follow/${parsedUser.id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch following");
         return res.json();
@@ -36,7 +37,7 @@ export default function Home() {
       });
 
     // Fetch posts
-    fetch(`/api/posts?page=${currentPage}&limit=5`, { credentials: 'include' })
+    authFetch(`/api/posts?page=${currentPage}&limit=5`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch posts");
         return res.json();
@@ -48,7 +49,7 @@ export default function Home() {
       .catch((err) => {
         console.error("Error loading posts:", err);
       });
-  }, [currentPage]);
+  }, [currentPage, navigate]);
 
   const handleOpenProfile = (person) => {
     setFollowing(prev =>
@@ -71,28 +72,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
-      {/* Top Bar */}
-      <header className="h-[75px] bg-[#F6F6F6] flex items-center justify-between px-12">
-        <Link to="/" className="text-[#163172] text-4xl font-semibold font-['Poppins']">
-          Technical Forum
-        </Link>
-        <div className="flex items-center gap-8">
-          <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
-            Create Post
-          </Link>
-          <Link to={`/profile/${user.username}`} className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <User className="w-5 h-5" />
-            )}
-          </Link>
-          <LogoutButton />
-        </div>
-      </header>
+      <Navbar user={user} showCreatePost={true} />
 
       <div className="flex gap-8 px-12 pt-12">
         {/* Main Content */}
