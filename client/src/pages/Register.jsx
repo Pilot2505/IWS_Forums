@@ -27,7 +27,6 @@ export default function Register() {
 
     try {
       const response = await fetch("/api/register", {
-        credentials: 'include',
         method: "POST",
         body: formData,
       });
@@ -35,6 +34,7 @@ export default function Register() {
       const data = await response.json();
 
       if (response.ok) {
+        localStorage.setItem("token", data.token);
         toast.success("Account created successfully!");
         navigate("/login");
       } else {

@@ -63,16 +63,9 @@ export const handleRegister = async (req, res) => {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
-    // set httpOnly cookie
-    res.cookie("token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    });
-    
     res.status(201).json({ 
       message: "User registered successfully",
+      token: accessToken,
       user: { id: userId, email: cleanEmail, username: cleanUsername, fullname: cleanFullname } 
     });
   } catch (error) {
@@ -115,16 +108,9 @@ export const handleLogin = async (req, res) => {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
-    // set httpOnly cookie
-    res.cookie("token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000
-    });
-
     res.json({ 
       message: "Login successful",
+      token: accessToken,
       user: {
         id: user.id,
         email: user.email,

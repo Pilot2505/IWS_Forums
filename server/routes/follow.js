@@ -1,10 +1,11 @@
 import express from "express";
 import pool from "../db.js";
+import auth from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 // Follow
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { followerId, followingId } = req.body;
 
   if (!followerId || !followingId)
@@ -30,7 +31,7 @@ router.post("/", async (req, res) => {
 });
 
 // Unfollow
-router.delete("/", async (req, res) => {
+router.delete("/", auth, async (req, res) => {
   const { followerId, followingId } = req.body;
 
   await pool.execute(
@@ -43,7 +44,7 @@ router.delete("/", async (req, res) => {
 });
 
 // Follow count
-router.get("/follow-count/:userId", async (req, res) => {
+router.get("/follow-count/:userId", auth, async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -67,7 +68,7 @@ router.get("/follow-count/:userId", async (req, res) => {
 });
 
 // Check if following
-router.get("/is-following", async (req, res) => {
+router.get("/is-following", auth, async (req, res) => {
   const { followerId, followingId } = req.query;
 
   const [rows] = await pool.execute(
@@ -79,7 +80,7 @@ router.get("/is-following", async (req, res) => {
 });
 
 // Get following users with new posts count
-router.get("/:userId", async (req, res) => {
+router.get("/:userId", auth, async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -111,7 +112,7 @@ router.get("/:userId", async (req, res) => {
 });
 
 // Update last seen
-router.put("/seen", async (req, res) => {
+router.put("/seen", auth, async (req, res) => {
   const { followerId, followingId } = req.body;
 
   try {

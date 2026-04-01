@@ -3,10 +3,11 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { User } from "lucide-react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import LogoutButton from "../components/LogoutButton";
+import Navbar from "../components/Navbar";
 import { updatePost, deletePost } from "../services/postService";
 import FollowButton from "../components/FollowButton";
 import { Editor } from "@tinymce/tinymce-react";
+import { authFetch } from "../services/api";
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -30,15 +31,15 @@ export default function PostDetail() {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
 
-    if (!storedUser) {
-      navigate("/register");
+    if (!storedUser || !localStorage.getItem("token")) {
+      navigate("/login");
       return;
     }
 
     setUser(JSON.parse(storedUser));
 
     // Fetch post
-    fetch(`/api/posts/${id}`, { credentials: 'include' })
+    authFetch(`/api/posts/${id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Post not found");
         return res.json();
@@ -54,7 +55,7 @@ export default function PostDetail() {
       });
 
     // Fetch comments
-    fetch(`/api/posts/${id}/comments`, { credentials: 'include' })
+    authFetch(`/api/posts/${id}/comments`)
       .then((res) => res.json())
       .then((data) => {
         setComments(data);
@@ -67,13 +68,12 @@ export default function PostDetail() {
     e.preventDefault();
 
     if (!comment.trim()) {
-      toast.erropr("Comment cannot be empty!");
+      toast.error("Comment cannot be empty!");
       return;
     }
     
     try {
-      const res = await fetch(`/api/posts/${id}/comments`, {
-        credentials: 'include',
+      const res = await authFetch(`/api/posts/${id}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -153,10 +153,11 @@ export default function PostDetail() {
     if (!window.confirm("Delete this comment?")) return;
 
     try {
-      const res = await fetch(`/api/posts/comments/${commentId}`, {
-        credentials: 'include',
+      const res = await authFetch(`/api/posts/comments/${commentId}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ userId: user.id }),
       });
 
@@ -291,28 +292,7 @@ export default function PostDetail() {
 
   return (
     <div className="min-h-screen bg-[#C8CFD8]">
-      {/* Top Bar */}
-      <header className="h-[75px] bg-[#F6F6F6] flex items-center justify-between px-12">
-        <Link to="/" className="text-[#163172] text-4xl font-semibold font-['Poppins']">
-          Technical Forum
-        </Link>
-        <div className="flex items-center gap-8">
-          <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
-            Create Post
-          </Link>
-          <Link to={`/profile/${user.username}`} className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <User className="w-5 h-5" />
-            )}
-          </Link>
-          <LogoutButton />
-        </div>
-      </header>
+      <Navbar user={user} showCreatePost={true} />
 
       <div className="flex items-start gap-8 px-12 pt-12">
         {/* Post Content */}

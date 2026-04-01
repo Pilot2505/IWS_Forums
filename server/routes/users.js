@@ -1,11 +1,12 @@
 import express from "express";
 import { upload } from "../middlewares/upload.js";
 import pool from "../db.js";
+import auth from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 //GET USER BY USERNAME
-router.get("/:username", async (req, res) => {
+router.get("/:username", auth, async (req, res) => {
   const { username } = req.params;
 
   const [rows] = await pool.execute(
@@ -21,7 +22,7 @@ router.get("/:username", async (req, res) => {
 });
 
 //UPDATE USER PROFILE
-router.put("/update-profile", async (req, res) => {
+router.put("/update-profile", auth, async (req, res) => {
   const { id, fullname, email, username, bio, avatar } = req.body;
 
   if (!id || !fullname || !email || !username) {
@@ -57,7 +58,7 @@ router.put("/update-profile", async (req, res) => {
 });
 
 //CHANGE AVATAR
-router.post("/upload-avatar", upload.single("avatar"), async (req, res) => {
+router.post("/upload-avatar", auth, upload.single("avatar"), async (req, res) => {
   try {
     const { userId } = req.body;
 

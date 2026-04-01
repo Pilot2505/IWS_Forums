@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { User, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { updatePost, deletePost } from "../services/postService";
-import LogoutButton from "../components/LogoutButton";
+import Navbar from "../components/Navbar";
 import FollowButton from "../components/FollowButton";
 import { Editor } from "@tinymce/tinymce-react";
+import { authFetch } from "../services/api";
 
 export default function Profile() {
   const { username } = useParams();
   const navigate = useNavigate();
+  const editEditorRef = useRef(null);
   const [user, setUser] = useState(null);
   const isOwnProfile = user && (!username || username === user.username);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -24,6 +26,7 @@ export default function Profile() {
   const [editingPost, setEditingPost] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [editorLoaded, setEditorLoaded] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
@@ -37,8 +40,9 @@ export default function Profile() {
   // Load current user
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      navigate("/register");
+    const storedToken = localStorage.getItem("token");
+    if (!storedUser || !storedToken) {
+      navigate("/login");
     } else {
       const loggedUser = JSON.parse(storedUser);
       setUser(loggedUser);
@@ -50,7 +54,7 @@ export default function Profile() {
     if (!username) return;
 
     const fetchProfileUser = async () => {
-      const res = await fetch(`/api/users/${username}`, { credentials: 'include' });
+      const res = await authFetch(`/api/users/${username}`);
       const data = await res.json();
 
       setProfileUser(data);
@@ -64,7 +68,7 @@ export default function Profile() {
     if (!targetUserId) return;
 
     const fetchFollowCounts = async () => {
-      const res = await fetch(`/api/follow/follow-count/${targetUserId}`, { credentials: 'include' });
+      const res = await authFetch(`/api/follow/follow-count/${targetUserId}`);
       const data = await res.json();
       setFollowersCount(data.followers);
       setFollowingCount(data.following);
@@ -78,7 +82,7 @@ export default function Profile() {
     if (!username) return;
 
     const fetchPosts = async () => {
-      const res = await fetch(`/api/posts/user/${username}`, { credentials: 'include' });
+      const res = await authFetch(`/api/posts/user/${username}`);
 
       if (!res.ok) {
         const text = await res.text();
@@ -97,10 +101,11 @@ export default function Profile() {
   useEffect(() => {
     if (!user || !targetUserId || isOwnProfile) return;
 
-    fetch("/api/follow/seen", {
-      credentials: 'include',
+    authFetch("/api/follow/seen", {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         followerId: user.id,
         followingId: targetUserId
@@ -125,7 +130,7 @@ export default function Profile() {
   const refetchFollowCounts = async () => {
     if (!targetUserId) return;
 
-    const res = await fetch(`/api/follow/follow-count/${targetUserId}`, { credentials: 'include' });
+    const res = await authFetch(`/api/follow/follow-count/${targetUserId}`);
     const data = await res.json();
     setFollowersCount(data.followers);
     setFollowingCount(data.following);
@@ -144,20 +149,20 @@ export default function Profile() {
         formData.append("avatar", selectedImage);
         formData.append("userId", user.id);
 
-        const uploadRes = await fetch("/api/users/upload-avatar", {
+        const uploadRes = await authFetch("/api/users/upload-avatar", {
           method: "POST",
-          body: formData,
-          credentials: 'include'
+          body: formData
         });
 
         const uploadData = await uploadRes.json();
         avatarUrl = uploadData.avatar;
       }
 
-      const res = await fetch("/api/users/update-profile", {
-        credentials: 'include',
+      const res = await authFetch("/api/users/update-profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           id: user.id,
           ...editFormData,
@@ -228,6 +233,48 @@ export default function Profile() {
     }
   };
 
+  const uploadEditorImage = async (blob, index) => {
+    const formData = new FormData();
+    const extension = blob.type.split("/")[1] || "png";
+    formData.append("image", blob, `editor-image-${Date.now()}-${index}.${extension}`);
+
+    const res = await authFetch("/api/posts/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error("Image upload failed");
+    }
+
+    const data = await res.json();
+    return data.location;
+  };
+
+  const uploadEmbeddedImages = async (content) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+    const images = Array.from(doc.querySelectorAll("img"));
+
+    for (let index = 0; index < images.length; index += 1) {
+      const image = images[index];
+      const src = image.getAttribute("src") || "";
+
+      image.style.maxWidth = "800px";
+      image.style.height = "auto";
+
+      if (!src.startsWith("data:image/")) {
+        continue;
+      }
+
+      const blob = await fetch(src).then((response) => response.blob());
+      const uploadedUrl = await uploadEditorImage(blob, index);
+      image.setAttribute("src", uploadedUrl);
+    }
+
+    return doc.body.innerHTML;
+  };
+
   const handleUpdatePost = async () => {
     // Validate title/content before sending update request
     if (!editTitle.trim()) {
@@ -242,12 +289,14 @@ export default function Profile() {
     if (!editingPost) return;
 
     try {
-      await updatePost(editingPost, editTitle, editContent);
+      const content = await uploadEmbeddedImages(editContent);
+
+      await updatePost(editingPost, editTitle, content);
 
       setPosts(prev =>
         prev.map(p =>
           p.id === editingPost
-            ? { ...p, title: editTitle, content: editContent }
+            ? { ...p, title: editTitle, content }
             : p
         )
       );
@@ -255,12 +304,18 @@ export default function Profile() {
       setEditingPost(null);
       setEditTitle("");
       setEditContent("");
+      setEditorLoaded(false);
 
       toast.success("Post updated!");
 
     } catch (err) {
       toast.error(err.message);
     }
+  };
+
+  const closeEditPostModal = () => {
+    setEditingPost(null);
+    setEditorLoaded(false);
   };
 
   if (!user) return null;
@@ -270,28 +325,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-[#C8CFD8]">
-      {/* Top Bar */}
-      <header className="h-[75px] bg-[#F6F6F6] flex items-center justify-between px-12">
-        <Link to="/home" className="text-[#163172] text-4xl font-semibold font-['Poppins']">
-          Technical Forum
-        </Link>
-        <div className="flex items-center gap-8">
-          <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium">
-            Create Post
-          </Link>
-          <Link to={`/profile/${user.username}`} className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <User className="w-5 h-5" />
-            )}
-          </Link>
-          <LogoutButton />
-        </div>
-      </header>
+      <Navbar user={user} showCreatePost={true} />
 
       <div className="max-w-4xl mx-auto px-12 pt-12">
         {/* Profile Header */}
@@ -362,44 +396,7 @@ export default function Profile() {
             ) : (
               posts.map((post) => (
                 <div key={post.id} className="border border-gray-200 rounded-lg p-6">
-                  {editingPost === post.id ? (
-                    <>
-                      <input
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                        className="w-full border p-2 mb-2 rounded"
-                      />
-                      <Editor
-                        tinymceScriptSrc="/tinymce/tinymce.min.js"
-                        value={editContent}
-                        onEditorChange={(newContent) => setEditContent(newContent)}
-                        init={{
-                          license_key: "gpl",
-                          promotion: false,
-                          branding: false,
-                          height: 300,
-                          menubar: false,
-                          plugins: ["lists", "link", "image", "code"],
-                          toolbar:
-                            "undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | code"
-                        }}
-                      />
-                      <div className="flex gap-3">
-                        <button
-                          onClick={handleUpdatePost}
-                          className="bg-[#1E56A0] text-white px-4 py-1 rounded"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingPost(null)}
-                          className="border px-4 py-1 rounded"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </>
-                  ) : (
+                  {editingPost !== post.id && (
                     <>
                       <h3 className="text-2xl font-semibold text-black mb-3">
                         {post.title}
@@ -421,12 +418,13 @@ export default function Profile() {
                       </Link>
                       {isOwnProfile && (
                         <>
-                          <button
+                      <button
                           className="text-[#1E56A0] font-medium"
                           onClick={() => {
                             setEditingPost(post.id);
                             setEditTitle(post.title);
                             setEditContent(post.content);
+                            setEditorLoaded(false);
                           }}>
                             Edit
                           </button>
@@ -449,6 +447,151 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {editingPost && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 py-6"
+          onClick={closeEditPostModal}
+        >
+          <div
+            className="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-xl bg-white p-8 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeEditPostModal}
+              className="absolute right-4 top-4 text-gray-500 transition-colors hover:text-black"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            <div className="mb-8">
+              <h3 className="text-3xl font-semibold text-[#0C245E]">Edit Post</h3>
+              <p className="mt-2 text-sm text-gray-500">Changes are applied only when you save.</p>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="mb-3 block text-lg font-semibold text-black">Title</label>
+                <input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[#1E56A0]"
+                />
+              </div>
+
+              <div>
+                <label className="mb-3 block text-lg font-semibold text-black">Content</label>
+                <div className="relative min-h-[700px] [&_.tox-edit-area__iframe]:max-h-[700px] [&_.tox-edit-area__iframe]:overflow-y-auto">
+                  {!editorLoaded && (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 text-gray-500">
+                      Loading editor...
+                    </div>
+                  )}
+                  <Editor
+                    ref={editEditorRef}
+                    tinymceScriptSrc="/tinymce/tinymce.min.js"
+                    value={editContent}
+                    onInit={(evt, editor) => {
+                      editEditorRef.current = editor;
+                      setEditorLoaded(true);
+                    }}
+                    onEditorChange={(newContent) => setEditContent(newContent)}
+                    init={{
+                      license_key: "gpl",
+                      promotion: false,
+                      branding: false,
+                      menubar: false,
+                      height: 700,
+                      skin_url: "/tinymce/skins/ui/oxide",
+                      plugins: ["lists", "link", "image", "code"],
+                      toolbar:
+                        "undo redo | fontsize | bold italic underline strikethrough | forecolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | link | image | code",
+                      toolbar_sticky: true,
+                      toolbar_sticky_offset: 0,
+                      file_picker_types: "image",
+                      file_picker_callback: (callback) => {
+                        const input = document.createElement("input");
+                        input.type = "file";
+                        input.accept = "image/*";
+
+                        input.onchange = () => {
+                          const file = input.files?.[0];
+                          if (!file) {
+                            return;
+                          }
+
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            const image = new Image();
+                            image.onload = () => {
+                              const maxWidth = 800;
+                              const width = image.width > maxWidth ? maxWidth : image.width;
+                              const height =
+                                image.width > maxWidth
+                                  ? Math.round((image.height * maxWidth) / image.width)
+                                  : image.height;
+
+                              callback(reader.result, {
+                                title: file.name,
+                                width: String(width),
+                                height: String(height),
+                                style: `max-width: ${maxWidth}px; height: auto;`,
+                              });
+                            };
+                            image.src = reader.result;
+                          };
+                          reader.readAsDataURL(file);
+                        };
+
+                        input.click();
+                      },
+                      image_title: true,
+                      image_dimensions: true,
+                      object_resizing: "img",
+                      extended_valid_elements: "img[src|alt|width|height|style]",
+                      valid_styles: { "*": "width,height,max-width" },
+                      convert_urls: false,
+                      remove_script_host: false,
+                      automatic_uploads: false,
+                      paste_data_images: true,
+                      allow_local_files: true,
+                      element_format: "html",
+                      schema: "html5",
+                      entity_encoding: "raw",
+                      autosave_ask_before_unload: false,
+                      statusbar: false,
+                      content_style: `
+                        body {
+                          font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                        }
+                        img {
+                          max-width: 800px;
+                          height: auto;
+                        }
+                      `,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-4 pt-2">
+                <button
+                  onClick={closeEditPostModal}
+                  className="rounded-md border border-gray-300 px-6 py-2 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdatePost}
+                  className="rounded-md bg-[#1E56A0] px-6 py-2 font-medium text-white"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Profile Modal */}
       {showEditProfile && (

@@ -26,12 +26,16 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
     environment:
       DB_HOST: mysql
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: root
       DB_NAME: IWS
+    command: npm run dev
 
   client:
     build: ./client
