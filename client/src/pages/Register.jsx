@@ -27,6 +27,7 @@ export default function Register() {
 
     try {
       const response = await fetch("/api/register", {
+        credentials: 'include',
         method: "POST",
         body: formData,
       });

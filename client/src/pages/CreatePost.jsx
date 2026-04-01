@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { User } from "lucide-react";
 import { toast } from "sonner";
 import { Editor } from '@tinymce/tinymce-react';
+import LogoutButton from "../components/LogoutButton";
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function CreatePost() {
 
     try {
       const res = await fetch("/api/posts", {
+        credentials: 'include',
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,12 +71,7 @@ export default function CreatePost() {
           <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
             <User className="w-5 h-5" />
           </Link>
-          <button
-            onClick={() => navigate("/home")}
-            className="text-[#1E56A0] text-2xl font-medium"
-          >
-            Logout
-          </button>
+          <LogoutButton />
         </div>
       </header>
 

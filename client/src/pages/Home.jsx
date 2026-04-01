@@ -23,7 +23,7 @@ export default function Home() {
     setUser(parsedUser);
 
     // Fetch following + newPosts
-    fetch(`/api/follow/${parsedUser.id}`)
+    fetch(`/api/follow/${parsedUser.id}`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch following");
         return res.json();
@@ -36,7 +36,7 @@ export default function Home() {
       });
 
     // Fetch posts
-    fetch(`/api/posts?page=${currentPage}&limit=5`)
+    fetch(`/api/posts?page=${currentPage}&limit=5`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch posts");
         return res.json();

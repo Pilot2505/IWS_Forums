@@ -50,7 +50,7 @@ export default function Profile() {
     if (!username) return;
 
     const fetchProfileUser = async () => {
-      const res = await fetch(`/api/users/${username}`);
+      const res = await fetch(`/api/users/${username}`, { credentials: 'include' });
       const data = await res.json();
 
       setProfileUser(data);
@@ -64,7 +64,7 @@ export default function Profile() {
     if (!targetUserId) return;
 
     const fetchFollowCounts = async () => {
-      const res = await fetch(`/api/follow/follow-count/${targetUserId}`);
+      const res = await fetch(`/api/follow/follow-count/${targetUserId}`, { credentials: 'include' });
       const data = await res.json();
       setFollowersCount(data.followers);
       setFollowingCount(data.following);
@@ -78,7 +78,7 @@ export default function Profile() {
     if (!username) return;
 
     const fetchPosts = async () => {
-      const res = await fetch(`/api/posts/user/${username}`);
+      const res = await fetch(`/api/posts/user/${username}`, { credentials: 'include' });
 
       if (!res.ok) {
         const text = await res.text();
@@ -98,6 +98,7 @@ export default function Profile() {
     if (!user || !targetUserId || isOwnProfile) return;
 
     fetch("/api/follow/seen", {
+      credentials: 'include',
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -124,7 +125,7 @@ export default function Profile() {
   const refetchFollowCounts = async () => {
     if (!targetUserId) return;
 
-    const res = await fetch(`/api/follow/follow-count/${targetUserId}`);
+    const res = await fetch(`/api/follow/follow-count/${targetUserId}`, { credentials: 'include' });
     const data = await res.json();
     setFollowersCount(data.followers);
     setFollowingCount(data.following);
@@ -146,6 +147,7 @@ export default function Profile() {
         const uploadRes = await fetch("/api/users/upload-avatar", {
           method: "POST",
           body: formData,
+          credentials: 'include'
         });
 
         const uploadData = await uploadRes.json();
@@ -153,6 +155,7 @@ export default function Profile() {
       }
 
       const res = await fetch("/api/users/update-profile", {
+        credentials: 'include',
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
