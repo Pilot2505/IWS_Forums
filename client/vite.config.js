@@ -19,6 +19,10 @@ export default defineConfig(() => ({
         target: "http://server:3000",
         changeOrigin: true,
       },
+      "/post-images": {
+        target: "http://server:3000",
+        changeOrigin: true,
+      },
     },
     fs: {
       allow: ["."],

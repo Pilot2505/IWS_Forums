@@ -14,7 +14,6 @@ export default function Login() {
 
     try {
       const response = await fetch("/api/login", {
-        credentials: 'include',
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier, password }),
@@ -25,6 +24,7 @@ export default function Login() {
       if (response.ok) {
         toast.success("Login successful!");
        // Store user in local storage or state management
+        localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/");
       } else {

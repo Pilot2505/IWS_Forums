@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { authFetch } from "../services/api";
 
 export default function useFollow(currentUserId, targetUserId) {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -9,9 +10,9 @@ export default function useFollow(currentUserId, targetUserId) {
 
     const checkFollow = async () => {
       try {
-        const res = await fetch(
+        const res = await authFetch(
           `/api/follow/is-following?followerId=${currentUserId}&followingId=${targetUserId}`,
-          { credentials: 'include' }
+          {}
         );
         
         if (!res.ok) throw new Error("Failed to check follow");
@@ -34,10 +35,11 @@ export default function useFollow(currentUserId, targetUserId) {
     try {
       const method = isFollowing ? "DELETE" : "POST";
 
-      const res = await fetch("/api/follow", {
-        credentials: 'include',
+      const res = await authFetch("/api/follow", {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           followerId: currentUserId,
           followingId: targetUserId,
