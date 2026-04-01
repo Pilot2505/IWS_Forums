@@ -1,4 +1,5 @@
 import "dotenv/config";
+
 import express from "express";
 import cors from "cors";
 import { handleRegister, handleLogin } from "./routes/auth.js";
@@ -6,6 +7,7 @@ import postsRouter from "./routes/posts.js";
 import followsRouter from "./routes/follow.js";
 import usersRouter from "./routes/users.js";
 import { upload } from "./middlewares/upload.js";
+import cookieParser from "cookie-parser";
 
 export function createServer() {
   const app = express();
@@ -13,6 +15,7 @@ export function createServer() {
   // Middleware
   app.use(cors());
   app.use(express.json());
+  app.use(cookieParser());
   app.use(express.urlencoded({ extended: true }));
   app.use("/avatars", express.static("public/avatars"));
 

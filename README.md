@@ -11,7 +11,7 @@ Make sure **Docker Desktop** is installed and running on your machine.
 From the root folder of the project, run:
 
 ```
-docker compose up --build
+docker-compose up --build
 ```
 
 This command will:

@@ -1,5 +1,6 @@
 import express from "express";
 import pool from "../db.js";
+import auth from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -87,7 +88,7 @@ router.get("/:id", async (req, res) => {
 });
 
 //CREATE POST
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { title, content, userId } = req.body;
 
   try {
@@ -109,7 +110,7 @@ router.post("/", async (req, res) => {
 });
 
 //DELETE POST
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     const [result] = await pool.execute(
       "DELETE FROM posts WHERE id = ?",
@@ -129,7 +130,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 //UPDATE POST
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   const { title, content } = req.body;
 
   // Validate title and content
@@ -179,7 +180,7 @@ router.get("/:id/comments", async (req, res) => {
 });
 
 //CREATE COMMENT
-router.post("/:id/comments", async (req, res) => {
+router.post("/:id/comments", auth, async (req, res) => {
   try {
     const { content, user_id, parent_id } = req.body;
 
@@ -214,7 +215,7 @@ router.post("/:id/comments", async (req, res) => {
 });
 
 //DELETE COMMENT
-router.delete("/comments/:id", async (req, res) => {
+router.delete("/comments/:id", auth, async (req, res) => {
   try {
     const commentId = req.params.id;
     const { userId } = req.body;
