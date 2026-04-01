@@ -1,11 +1,13 @@
 import express from "express";
 import pool from "../db.js";
 import auth from "../middlewares/authMiddleware.js";
+import { createUploadHandler } from "../middlewares/upload.js";
 
 const router = express.Router();
+const postImageUpload = createUploadHandler("post-images");
 
 //GET ALL POSTS
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
@@ -41,7 +43,7 @@ router.get("/", async (req, res) => {
 });
 
 //GET ALL POSTS BY USERNAME
-router.get("/user/:username", async (req, res) => {
+router.get("/user/:username", auth, async (req, res) => {
   try {
     const { username } = req.params;
 
@@ -64,7 +66,7 @@ router.get("/user/:username", async (req, res) => {
 });
 
 //GET SINGLE POST
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   try {
     const [rows] = await pool.execute(
       `
@@ -106,6 +108,23 @@ router.post("/", auth, async (req, res) => {
 
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Image upload endpoint for TinyMCE
+router.post("/upload-image", auth, postImageUpload.single("image"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No image provided" });
+    }
+
+    const imageUrl = `/post-images/${req.file.filename}`;
+    res.json({
+      location: imageUrl,
+    });
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ error: "Image upload failed", details: err.message });
   }
 });
 
@@ -159,7 +178,7 @@ router.put("/:id", auth, async (req, res) => {
 })
 
 //GET COMMENTS
-router.get("/:id/comments", async (req, res) => {
+router.get("/:id/comments", auth, async (req, res) => {
   try {
     const [rows] = await pool.execute(
       `

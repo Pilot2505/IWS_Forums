@@ -1,6 +1,7 @@
+import { authFetch } from "./api";
+
 export const updatePost = async (id, title, content) => {
-  const res = await fetch(`/api/posts/${id}`, {
-    credentials: 'include',
+  const res = await authFetch(`/api/posts/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -16,9 +17,8 @@ export const updatePost = async (id, title, content) => {
 };
 
 export const deletePost = async (id) => {
-  const res = await fetch(`/api/posts/${id}`, {
+  const res = await authFetch(`/api/posts/${id}`, {
     method: "DELETE",
-    credentials: 'include'
   });
 
   if (!res.ok) {

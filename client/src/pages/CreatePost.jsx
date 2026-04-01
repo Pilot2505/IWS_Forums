@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { User } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Editor } from '@tinymce/tinymce-react';
-import LogoutButton from "../components/LogoutButton";
+import Navbar from "../components/Navbar";
+import { authFetch } from "../services/api";
 
 export default function CreatePost() {
   const navigate = useNavigate();
+  const editorRef = useRef(null);
   const [user, setUser] = useState(null);
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [editorLoaded, setEditorLoaded] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -20,62 +21,87 @@ export default function CreatePost() {
     }
   }, [navigate]);
 
+  const uploadEditorImage = async (blob, index) => {
+    const formData = new FormData();
+    const extension = blob.type.split("/")[1] || "png";
+    formData.append("image", blob, `editor-image-${Date.now()}-${index}.${extension}`);
+
+    const res = await authFetch("/api/posts/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error("Image upload failed");
+    }
+
+    const data = await res.json();
+    return data.location;
+  };
+
+  const uploadEmbeddedImages = async (content) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+    const images = Array.from(doc.querySelectorAll("img"));
+
+    for (let index = 0; index < images.length; index += 1) {
+      const image = images[index];
+      const src = image.getAttribute("src") || "";
+
+      image.style.maxWidth = "800px";
+      image.style.height = "auto";
+
+      if (!src.startsWith("data:image/")) {
+        continue;
+      }
+
+      const blob = await fetch(src).then((response) => response.blob());
+      const uploadedUrl = await uploadEditorImage(blob, index);
+      image.setAttribute("src", uploadedUrl);
+    }
+
+    return doc.body.innerHTML;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title.trim() || !content.trim()) {
+    const rawContent = editorRef.current.getContent();
+
+    if (!title.trim() || !rawContent.trim()) {
       toast.error("Please fill in all fields");
       return;
     }
 
     try {
-      const res = await fetch("/api/posts", {
-        credentials: 'include',
+      const content = await uploadEmbeddedImages(rawContent);
+
+      const res = await authFetch("/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          title,
-          content,
-          userId: user.id,
-        }),
+        body: JSON.stringify({ title, content, userId: user.id }),
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to create post");
-      }
+      if (!res.ok) throw new Error("Failed to create post");
 
       const data = await res.json();
-
       toast.success("Post created successfully!");
       navigate(`/post/${data.id}`);
-
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong");
     }
   };
 
-
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
-      {/* Top Bar */}
-      <header className="h-[75px] bg-[#F6F6F6] flex items-center justify-between px-12">
-        <Link to="/home" className="text-[#163172] text-4xl font-semibold font-['Poppins']">
-          Technical Forum
-        </Link>
-        <div className="flex items-center gap-8">
-          <Link to="/profile" className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform">
-            <User className="w-5 h-5" />
-          </Link>
-          <LogoutButton />
-        </div>
-      </header>
+      <Navbar user={user} showCreatePost={false} />
 
-      <div className="max-w-2xl mx-auto px-12 pt-16">
+      <div className="max-w-5xl mx-auto px-12 pt-16">
         <h1 className="text-5xl font-bold text-[#0C245E] mb-12">Create New Post</h1>
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -98,23 +124,105 @@ export default function CreatePost() {
             <label htmlFor="content" className="block text-lg font-semibold text-black mb-3">
               Content
             </label>
-            <Editor
-              tinymceScriptSrc="tinymce/tinymce.min.js"
-              value={content}
-              onEditorChange={(newContent) => setContent(newContent)}
-              init={{
-              license_key: "gpl",
-              promotion: false,
-              branding: false,
-              height: 400,
-              menubar: true,
-              plugins: [
-                'lists', 'link', 'image', 'code', 'table', 'wordcount'
-              ],
-              toolbar:
-                'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | code'
-            }}  
-            />
+            <div className="create-post-editor relative min-h-[800px] [&_.tox-edit-area__iframe]:max-h-[800px] [&_.tox-edit-area__iframe]:overflow-y-auto">
+              {!editorLoaded && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 text-gray-500">
+                  Loading editor...
+                </div>
+              )}
+              <Editor
+                ref={editorRef}
+                tinymceScriptSrc="/tinymce/tinymce.min.js"
+                onInit={(evt, editor) => {
+                  editorRef.current = editor;
+                  setEditorLoaded(true);
+                }}
+
+                init={{
+                  license_key: "gpl",
+                  promotion: false,
+                  branding: false,
+                  menubar: false,
+                  height: 800,
+                  skin_url: '/tinymce/skins/ui/oxide',
+                  // Reduce plugins to only what you need
+                  plugins: ['lists', 'link', 'image', 'code'],
+                  // Simplified toolbar - remove unnecessary buttons
+                  toolbar: 'undo redo | fontsize | bold italic underline strikethrough | forecolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | link | image | code',
+                  toolbar_sticky: true,
+                  toolbar_sticky_offset: 0,
+
+                  file_picker_types: 'image',
+                  file_picker_callback: (callback) => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = "image/*";
+
+                    input.onchange = () => {
+                      const file = input.files?.[0];
+                      if (!file) {
+                        return;
+                      }
+
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const image = new Image();
+                        image.onload = () => {
+                          const maxWidth = 800;
+                          const width = image.width > maxWidth ? maxWidth : image.width;
+                          const height =
+                            image.width > maxWidth
+                              ? Math.round((image.height * maxWidth) / image.width)
+                              : image.height;
+
+                          callback(reader.result, {
+                            title: file.name,
+                            width: String(width),
+                            height: String(height),
+                            style: `max-width: ${maxWidth}px; height: auto;`,
+                          });
+                        };
+                        image.src = reader.result;
+                      };
+                      reader.readAsDataURL(file);
+                    };
+
+                    input.click();
+                  },
+
+                  image_title: true,
+                  image_dimensions: true,
+                  object_resizing: 'img',
+                  extended_valid_elements: 'img[src|alt|width|height|style]',
+                  valid_styles: {'*': 'width,height,max-width'},
+
+                  convert_urls: false,
+                  remove_script_host: false,
+                  automatic_uploads: false,
+                  paste_data_images: true,
+                  allow_local_files: true,
+                  
+                  // Performance optimizations
+                  element_format: 'html',
+                  schema: 'html5',
+                  entity_encoding: 'raw',
+                  // Disable auto-save for better perf
+                  autosave_ask_before_unload: false,
+                  // Faster loading by reducing UI elements
+                  statusbar: false,
+                  // Lazy load content
+                  content_style: `
+                    body {
+                    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    }
+                    img {
+                      max-width: 800px; 
+                      height: auto;
+                    }
+                  `,
+                }}
+              />
+            </div>
           </div>
 
           <div className="flex justify-center pt-4">

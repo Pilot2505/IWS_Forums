@@ -39,7 +39,14 @@ http://localhost:3000
 
 ---
 
-### 3. Stop the Containers
+### Reset the server
+If the server doesn't hot reload, run:
+
+```
+docker compose restart server
+```
+
+### 4. Stop the Containers
 
 To stop the application, run:
 

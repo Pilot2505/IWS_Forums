@@ -7,17 +7,16 @@ import postsRouter from "./routes/posts.js";
 import followsRouter from "./routes/follow.js";
 import usersRouter from "./routes/users.js";
 import { upload } from "./middlewares/upload.js";
-import cookieParser from "cookie-parser";
 
 export function createServer() {
   const app = express();
 
   // Middleware
-  app.use(cors());
+  app.use(cors({origin: "http://localhost:8080"}));
   app.use(express.json());
-  app.use(cookieParser());
   app.use(express.urlencoded({ extended: true }));
   app.use("/avatars", express.static("public/avatars"));
+  app.use("/post-images", express.static("public/post-images"));
 
   // Auth routes
   app.post("/api/register", upload.single("avatar"), handleRegister);
