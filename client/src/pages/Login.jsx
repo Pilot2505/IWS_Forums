@@ -41,7 +41,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#d4e4ec]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-5">
+      <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
         <h1 className="text-xl font-bold text-[#1a2332]">Technical Forum</h1>
         <Link 
           to="/register" 
@@ -52,13 +52,13 @@ export default function Login() {
       </header>
 
       {/* Login Form */}
-      <div className="flex items-center justify-center px-4 pt-8">
+      <div className="flex items-center justify-center px-4 py-8 sm:pt-8">
         <div className="w-full max-w-md">
-          <h2 className="text-4xl font-bold text-center text-[#0a0a0a] mb-8">
+          <h2 className="mb-6 text-center text-3xl font-bold text-[#0a0a0a] sm:mb-8 sm:text-4xl">
             Login
           </h2>
 
-          <div className="bg-white rounded-lg shadow-sm p-8">
+          <div className="rounded-lg bg-white p-5 shadow-sm sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Username Field */}
               <div>

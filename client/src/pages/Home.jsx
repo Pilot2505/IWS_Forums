@@ -74,24 +74,24 @@ export default function Home() {
     <div className="min-h-screen bg-[#D6E4F0]">
       <Navbar user={user} showCreatePost={true} />
 
-      <div className="flex gap-8 px-12 pt-12">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:flex-row lg:items-start lg:px-10 lg:py-10">
         {/* Main Content */}
         <div className="flex-1">
-          <Link to="/create-post" className="inline-block bg-[#1E56A0] text-white px-8 py-4 rounded-lg text-xl font-medium mb-8">
+          <Link to="/create-post" className="mb-6 inline-block rounded-lg bg-[#1E56A0] px-5 py-3 text-base font-medium text-white sm:px-6 sm:text-lg lg:mb-8 lg:px-8 lg:py-4 lg:text-xl">
             Create a New Post
           </Link>
 
-          <h2 className="text-[#4F6F9F] text-5xl font-medium mb-8">Recent Posts</h2>
+          <h2 className="mb-6 text-3xl font-medium text-[#4F6F9F] sm:text-4xl lg:mb-8 lg:text-5xl">Recent Posts</h2>
 
-          <div className="space-y-8">
+          <div className="space-y-5 sm:space-y-6 lg:space-y-8">
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="bg-[#F6F6F6] rounded-lg border-r-[0.5px] border-b-[0.5px] border-black p-8"
+                className="rounded-lg border-b-[0.5px] border-r-[0.5px] border-black bg-[#F6F6F6] p-4 sm:p-6 lg:p-8"
               >
-                <div className="flex justify-between items-start mb-5">
-                  <h3 className="text-black text-4xl font-semibold">{post.title}</h3>
-                  <p className="text-black text-2xl">
+                <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-start sm:justify-between">
+                  <h3 className="text-2xl font-semibold text-black sm:text-3xl lg:text-4xl">{post.title}</h3>
+                  <p className="text-base text-black sm:text-lg lg:text-2xl">
                       By{" "}
                       <Link
                         to={`/profile/${encodeURIComponent(post.username)}`}
@@ -101,14 +101,14 @@ export default function Home() {
                       </Link>
                   </p>
                 </div>
-                <p className="text-black text-2xl leading-relaxed mb-8 line-clamp-3">
+                <p className="mb-6 line-clamp-3 text-base leading-relaxed text-black sm:text-lg lg:mb-8 lg:text-2xl">
                   {stripHtml(post.content)}
                 </p>
-                <div className="flex justify-between items-center">
-                  <p className="text-black text-xl font-light">{new Date(post.created_at).toLocaleString()}</p>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm font-light text-black sm:text-base lg:text-xl">{new Date(post.created_at).toLocaleString()}</p>
                   <Link
                     to={`/post/${post.id}`}
-                    className="text-[#1E56A0] text-[22px] font-medium"
+                    className="text-base font-medium text-[#1E56A0] sm:text-lg lg:text-[22px]"
                   >
                     Read More
                   </Link>
@@ -117,7 +117,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="flex justify-center gap-3 mt-8">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             {Array.from({ length: totalPages }, (_, index) => (
               <button
                 key={index}
@@ -138,18 +138,18 @@ export default function Home() {
         </div>
 
         {/* Sidebar */}
-        <div className="w-[332px] bg-[#F6F6F6] rounded-lg max-h-[85vh] overflow-y-auto p-8">
-          <h3 className="sticky top-0 z-10 bg-[#F6F6F6] pb-2 text-[#0C245E]/70 text-4xl font-medium capitalize mb-8">
+        <div className="w-full rounded-lg bg-[#F6F6F6] p-4 sm:p-6 lg:sticky lg:top-6 lg:w-[320px] lg:max-h-[85vh] lg:flex-shrink-0 lg:overflow-y-auto lg:p-8 xl:w-[332px]">
+          <h3 className="mb-6 bg-[#F6F6F6] pb-2 text-2xl font-medium capitalize text-[#0C245E]/70 sm:text-3xl lg:sticky lg:top-0 lg:z-10 lg:mb-8 lg:text-4xl">
             Following
           </h3>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-5 lg:space-y-6">
             {following.map((person, index) => (
               <div key={person.id}>
                 <div className="flex items-center gap-4">
                   <div
                     onClick={() => handleOpenProfile(person)}
-                    className={`w-[60px] h-[60px] rounded-full p-[3px] cursor-pointer hover:scale-105 transition-transform
+                    className={`h-12 w-12 rounded-full p-[3px] transition-transform hover:scale-105 cursor-pointer sm:h-[52px] sm:w-[52px] lg:h-[60px] lg:w-[60px]
                       ${person.newPosts > 0 ? "bg-gradient-to-tr from-blue-500 to-cyan-400" : "border-[#D6E4F0]"}
                     `}
                   >
@@ -167,11 +167,11 @@ export default function Home() {
                   <div>
                     <p
                       onClick={() => handleOpenProfile(person)}
-                      className="text-black text-2xl hover:text-[#1E56A0] transition-colors cursor-pointer">
+                      className="cursor-pointer text-lg text-black transition-colors hover:text-[#1E56A0] sm:text-xl lg:text-2xl">
                       {person.fullname || person.username}
                     </p>
                     {person.newPosts > 0 && (
-                        <p className="text-[#0C245E]/70 text-base">
+                        <p className="text-sm text-[#0C245E]/70 sm:text-base">
                           {person.newPosts} new post{person.newPosts > 1 ? "s" : ""}
                         </p>
                     )}
