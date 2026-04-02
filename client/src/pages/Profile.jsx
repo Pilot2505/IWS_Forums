@@ -327,14 +327,14 @@ export default function Profile() {
     <div className="min-h-screen bg-[#C8CFD8]">
       <Navbar user={user} showCreatePost={true} />
 
-      <div className="max-w-4xl mx-auto px-12 pt-12">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
         {/* Profile Header */}
-        <div className="bg-[#ACB8C9] rounded-t-lg p-8">
-          <div className="flex items-start justify-between">
-            <div className="flex gap-6">
+        <div className="rounded-t-lg bg-[#ACB8C9] p-5 sm:p-6 lg:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
               <div
                 to={isOwnProfile ? "/profile" : `/profile/${username}`}
-                className="w-24 h-24 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] overflow-hidden flex items-center justify-center"
+                className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-[#D6E4F0] bg-[#21005D]/10 sm:h-24 sm:w-24"
               >
                   {displayUser?.avatar ? (
                   <img
@@ -346,9 +346,9 @@ export default function Profile() {
                 )}
               </div>
               <div>
-                <h1 className="text-3xl font-semibold text-black">{displayUser?.fullname}</h1>
-                <p className="text-lg text-gray-700">{displayUser?.username}</p>
-                <div className="flex gap-8 mt-3">
+                <h1 className="text-2xl font-semibold text-black sm:text-3xl">{displayUser?.fullname}</h1>
+                <p className="text-base text-gray-700 sm:text-lg">{displayUser?.username}</p>
+                <div className="mt-3 grid grid-cols-3 gap-4 sm:flex sm:gap-8">
                   <div className="text-center">
                     <div className="text-2xl font-semibold">{posts.length}</div>
                     <div className="text-sm text-gray-700">Posts</div>
@@ -367,7 +367,7 @@ export default function Profile() {
             {isOwnProfile ? (
               <button
                 onClick={() => setShowEditProfile(true)}
-                className="bg-[#1E56A0] text-white px-6 py-2 rounded-md font-medium"
+                className="w-full rounded-md bg-[#1E56A0] px-6 py-2 font-medium text-white sm:w-auto"
               >
                 Edit Profile
               </button>
@@ -379,12 +379,12 @@ export default function Profile() {
               />
             )}
           </div>
-          <p className="mt-4 text-black">{displayUser?.bio || "No bio yet"}</p>
+          <p className="mt-4 text-sm text-black sm:text-base">{displayUser?.bio || "No bio yet"}</p>
         </div>
 
         {/* Posts Section */}
-        <div className="bg-white rounded-b-lg p-8">
-          <h2 className="text-3xl font-semibold text-[#0C245E] mb-6">
+        <div className="rounded-b-lg bg-white p-5 sm:p-6 lg:p-8">
+          <h2 className="mb-6 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
             {isOwnProfile ? "Your Posts" : `${username}'s Posts`}
           </h2>
 
@@ -395,10 +395,10 @@ export default function Profile() {
               </div>
             ) : (
               posts.map((post) => (
-                <div key={post.id} className="border border-gray-200 rounded-lg p-6">
+                <div key={post.id} className="rounded-lg border border-gray-200 p-4 sm:p-6">
                   {editingPost !== post.id && (
                     <>
-                      <h3 className="text-2xl font-semibold text-black mb-3">
+                      <h3 className="mb-3 text-xl font-semibold text-black sm:text-2xl">
                         {post.title}
                       </h3>
                       <div
@@ -407,9 +407,9 @@ export default function Profile() {
                       />
                     </>
                   )}
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-sm text-gray-500">{post.timeAgo}</span>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4">
                       <Link
                         to={`/post/${post.id}`}
                         className="text-[#1E56A0] font-medium"
@@ -454,7 +454,7 @@ export default function Profile() {
           onClick={closeEditPostModal}
         >
           <div
-            className="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-xl bg-white p-8 shadow-2xl"
+            className="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-xl bg-white p-4 shadow-2xl sm:p-6 lg:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -465,7 +465,7 @@ export default function Profile() {
             </button>
 
             <div className="mb-8">
-              <h3 className="text-3xl font-semibold text-[#0C245E]">Edit Post</h3>
+              <h3 className="text-2xl font-semibold text-[#0C245E] sm:text-3xl">Edit Post</h3>
               <p className="mt-2 text-sm text-gray-500">Changes are applied only when you save.</p>
             </div>
 
@@ -481,7 +481,7 @@ export default function Profile() {
 
               <div>
                 <label className="mb-3 block text-lg font-semibold text-black">Content</label>
-                <div className="relative min-h-[700px] [&_.tox-edit-area__iframe]:max-h-[700px] [&_.tox-edit-area__iframe]:overflow-y-auto">
+                <div className="relative min-h-[420px] [&_.tox-edit-area__iframe]:max-h-[420px] [&_.tox-edit-area__iframe]:overflow-y-auto sm:min-h-[560px] sm:[&_.tox-edit-area__iframe]:max-h-[560px] lg:min-h-[700px] lg:[&_.tox-edit-area__iframe]:max-h-[700px]">
                   {!editorLoaded && (
                     <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 text-gray-500">
                       Loading editor...
@@ -501,7 +501,7 @@ export default function Profile() {
                       promotion: false,
                       branding: false,
                       menubar: false,
-                      height: 700,
+                      height: window.innerWidth < 640 ? 420 : window.innerWidth < 1024 ? 560 : 700,
                       skin_url: "/tinymce/skins/ui/oxide",
                       plugins: ["lists", "link", "image", "code"],
                       toolbar:
@@ -595,8 +595,8 @@ export default function Profile() {
 
       {/* Edit Profile Modal */}
       {showEditProfile && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
+          <div className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-5 sm:p-6 lg:p-8">
             <button
               onClick={() => setShowEditProfile(false)}
               className="absolute top-4 right-4"
@@ -643,12 +643,12 @@ export default function Profile() {
                   Change Image
                 </label>
               </div>
-              <h2 className="text-3xl font-semibold mt-4">Edit Profile</h2>
+              <h2 className="mt-4 text-2xl font-semibold sm:text-3xl">Edit Profile</h2>
             </div>
 
             <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div className="grid grid-cols-[120px,1fr] items-start gap-4">
-                <label className="text-right font-medium pt-2">Fullname:</label>
+              <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
+                <label className="font-medium sm:pt-2 sm:text-right">Fullname:</label>
                 <div className="w-full">
                   <input
                     type="text"
@@ -667,8 +667,8 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-[120px,1fr] items-start gap-4">
-                <label className="text-right font-medium pt-2">Email:</label>
+              <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
+                <label className="font-medium sm:pt-2 sm:text-right">Email:</label>
                 <div className="w-full">
                   <input
                     type="email"
@@ -687,8 +687,8 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-[120px,1fr] items-start gap-4">
-                <label className="text-right font-medium pt-2">Username:</label>
+              <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
+                <label className="font-medium sm:pt-2 sm:text-right">Username:</label>
                 <div className="w-full">
                   <input
                     type="text"
@@ -707,8 +707,8 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-[120px,1fr] items-start gap-4">
-                <label className="text-right font-medium pt-2">Bio:</label>
+              <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
+                <label className="font-medium sm:pt-2 sm:text-right">Bio:</label>
                 <div className="w-full">
                   <textarea
                     value={editFormData.bio}
@@ -727,10 +727,10 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="flex gap-4 justify-center pt-6">
+              <div className="flex flex-col justify-center gap-3 pt-6 sm:flex-row sm:gap-4">
                 <button
                   type="submit"
-                  className="bg-[#1E56A0] text-white px-8 py-2 rounded-md font-medium"
+                  className="rounded-md bg-[#1E56A0] px-8 py-2 font-medium text-white"
                 >
                   Save Changes
                 </button>
@@ -749,8 +749,8 @@ export default function Profile() {
 
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="max-w-md rounded-lg bg-white p-5 sm:p-8">
             <div className="flex items-center gap-3 mb-6">
               <Trash2 className="w-6 h-6 text-red-600" />
               <h3 className="text-xl font-semibold text-red-600">
