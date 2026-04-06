@@ -294,16 +294,16 @@ export default function PostDetail() {
     <div className="min-h-screen bg-[#C8CFD8]">
       <Navbar user={user} showCreatePost={true} />
 
-      <div className="flex items-start gap-8 px-12 pt-12">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:items-start lg:gap-8 lg:px-10 lg:py-10">
         {/* Post Content */}
-        <div className="flex-1 bg-white rounded-lg p-12">
-          <div className="flex items-start justify-between mb-4">
+        <div className="flex-1 rounded-lg bg-white p-5 sm:p-8 lg:p-12">
+          <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             {isEditing ? (
               <div className="space-y-4">
                 <input
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full border p-3 rounded text-2xl font-bold"
+                  className="w-full rounded border p-3 text-xl font-bold sm:text-2xl"
                 />
                 <Editor
                   tinymceScriptSrc="/tinymce/tinymce.min.js"
@@ -313,7 +313,7 @@ export default function PostDetail() {
                     license_key: "gpl",
                     promotion: false,
                     branding: false,
-                    height: 400,
+                    height: window.innerWidth < 640 ? 320 : window.innerWidth < 1024 ? 380 : 400,
                     menubar: true,
                     plugins: [
                       "lists",
@@ -344,7 +344,7 @@ export default function PostDetail() {
               </div>
             ) : (
               <>
-                <h1 className="text-5xl font-bold text-black mb-6">
+                <h1 className="mb-4 text-3xl font-bold text-black sm:text-4xl lg:mb-6 lg:text-5xl">
                   {post.title}
                 </h1>
               </>
@@ -354,7 +354,7 @@ export default function PostDetail() {
                 <div className="flex gap-4">
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="text-[#1E56A0] text-xl font-medium"
+                    className="text-lg font-medium text-[#1E56A0] sm:text-xl"
                   >
                     Edit
                   </button>
@@ -363,7 +363,7 @@ export default function PostDetail() {
                       setDeletePostId(post.id);
                       setShowDeleteDialog(true);
                     }}
-                    className="text-red-600 text-xl font-medium"
+                    className="text-lg font-medium text-red-600 sm:text-xl"
                   >
                     Delete
                   </button>
@@ -372,8 +372,8 @@ export default function PostDetail() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 mb-8">
-            <Link to={`/profile/${post.username}`} className="w-12 h-12 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <Link to={`/profile/${post.username}`} className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-4 border-[#D6E4F0] bg-[#21005D]/10 transition-transform hover:scale-105">
               {post.avatar ? (
                 <img
                   src={post.avatar}
@@ -384,7 +384,7 @@ export default function PostDetail() {
               )}
             </Link>
             <div className="flex-1">
-              <p className="text-black text-xl">
+              <p className="text-lg text-black sm:text-xl">
                 By <Link to={`/profile/${post.username}`} className="text-[#1E56A0] font-medium">{post.username}</Link>
               </p>
               <p className="text-gray-600 text-sm">{new Date(post.created_at).toLocaleString("en-GB")}</p>
@@ -395,15 +395,15 @@ export default function PostDetail() {
             />
           </div>
 
-          <div className="text-black text-lg leading-relaxed"
+          <div className="text-base leading-relaxed text-black sm:text-lg"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </div>
 
         {/* Comments Sidebar */}
-        <div className="w-[400px] flex-shrink-0 sticky top-6 self-start">
-          <div className="bg-white rounded-lg p-6">
-            <h3 className="text-2xl font-semibold mb-6">
+        <div className="w-full lg:sticky lg:top-6 lg:w-[360px] lg:flex-shrink-0 xl:w-[400px]">
+          <div className="rounded-lg bg-white p-4 sm:p-6">
+            <h3 className="mb-6 text-xl font-semibold sm:text-2xl">
               Comments <span className="text-gray-500">{comments.length} Comments</span>
             </h3>
 
@@ -445,8 +445,8 @@ export default function PostDetail() {
       
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="max-w-md rounded-lg bg-white p-5 sm:p-8">
             <div className="flex items-center gap-3 mb-6">
               <Trash2 className="w-6 h-6 text-red-600" />
               <h3 className="text-xl font-semibold text-red-600">

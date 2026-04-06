@@ -101,8 +101,8 @@ export default function CreatePost() {
     <div className="min-h-screen bg-[#D6E4F0]">
       <Navbar user={user} showCreatePost={false} />
 
-      <div className="max-w-5xl mx-auto px-12 pt-16">
-        <h1 className="text-5xl font-bold text-[#0C245E] mb-12">Create New Post</h1>
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+        <h1 className="mb-8 text-3xl font-bold text-[#0C245E] sm:text-4xl lg:mb-12 lg:text-5xl">Create New Post</h1>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div>
@@ -124,7 +124,7 @@ export default function CreatePost() {
             <label htmlFor="content" className="block text-lg font-semibold text-black mb-3">
               Content
             </label>
-            <div className="create-post-editor relative min-h-[800px] [&_.tox-edit-area__iframe]:max-h-[800px] [&_.tox-edit-area__iframe]:overflow-y-auto">
+            <div className="create-post-editor relative min-h-[520px] [&_.tox-edit-area__iframe]:max-h-[520px] [&_.tox-edit-area__iframe]:overflow-y-auto sm:min-h-[640px] sm:[&_.tox-edit-area__iframe]:max-h-[640px] lg:min-h-[800px] lg:[&_.tox-edit-area__iframe]:max-h-[800px]">
               {!editorLoaded && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 text-gray-500">
                   Loading editor...
@@ -143,7 +143,7 @@ export default function CreatePost() {
                   promotion: false,
                   branding: false,
                   menubar: false,
-                  height: 800,
+                  height: window.innerWidth < 640 ? 520 : window.innerWidth < 1024 ? 640 : 800,
                   skin_url: '/tinymce/skins/ui/oxide',
                   // Reduce plugins to only what you need
                   plugins: ['lists', 'link', 'image', 'code'],
@@ -228,7 +228,7 @@ export default function CreatePost() {
           <div className="flex justify-center pt-4">
             <button
               type="submit"
-              className="bg-[#1E56A0] text-white px-12 py-3 rounded-md text-lg font-medium hover:bg-[#163d7a] transition-colors"
+              className="w-full rounded-md bg-[#1E56A0] px-8 py-3 text-base font-medium text-white transition-colors hover:bg-[#163d7a] sm:w-auto sm:px-12 sm:text-lg"
             >
               Submit Post
             </button>
