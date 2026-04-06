@@ -4,17 +4,18 @@ import LogoutButton from "./LogoutButton";
 
 export default function Navbar({ user, showCreatePost = true }) {
   return (
-    <header className="h-[75px] bg-[#F6F6F6] flex items-center justify-between px-12">
+    <header className="bg-[#F6F6F6] px-4 py-3 sm:px-6 lg:px-12">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       {/* Logo */}
-      <Link to="/" className="text-[#163172] text-4xl font-semibold font-['Poppins']">
+      <Link to="/" className="text-2xl font-semibold text-[#163172] font-['Poppins'] sm:text-3xl lg:text-4xl">
         Technical Forum
       </Link>
 
       {/* Navigation Items */}
-      <div className="flex items-center gap-8">
+      <div className="flex flex-wrap items-center gap-3 self-end sm:self-auto sm:gap-5 lg:gap-8">
         {/* shown on all pages except Create Post page */}
         {showCreatePost && (
-          <Link to="/create-post" className="text-[#1E56A0] text-2xl font-medium hover:text-[#163172] transition-colors">
+          <Link to="/create-post" className="text-base font-medium text-[#1E56A0] transition-colors hover:text-[#163172] sm:text-lg lg:text-2xl">
             Create Post
           </Link>
         )}
@@ -23,7 +24,7 @@ export default function Navbar({ user, showCreatePost = true }) {
         {user && (
           <Link 
             to={`/profile/${user.username}`} 
-            className="w-10 h-10 rounded-full bg-[#21005D]/10 border-4 border-[#D6E4F0] flex items-center justify-center hover:scale-105 transition-transform overflow-hidden"
+            className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-[#D6E4F0] bg-[#21005D]/10 transition-transform hover:scale-105 sm:h-11 sm:w-11 sm:border-4"
           >
             {user?.avatar ? (
               <img src={user.avatar} className="w-full h-full object-cover" />
@@ -34,6 +35,7 @@ export default function Navbar({ user, showCreatePost = true }) {
         )}
         
         <LogoutButton />
+      </div>
       </div>
     </header>
   );
