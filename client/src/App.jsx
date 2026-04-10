@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import PostDetail from "./pages/PostDetail";
 import CreatePost from "./pages/CreatePost";
 import Profile from "./pages/Profile";
+import SearchResult from "./pages/SearchResult";
 import NotFound from "./pages/NotFound";
 
 const App = () => (
@@ -23,6 +24,7 @@ const App = () => (
         <Route path="/create-post" element={<CreatePost />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:username" element={<Profile />} />
+        <Route path="/search" element={<SearchResult />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
