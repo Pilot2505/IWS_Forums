@@ -42,6 +42,35 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+//SEARCH POSTS BY TITLE OR CONTENT
+router.get("/search", auth, async (req, res) => {
+  try {
+    const q = req.query.q || "";
+    if (!q.trim()) {
+      return res.json([]);
+    }
+
+    const keyword = `%${q.trim()}%`;
+
+    const [rows] = await pool.execute(
+      `
+      SELECT posts.*, users.username, users.avatar
+      FROM posts
+      JOIN users ON posts.user_id = users.id
+      WHERE posts.title LIKE ? OR posts.content LIKE ?
+      ORDER BY posts.created_at DESC
+      LIMIT 50
+      `,
+      [keyword, keyword]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //GET ALL POSTS BY USERNAME
 router.get("/user/:username", auth, async (req, res) => {
   try {
