@@ -35,8 +35,14 @@ export default function Register() {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
+        // Lưu user với categories rỗng để biết là new user chưa chọn
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ ...data.user, categories: null })
+        );
         toast.success("Account created successfully!");
-        navigate("/login");
+        // Redirect sang trang chọn categories
+        navigate("/select-categories");
       } else {
         toast.error(data.error || "Registration failed");
       }

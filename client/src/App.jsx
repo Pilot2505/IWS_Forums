@@ -9,6 +9,7 @@ import PostDetail from "./pages/PostDetail";
 import CreatePost from "./pages/CreatePost";
 import Profile from "./pages/Profile";
 import SearchResult from "./pages/SearchResult";
+import SelectCategories from "./pages/SelectCategories";
 import NotFound from "./pages/NotFound";
 
 const App = () => (
@@ -25,6 +26,7 @@ const App = () => (
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:username" element={<Profile />} />
         <Route path="/search" element={<SearchResult />} />
+        <Route path="/select-categories" element={<SelectCategories />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
