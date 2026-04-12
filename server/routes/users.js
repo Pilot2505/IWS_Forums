@@ -10,7 +10,7 @@ router.get("/:username", auth, async (req, res) => {
   const { username } = req.params;
 
   const [rows] = await pool.execute(
-    "SELECT id, username, fullname, email, bio, avatar FROM users WHERE username = ?",
+    "SELECT id, username, fullname, email, bio, avatar, categories FROM users WHERE username = ?",
     [username]
   );
 
@@ -18,7 +18,18 @@ router.get("/:username", auth, async (req, res) => {
     return res.status(404).json({ message: "User not found" });
   }
 
-  res.json(rows[0]);
+  const user = rows[0];
+
+  // Parse categories nếu là string JSON
+  if (typeof user.categories === "string") {
+    try {
+      user.categories = JSON.parse(user.categories);
+    } catch {
+      user.categories = [];
+    }
+  }
+
+  res.json(user);
 });
 
 //UPDATE USER PROFILE
@@ -45,14 +56,47 @@ router.put("/update-profile", auth, async (req, res) => {
     );
 
     const [updatedUser] = await pool.execute(
-      "SELECT id, username, fullname, email, bio, avatar FROM users WHERE id = ?",
+      "SELECT id, username, fullname, email, bio, avatar, categories FROM users WHERE id = ?",
       [id]
     );
 
-    res.json(updatedUser[0]);
+    const user = updatedUser[0];
+    if (typeof user.categories === "string") {
+      try { user.categories = JSON.parse(user.categories); } catch { user.categories = []; }
+    }
+
+    res.json(user);
 
   } catch (err) {
     console.error("Update profile error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+//SAVE CATEGORIES
+router.put("/categories", auth, async (req, res) => {
+  const { userId, categories } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ message: "Missing userId" });
+  }
+
+  if (!Array.isArray(categories)) {
+    return res.status(400).json({ message: "Categories must be an array" });
+  }
+
+  // Giới hạn tối đa 3 categories
+  const limited = categories.slice(0, 3);
+
+  try {
+    await pool.execute(
+      "UPDATE users SET categories = ? WHERE id = ?",
+      [JSON.stringify(limited), userId]
+    );
+
+    res.json({ success: true, categories: limited });
+  } catch (err) {
+    console.error("Save categories error:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 });
