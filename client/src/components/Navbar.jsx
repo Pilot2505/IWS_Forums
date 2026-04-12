@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronDown, LogOut, Trash2, User } from "lucide-react";
 import LogoutButton from "./LogoutButton";
+import SearchBar from "./SearchBar";
 
 export default function Navbar({ user, showCreatePost = true }) {
   const navigate = useNavigate();
@@ -48,14 +49,17 @@ export default function Navbar({ user, showCreatePost = true }) {
           Technical Forum
         </Link>
 
-        {/* Navigation Items */}
-        <div className="flex flex-wrap items-center gap-3 self-end sm:self-auto sm:gap-5 lg:gap-8">
-          {/* shown on all pages except Create Post page */}
-          {showCreatePost && (
-            <Link to="/create-post" className="text-base font-medium text-[#1E56A0] transition-colors hover:text-[#163172] sm:text-lg lg:text-2xl">
-              Create Post
-            </Link>
-          )}
+      {/* Navigation Items */}
+      <div className="flex flex-wrap items-center gap-3 self-end sm:self-auto sm:gap-5 lg:gap-6">
+        {/* Search Bar */}
+        <SearchBar />
+
+        {/* shown on all pages except Create Post page */}
+        {showCreatePost && (
+          <Link to="/create-post" className="text-base font-medium text-[#1E56A0] transition-colors hover:text-[#163172] sm:text-lg lg:text-2xl">
+            Create Post
+          </Link>
+        )}
 
           {/* User Profile Avatar */}
           {user && (
