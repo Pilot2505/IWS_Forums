@@ -71,6 +71,79 @@ router.get("/search", auth, async (req, res) => {
   }
 });
 
+//GET RECOMMENDED POSTS BY CATEGORIES
+// categories được truyền qua query string: ?categories=javascript,python,web
+router.get("/recommended", auth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const offset = (page - 1) * limit;
+
+    const rawCats = req.query.categories || "";
+    const categories = rawCats
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean);
+
+    if (categories.length === 0) {
+      return res.status(400).json({ message: "No categories provided" });
+    }
+
+    // Map category id -> keywords để tìm trong title/content
+    const categoryKeywords = {
+      javascript: ["javascript", "js", "node", "react", "vue", "angular", "typescript"],
+      python: ["python", "django", "flask", "fastapi", "pandas", "numpy"],
+      java: ["java", "spring", "maven", "gradle", "jvm", "kotlin"],
+      cpp: ["c++", "cpp", "c language", "pointer", "memory management"],
+      web: ["html", "css", "web", "frontend", "backend", "http", "api", "rest"],
+      mobile: ["mobile", "android", "ios", "flutter", "react native", "swift"],
+      database: ["sql", "mysql", "postgresql", "mongodb", "database", "nosql", "redis"],
+      devops: ["devops", "docker", "kubernetes", "ci/cd", "jenkins", "nginx", "linux"],
+      ai_ml: ["ai", "machine learning", "deep learning", "neural", "tensorflow", "pytorch", "llm"],
+      security: ["security", "cybersecurity", "encryption", "firewall", "vulnerability", "hacking"],
+      cloud: ["aws", "azure", "gcp", "cloud", "serverless", "s3", "lambda"],
+      opensource: ["open source", "github", "git", "contribution", "license"],
+    };
+
+    // Gom tất cả keywords từ các categories được chọn
+    const keywords = categories.flatMap((cat) => categoryKeywords[cat] || [cat]);
+
+    if (keywords.length === 0) {
+      return res.status(400).json({ message: "Invalid categories" });
+    }
+
+    // Tạo điều kiện LIKE cho từng keyword
+    const conditions = keywords.map(() => "(posts.title LIKE ? OR posts.content LIKE ?)").join(" OR ");
+    const params = keywords.flatMap((kw) => [`%${kw}%`, `%${kw}%`]);
+
+    // Đếm tổng
+    const [countRows] = await pool.query(
+      `SELECT COUNT(*) as total FROM posts JOIN users ON posts.user_id = users.id WHERE ${conditions}`,
+      params
+    );
+    const totalPosts = countRows[0].total;
+    const totalPages = Math.ceil(totalPosts / limit);
+
+    // Lấy bài viết recommended có phân trang
+    const [rows] = await pool.query(
+      `
+      SELECT posts.*, users.username, users.avatar
+      FROM posts
+      JOIN users ON posts.user_id = users.id
+      WHERE ${conditions}
+      ORDER BY posts.created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+      `,
+      params
+    );
+
+    res.json({ posts: rows, currentPage: page, totalPages, totalPosts });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //GET ALL POSTS BY USERNAME
 router.get("/user/:username", auth, async (req, res) => {
   try {
