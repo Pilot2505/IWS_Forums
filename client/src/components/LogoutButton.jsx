@@ -1,22 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 
-export default function LogoutButton() {
+export default function LogoutButton({ className}) {
     const navigate = useNavigate();
     const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem("user");
+        localStorage.removeItem("token");
         setShowLogoutDialog(false);
         navigate("/login", { replace: true });
         };
+
+    const defaultButtonClassName =
+        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100";
 
     return (
     <>
         <button
             onClick={() => setShowLogoutDialog(true)}
-            className="text-[#1E56A0] text-2xl font-medium"
+            className={className || defaultButtonClassName}
           >
+            <LogOut className="h-4 w-4" />
             Logout
           </button>
 
