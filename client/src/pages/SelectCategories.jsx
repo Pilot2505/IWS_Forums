@@ -34,9 +34,9 @@ export default function SelectCategories() {
     const parsed = JSON.parse(storedUser);
     setUser(parsed);
 
-    // Nếu đã chọn categories rồi thì vào thẳng home
-    if (parsed.categories && parsed.categories.length > 0) {
-      navigate("/home");
+    // Nếu user đã có categories, load lên để có thể chỉnh sửa
+    if (parsed.categories && Array.isArray(parsed.categories)) {
+      setSelected(parsed.categories);
     }
   }, [navigate]);
 
@@ -105,7 +105,9 @@ export default function SelectCategories() {
         <div className="w-full max-w-2xl">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-[#0a0a0a] sm:text-4xl mb-2">
-              What are you interested in?
+              {user?.categories && Array.isArray(user.categories) && user.categories.length > 0
+                ? "Update your interests"
+                : "What are you interested in?"}
             </h2>
             <p className="text-gray-600 text-sm sm:text-base">
               Select up to <span className="font-semibold text-[#2b5a8a]">3 categories</span> to personalize your feed.
