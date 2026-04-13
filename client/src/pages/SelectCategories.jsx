@@ -22,6 +22,7 @@ export default function SelectCategories() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [selected, setSelected] = useState([]);
+  const [initialSelected, setInitialSelected] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -35,9 +36,9 @@ export default function SelectCategories() {
     setUser(parsed);
 
     // Nếu user đã có categories, load lên để có thể chỉnh sửa
-    if (parsed.categories && Array.isArray(parsed.categories)) {
-      setSelected(parsed.categories);
-    }
+    const savedCategories = Array.isArray(parsed.categories) ? parsed.categories : [];
+    setSelected(savedCategories);
+    setInitialSelected(savedCategories);
   }, [navigate]);
 
   const toggleCategory = (id) => {
@@ -53,9 +54,17 @@ export default function SelectCategories() {
     });
   };
 
+  const normalizeCategories = (arr) => [...arr].sort(); // Để so sánh không bị ảnh hưởng bởi thứ tự chọn categories
+
+  const hasChanges =
+    JSON.stringify(normalizeCategories(selected)) !==
+    JSON.stringify(normalizeCategories(initialSelected)); // So sánh mảng đã chọn hiện tại với mảng ban đầu để xác định xem có thay đổi nào không
+
+  const canContinue = selected.length > 0 && hasChanges; // Cho phép tiếp tục nếu đã chọn ít nhất 1 category và có sự thay đổi so với ban đầu. Nếu user đã có categories và không thay đổi gì thì sẽ không cho submit nữa, tránh việc gửi request update không cần thiết.
+
+
   const handleSkip = async () => {
-    // Lưu mảng rỗng để đánh dấu đã hoàn thành bước này
-    await saveCategories([]);
+    navigate("/home"); // Không thay đổi gì, chuyển hướng về home
   };
 
   const handleSubmit = async () => {
@@ -80,6 +89,7 @@ export default function SelectCategories() {
       const updatedUser = { ...user, categories: cats };
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
+      setInitialSelected(cats);
 
       toast.success(cats.length > 0 ? "Categories saved!" : "Skipped!");
       navigate("/home");
@@ -162,7 +172,7 @@ export default function SelectCategories() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={handleSubmit}
-                disabled={loading || selected.length === 0}
+                disabled={loading || !canContinue}
                 className="flex-1 bg-[#2b5a8a] hover:bg-[#1e4167] disabled:bg-gray-400 text-white font-semibold py-3 rounded-md transition-colors"
               >
                 {loading ? "Saving..." : "Continue"}

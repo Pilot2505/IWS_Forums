@@ -49,6 +49,15 @@ If hot reload does not trigger on Windows, recreate the server container:
 docker compose up -d --force-recreate server
 ```
 
+## Reset the database after schema changes
+
+If the database schema is changed in `schema.sql`, stop the `iws-mysql` container in Docker Desktop, then remove the MySQL volume and recreate the containers so Docker runs the updated init script.
+
+```bash
+docker volume rm iws_forums_mysql_data
+docker compose up --build
+```
+
 ## Stop the project
 
 To stop the containers:
