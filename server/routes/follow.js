@@ -1,135 +1,29 @@
 import express from "express";
-import pool from "../db.js";
 import auth from "../middlewares/authMiddleware.js";
+import { validate } from "../middlewares/validate.js";
+import {
+  followSchema,
+  unfollowSchema,
+  seenSchema,
+  followCountSchema,
+  isFollowingSchema,
+} from "../validators/followSchemas.js";
+import {
+  followUser,
+  unfollowUser,
+  getFollowCount,
+  isFollowing,
+  getFollowingUsers,
+  updateLastSeen,
+} from "../controllers/followController.js";
 
 const router = express.Router();
 
-// Follow
-router.post("/", auth, async (req, res) => {
-  const { followerId, followingId } = req.body;
-
-  if (!followerId || !followingId)
-    return res.status(400).json({ message: "Missing data" });
-
-  if (followerId === followingId)
-    return res.status(400).json({ message: "Cannot follow yourself" });
-
-  try {
-    await pool.execute(
-      `INSERT INTO followers (follower_id, following_id, last_seen)
-       VALUES (?, ?, NOW())`,
-      [followerId, followingId]
-    );
-
-    res.json({ isFollowing: true });
-  } catch (err) {
-    if (err.code === "ER_DUP_ENTRY") {
-      return res.json({ isFollowing: true });
-    }
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Unfollow
-router.delete("/", auth, async (req, res) => {
-  const { followerId, followingId } = req.body;
-
-  await pool.execute(
-    `DELETE FROM followers
-     WHERE follower_id = ? AND following_id = ?`,
-    [followerId, followingId]
-  );
-
-  res.json({ isFollowing: false });
-});
-
-// Follow count
-router.get("/follow-count/:userId", auth, async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const [followers] = await pool.execute(
-      "SELECT COUNT(*) AS count FROM followers WHERE following_id = ?",
-      [userId]
-    );
-
-    const [following] = await pool.execute(
-      "SELECT COUNT(*) AS count FROM followers WHERE follower_id = ?",
-      [userId]
-    );
-
-    res.json({
-      followers: followers[0].count,
-      following: following[0].count
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Check if following
-router.get("/is-following", auth, async (req, res) => {
-  const { followerId, followingId } = req.query;
-
-  const [rows] = await pool.execute(
-    "SELECT * FROM followers WHERE follower_id = ? AND following_id = ?",
-    [followerId, followingId]
-  );
-
-  res.json({ isFollowing: rows.length > 0 });
-});
-
-// Get following users with new posts count
-router.get("/:userId", auth, async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const [rows] = await pool.execute(
-      `
-      SELECT 
-          u.id,
-          u.username,
-          u.fullname,
-          u.avatar,
-          COUNT(p.id) AS newPosts
-      FROM followers f
-      JOIN users u 
-          ON f.following_id = u.id
-      LEFT JOIN posts p 
-          ON p.user_id = u.id
-          AND p.created_at > COALESCE(f.last_seen, '1970-01-01')
-      WHERE f.follower_id = ?
-      GROUP BY u.id, u.username
-      `,
-      [userId]
-    );
-
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-// Update last seen
-router.put("/seen", auth, async (req, res) => {
-  const { followerId, followingId } = req.body;
-
-  try {
-    await pool.execute(
-      `
-      UPDATE followers
-      SET last_seen = NOW()
-      WHERE follower_id = ? AND following_id = ?
-      `,
-      [followerId, followingId]
-    );
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
+router.post("/", auth, validate(followSchema), followUser); // Follow a user
+router.delete("/", auth, validate(unfollowSchema), unfollowUser); // Unfollow a user
+router.get("/follow-count/:userId", auth, validate(followCountSchema), getFollowCount); // Get followers and following count
+router.get("/is-following", auth, validate(isFollowingSchema), isFollowing); // Check if a user is following another user
+router.get("/:userId", auth, validate(followCountSchema), getFollowingUsers); // Get list of users that a user is following
+router.put("/seen", auth, validate(seenSchema), updateLastSeen); // Update last seen timestamp
 
 export default router;
