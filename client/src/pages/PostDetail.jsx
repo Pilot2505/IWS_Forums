@@ -8,6 +8,7 @@ import { updatePost, deletePost } from "../services/postService";
 import FollowButton from "../components/FollowButton";
 import { Editor } from "@tinymce/tinymce-react";
 import { authFetch } from "../services/api";
+import PostVoteControls from "../components/PostVoteControls";
 
 const blockedWords = ["dm", "vcl", "chửi_bậy"];
 
@@ -179,6 +180,18 @@ export default function PostDetail() {
       console.error(err);
       toast.error(err.message);
     }
+  };
+
+  const handlePostVoteChange = ({ voteCount, currentUserVote }) => {
+    setPost((prev) =>
+      prev
+        ? {
+            ...prev,
+            vote_count: voteCount,
+            current_user_vote: currentUserVote,
+          }
+        : prev
+    );
   };
 
   if (!user || !post) return null;
@@ -425,6 +438,15 @@ export default function PostDetail() {
             <FollowButton
               currentUserId={user.id}
               targetUserId={post.user_id}
+            />
+          </div>
+
+          <div className="mb-8 flex flex-wrap items-center gap-4">
+            <PostVoteControls
+              postId={post.id}
+              initialVoteCount={post.vote_count ?? 0}
+              initialCurrentUserVote={post.current_user_vote ?? 0}
+              onChange={handlePostVoteChange}
             />
           </div>
 

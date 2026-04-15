@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { updatePost, deletePost } from "../services/postService";
 import Navbar from "../components/Navbar";
 import FollowButton from "../components/FollowButton";
+import PostVoteControls from "../components/PostVoteControls";
 import { Editor } from "@tinymce/tinymce-react";
 import { authFetch } from "../services/api";
 
@@ -233,6 +234,20 @@ export default function Profile() {
     }
   };
 
+  const handlePostVoteChange = ({ postId, voteCount, currentUserVote }) => {
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              vote_count: voteCount,
+              current_user_vote: currentUserVote,
+            }
+          : post
+      )
+    );
+  };
+
   const uploadEditorImage = async (blob, index) => {
     const formData = new FormData();
     const extension = blob.type.split("/")[1] || "png";
@@ -406,6 +421,16 @@ export default function Profile() {
                         dangerouslySetInnerHTML={{ __html: post.content }}
                       />
                     </>
+                  )}
+                  {editingPost !== post.id && (
+                    <div className="mb-4 flex flex-wrap items-center gap-4">
+                      <PostVoteControls
+                        postId={post.id}
+                        initialVoteCount={post.vote_count ?? 0}
+                        initialCurrentUserVote={post.current_user_vote ?? 0}
+                        onChange={handlePostVoteChange}
+                      />
+                    </div>
                   )}
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-sm text-gray-500">{post.timeAgo}</span>

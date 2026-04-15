@@ -11,8 +11,31 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+const ensurePostVotesTable = async () => {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS post_votes (
+        post_id INT NOT NULL,
+        user_id INT NOT NULL,
+        vote TINYINT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (post_id, user_id),
+        FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        CHECK (vote IN (-1, 1))
+      ) ENGINE=InnoDB;
+    `);
+  } finally {
+    connection.release();
+  }
+};
+
 (async () => {
   try {
+    await ensurePostVotesTable();
     const connection = await pool.getConnection();
     console.log("MySQL connected successfully");
     connection.release();

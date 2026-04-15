@@ -81,3 +81,14 @@ export const deleteCommentSchema = z.object({
     id: z.coerce.number().int().positive(),
   }),
 });
+
+export const votePostSchema = z.object({
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
+  body: z.object({
+    vote: z.coerce.number().int().refine((value) => [-1, 0, 1].includes(value), {
+      message: "Vote must be -1, 0, or 1",
+    }),
+  }),
+});
