@@ -9,6 +9,28 @@ import FollowButton from "../components/FollowButton";
 import { Editor } from "@tinymce/tinymce-react";
 import { authFetch } from "../services/api";
 
+const blockedWords = ["dm", "vcl", "chửi_bậy"];
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const containsBlockedWord = (text) => {
+  const normalizedText = text.toLowerCase();
+
+  return blockedWords.some((word) => {
+    const pattern = new RegExp(`\\b${escapeRegExp(word.toLowerCase())}\\b`, "i");
+    return pattern.test(normalizedText);
+  });
+};
+
+const cleanBlockedWords = (text) => {
+  return blockedWords.reduce((result, word) => {
+    const replacement = "*".repeat(word.length);
+    const pattern = new RegExp(`\\b${escapeRegExp(word)}\\b`, "gi");
+    return result.replace(pattern, replacement);
+  }, text);
+};
+
+
 export default function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -67,11 +89,16 @@ export default function PostDetail() {
   const handleSubmitComment = async (e) => {
     e.preventDefault();
 
-    if (!comment.trim()) {
+    const trimmedComment = comment.trim();
+
+    if (!trimmedComment) {
       toast.error("Comment cannot be empty!");
       return;
     }
-    
+
+    const cleanedCommentText = cleanBlockedWords(trimmedComment);
+
+
     try {
       const res = await authFetch(`/api/posts/${id}/comments`, {
         method: "POST",
@@ -79,21 +106,24 @@ export default function PostDetail() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: comment,
+          content: cleanedCommentText,
           user_id: user.id,
-          parent_id: replyTo
+          parent_id: replyTo,
         }),
       });
 
       if (!res.ok) throw new Error("Failed to comment");
 
       const newComment = await res.json();
-
-      setComments(prev => [...prev, newComment]);
+      setComments((prev) => [...prev, newComment]);
       setComment("");
       setReplyTo(null);
-      toast.success("Comment added!");
 
+      if (cleanedCommentText !== trimmedComment) {
+        toast.success("Comment submitted with filtered content.");
+      } else {
+        toast.success("Comment added!");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong");
@@ -119,13 +149,17 @@ export default function PostDetail() {
   };
 
   const handleUpdatePost = async () => {
-    // Validate title/content before sending update request
     if (!editTitle.trim()) {
       toast.error("Title is required");
       return;
     }
     if (!editContent.trim() || editContent === "<p><br></p>") {
       toast.error("Content is required");
+      return;
+    }
+
+    if (containsBlockedWord(editTitle) || containsBlockedWord(editContent)) {
+      toast.error("This post contains language that violates community standards. Please edit it!");
       return;
     }
 
@@ -185,9 +219,8 @@ export default function PostDetail() {
   }) {
     return (
       <div
-        className={`border-t pt-4 p-3 ${
-          replyTo === c.id ? "bg-[#21005D]/5 rounded-md" : ""
-        }`}
+        className={`border-t pt-4 p-3 ${replyTo === c.id ? "bg-[#21005D]/5 rounded-md" : ""
+          }`}
       >
         <div className="flex items-start gap-3">
           <Link
@@ -438,11 +471,11 @@ export default function PostDetail() {
               </button>
             </form>
 
-            {renderComments(null)}            
+            {renderComments(null)}
           </div>
         </div>
       </div>
-      
+
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
