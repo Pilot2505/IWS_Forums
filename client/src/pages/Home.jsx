@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { User } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { authFetch } from "../services/api";
+import PostVoteControls from "../components/PostVoteControls";
 
 // Map category id -> label hiển thị
 const CATEGORY_LABELS = {
@@ -101,6 +102,20 @@ export default function Home() {
     const doc = new DOMParser().parseFromString(html, "text/html");
     return doc.body.textContent || "";
   }
+
+  const handlePostVoteChange = ({ postId, voteCount, currentUserVote }) => {
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              vote_count: voteCount,
+              current_user_vote: currentUserVote,
+            }
+          : post
+      )
+    );
+  };
 
   if (!user) return null;
 
@@ -205,16 +220,24 @@ export default function Home() {
                   <p className="mb-6 line-clamp-3 text-base leading-relaxed text-black sm:text-lg lg:mb-8 lg:text-2xl">
                     {stripHtml(post.content)}
                   </p>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm font-light text-black sm:text-base lg:text-xl">
-                      {new Date(post.created_at).toLocaleString()}
-                    </p>
+                  <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <PostVoteControls
+                      postId={post.id}
+                      initialVoteCount={post.vote_count ?? 0}
+                      initialCurrentUserVote={post.current_user_vote ?? 0}
+                      onChange={handlePostVoteChange}
+                    />
                     <Link
                       to={`/post/${post.id}`}
                       className="text-base font-medium text-[#1E56A0] sm:text-lg lg:text-[22px]"
                     >
                       Read More
                     </Link>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-light text-black sm:text-base lg:text-xl">
+                      {new Date(post.created_at).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               ))}

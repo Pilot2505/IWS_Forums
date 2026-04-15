@@ -11,6 +11,7 @@ import {
   updatePostSchema,
   createCommentSchema,
   deleteCommentSchema,
+  votePostSchema,
 } from "../validators/postsSchemas.js";
 import { usernameParamsSchema } from "../validators/usersSchemas.js";
 import {
@@ -26,6 +27,7 @@ import {
   getCommentsByPostId,
   createComment,
   deleteComment,
+  togglePostVote,
 } from "../controllers/postsController.js";
 
 const router = express.Router();
@@ -40,6 +42,7 @@ router.post("/", auth, validate(createPostSchema), createPost); // Create a new 
 router.post("/upload-image", auth, withMulter400(postImageUpload.single("image")), uploadPostImage); // Upload an image for a post
 router.delete("/:id", auth, validate(postIdParamsSchema), deletePost); // Delete a post
 router.put("/:id", auth, validate(updatePostSchema), updatePost); // Update a post
+router.post("/:id/vote", auth, validate(votePostSchema), togglePostVote); // Toggle upvote/downvote for a post
 router.get("/:id/comments", auth, validate(postIdParamsSchema), getCommentsByPostId); // Get comments for a specific post
 router.post("/:id/comments", auth, validate(createCommentSchema), createComment); // Create a new comment
 router.delete("/comments/:id", auth, validate(deleteCommentSchema), deleteComment); // Delete a comment
