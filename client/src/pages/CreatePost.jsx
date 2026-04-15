@@ -5,6 +5,19 @@ import { Editor } from '@tinymce/tinymce-react';
 import Navbar from "../components/Navbar";
 import { authFetch } from "../services/api";
 
+const blockedWords = ["dm", "vcl", "chửi_bậy"];
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const containsBlockedWord = (text) => {
+  const normalizedText = text.toLowerCase();
+
+  return blockedWords.some((word) => {
+    const pattern = new RegExp(`\\b${escapeRegExp(word.toLowerCase())}\\b`, "i");
+    return pattern.test(normalizedText);
+  });
+};
+
 export default function CreatePost() {
   const navigate = useNavigate();
   const editorRef = useRef(null);
@@ -64,36 +77,42 @@ export default function CreatePost() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const rawContent = editorRef.current.getContent();
+  const trimmedTitle = title.trim();
+  const rawContent = editorRef.current.getContent();
 
-    if (!title.trim() || !rawContent.trim()) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+  if (!trimmedTitle || !rawContent.trim()) {
+    toast.error("Please fill in all fields");
+    return;
+  }
 
-    try {
-      const content = await uploadEmbeddedImages(rawContent);
+  if (containsBlockedWord(trimmedTitle) || containsBlockedWord(rawContent)) {
+    toast.error("Post contains blocked words. Please edit before creating.");
+    return;
+  }
 
-      const res = await authFetch("/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title, content, userId: user.id }),
-      });
+  try {
+    const content = await uploadEmbeddedImages(rawContent);
 
-      if (!res.ok) throw new Error("Failed to create post");
+    const res = await authFetch("/api/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title: trimmedTitle, content, userId: user.id }),
+    });
 
-      const data = await res.json();
-      toast.success("Post created successfully!");
-      navigate(`/post/${data.id}`);
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong");
-    }
-  };
+    if (!res.ok) throw new Error("Failed to create post");
+
+    const data = await res.json();
+    toast.success("Post created successfully!");
+    navigate(`/post/${data.id}`);
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong");
+  }
+};
 
   if (!user) return null;
 
