@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronDown, LogOut, Trash2, User } from "lucide-react";
+import { User } from "lucide-react";
 import LogoutButton from "./LogoutButton";
+import DeleteAccountButton from "./DeleteAccountButton";
 import SearchBar from "./SearchBar";
 
-export default function Navbar({ user, showCreatePost = true }) {
+export default function Navbar({ user, setUser, showCreatePost = true }) {
   const navigate = useNavigate();
   const menuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -46,7 +47,7 @@ export default function Navbar({ user, showCreatePost = true }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Logo */}
         <Link to="/" className="text-2xl font-semibold text-[#163172] font-['Poppins'] sm:text-3xl lg:text-4xl">
-          Technical Forum
+          Tech Pulse
         </Link>
 
       {/* Navigation Items */}
@@ -98,15 +99,14 @@ export default function Navbar({ user, showCreatePost = true }) {
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100"
                   />
 
-                  <button
-                    type="button"
-                    disabled
-                    title="Coming soon"
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-500 opacity-60"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete account
-                  </button>
+                  <DeleteAccountButton 
+                    pendingDeletion={Boolean(user?.delete_after_at)}
+                    onDeletionChange={(value) => {
+                      const updatedUser = { ...user, delete_after_at: value };
+                      setUser(updatedUser);
+                      localStorage.setItem("user", JSON.stringify(updatedUser));
+                    }}
+                  />
                 </div>
               )}
             </div>

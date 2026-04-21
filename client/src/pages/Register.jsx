@@ -7,6 +7,7 @@ export default function Register() {
   const [username, setUsername] = useState("");
   const [fullname, setFullname] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ export default function Register() {
     <div className="min-h-screen bg-[#d4e4ec]">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-        <h1 className="text-xl font-bold text-[#1a2332]">Technical Forum</h1>
+        <h1 className="text-xl font-bold text-[#1a2332]">Tech Pulse</h1>
         <Link 
           to="/login" 
           className="text-[#2b5a8a] hover:text-[#1e4167] font-medium transition-colors"
@@ -141,15 +142,24 @@ export default function Register() {
                 >
                   Password
                 </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-sm font-medium text-[#2b5a8a] hover:text-[#1e4167]"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </div>
 
               {/* Avatar Upload */}

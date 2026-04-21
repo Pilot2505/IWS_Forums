@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import pool from "../config/db.js";
 
-export default function auth(req, res, next) {
+export default async function auth(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -11,6 +12,16 @@ export default function auth(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const [rows] = await pool.execute(
+      "SELECT id FROM users WHERE id = ?",
+      [decoded.id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
     req.user = decoded;
     next();
   } catch (err) {

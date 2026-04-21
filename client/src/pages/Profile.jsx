@@ -340,7 +340,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-[#C8CFD8]">
-      <Navbar user={user} showCreatePost={true} />
+      <Navbar user={user} setUser={setUser} showCreatePost={true} />
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
         {/* Profile Header */}

@@ -18,25 +18,26 @@ const voteJoinClause = `
 
 const postSelectFields = `posts.*, users.username, users.avatar, ${voteSelectFields}`;
 export const getPosts = async (req, res) => {
-  const { page, limit } = req.validated.query;
+  const page = Number(req.validated.query.page);
+  const limit = Number(req.validated.query.limit);
   const offset = (page - 1) * limit;
-  const userId = req.user.id;
+  const userId = Number(req.user?.id)
 
   try {
-    const [countRows] = await pool.execute("SELECT COUNT(*) as total FROM posts");
+    const [countRows] = await pool.query("SELECT COUNT(*) as total FROM posts");
     const totalPosts = countRows[0].total;
     const totalPages = Math.ceil(totalPosts / limit);
 
-    const [rows] = await pool.execute(
+    const [rows] = await pool.query(
       `
       SELECT ${postSelectFields}
       FROM posts
       JOIN users ON posts.user_id = users.id
       ${voteJoinClause}
       ORDER BY posts.created_at DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${limit} OFFSET ${offset}
       `,
-      [userId, limit, offset]
+      [userId]
     );
 
     res.json({
