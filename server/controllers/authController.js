@@ -55,11 +55,11 @@ export const handleLogin = async (req, res) => {
   const { identifier, password } = req.validated.body;
 
   try {
-    const cleanIdentifier = identifier.trim().toLowerCase();
+    const cleanIdentifier = identifier.trim();
 
     const [users] = await pool.execute(
-      "SELECT id, email, username, fullname, avatar, password FROM users WHERE email = ? OR username = ?",
-      [cleanIdentifier, cleanIdentifier]
+      "SELECT id, email, username, fullname, avatar, password, delete_after_at FROM users WHERE email = ? OR LOWER(username) = LOWER(?)",
+      [cleanIdentifier.toLowerCase(), cleanIdentifier]
     );
 
     if (users.length === 0) {
@@ -72,7 +72,6 @@ export const handleLogin = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
-
     const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
@@ -86,6 +85,7 @@ export const handleLogin = async (req, res) => {
         username: user.username,
         fullname: user.fullname,
         avatar: user.avatar || null,
+        delete_after_at: user.delete_after_at || null,
       },
     });
   } catch (error) {

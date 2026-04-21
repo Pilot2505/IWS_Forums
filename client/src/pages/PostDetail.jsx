@@ -338,7 +338,7 @@ export default function PostDetail() {
 
   return (
     <div className="min-h-screen bg-[#C8CFD8]">
-      <Navbar user={user} showCreatePost={true} />
+      <Navbar user={user} setUser={setUser} showCreatePost={true} />
 
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:items-start lg:gap-8 lg:px-10 lg:py-10">
         {/* Post Content */}
