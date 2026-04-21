@@ -12,7 +12,12 @@ CREATE TABLE IF NOT EXISTS users (
   bio TEXT,
   avatar VARCHAR(255),
   categories JSON DEFAULT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  delete_requested_at DATETIME DEFAULT NULL,
+  delete_confirmed_at DATETIME DEFAULT NULL,
+  delete_after_at DATETIME DEFAULT NULL,
+  delete_token_hash VARCHAR(255) DEFAULT NULL,
+  delete_token_expires_at DATETIME DEFAULT NULL
 ) ENGINE=InnoDB;
 
 -- Posts
@@ -50,7 +55,7 @@ CREATE TABLE IF NOT EXISTS followers (
   CHECK (follower_id <> following_id)
 ) ENGINE=InnoDB;
 
---Votes
+-- Votes
 CREATE TABLE IF NOT EXISTS post_votes (
   post_id INT NOT NULL,
   user_id INT NOT NULL,
@@ -66,9 +71,8 @@ CREATE TABLE IF NOT EXISTS post_votes (
 -- =========================
 -- USERS DATA
 -- =========================
-
 INSERT INTO users (id, username, fullname, email, password, created_at, bio, avatar) VALUES
-(3, 'pilot', 'Minh Quan', 'pilot250504@gmail.com', '$2b$10$EQJ57n2nh4SexLEUWklMrO3pcVLcT99b8WjOLbpDwtklr6hm4Q8Ge', '2026-02-15 21:01:00', 'Computer Science undergraduate', '/avatars/1771944687949-190039823.jpg'),
+(3, 'pilot', 'Quan', 'pilot250504@gmail.com', '$2a$10$LvRULigNNg6KtXNsHNbO7.rKccqoZ.FovDGCIo8Z//G4P4U5Ll1aC', '2026-02-15 21:11:31', '', '/avatars/avatar.jpg'),
 (4, 'An', '', 'an@test.com', 'test123', '2026-02-15 21:11:31', '', '/avatars/avatar.jpg'),
 (5, 'Kien', '', 'kien@test.com', 'test123', '2026-02-15 21:11:31', '', 'https://i.pravatar.cc/150?img=5'),
 (6, 'Linh', '', 'linh@test.com', 'test123', '2026-02-15 21:11:31', '', 'https://i.pravatar.cc/150?img=6'),
@@ -80,7 +84,6 @@ INSERT INTO users (id, username, fullname, email, password, created_at, bio, ava
 -- =========================
 -- POSTS DATA
 -- =========================
-
 INSERT INTO posts (id, user_id, title, content, created_at) VALUES
 (6, 4, 'How to Learn Java Effectively',
 'Java is one of the most widely used programming languages in the world. It powers enterprise systems, Android apps, and backend services. To master Java, you need to understand OOP concepts, memory management, multithreading, and design patterns.',
@@ -105,7 +108,6 @@ INSERT INTO posts (id, user_id, title, content, created_at) VALUES
 -- =========================
 -- COMMENTS DATA
 -- =========================
-
 INSERT INTO comments (id, post_id, user_id, parent_id, content, created_at) VALUES
 (31, 8, 4, NULL, 'Đây là comment mẫu từ user 4', '2026-02-22 22:07:13'),
 (42, 40, 3, NULL, 'test', '2026-03-10 19:10:40');
@@ -114,7 +116,6 @@ INSERT INTO comments (id, post_id, user_id, parent_id, content, created_at) VALU
 -- =========================
 -- FOLLOWERS DATA
 -- =========================
-
 INSERT INTO followers (follower_id, following_id, created_at, last_seen) VALUES
 (3,4,'2026-02-24 22:30:38','2026-03-10 19:09:53'),
 (3,5,'2026-02-18 22:15:36','2026-02-22 17:04:33'),
@@ -124,3 +125,13 @@ INSERT INTO followers (follower_id, following_id, created_at, last_seen) VALUES
 (4,3,'2026-02-18 22:15:36',NULL),
 (5,3,'2026-02-18 22:15:36',NULL),
 (5,6,'2026-02-18 22:15:36',NULL);
+
+-- =========================
+-- POST VOTES DATA
+-- =========================
+INSERT INTO post_votes (post_id, user_id, vote, created_at, updated_at) VALUES
+(6, 3, 1, '2026-03-10 19:00:00', '2026-03-10 19:00:00'),
+(6, 4, -1, '2026-03-10 19:01:00', '2026-03-10 19:01:00'),
+(7, 3, 1, '2026-03-10 19:02:00', '2026-03-10 19:02:00'),
+(8, 5, 1, '2026-03-10 19:03:00', '2026-03-10 19:03:00'),
+(40, 4, 1, '2026-03-10 19:04:00', '2026-03-10 19:04:00');

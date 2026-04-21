@@ -5,6 +5,7 @@ import { toast } from "sonner";
 export default function Login() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -42,7 +43,7 @@ export default function Login() {
     <div className="min-h-screen bg-[#d4e4ec]">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-        <h1 className="text-xl font-bold text-[#1a2332]">Technical Forum</h1>
+        <h1 className="text-xl font-bold text-[#1a2332]">Tech Pulse</h1>
         <Link 
           to="/register" 
           className="text-[#2b5a8a] hover:text-[#1e4167] font-medium transition-colors"
@@ -81,21 +82,30 @@ export default function Login() {
 
               {/* Password Field */}
               <div>
-                <label 
-                  htmlFor="password" 
-                  className="block text-sm font-semibold text-[#0a0a0a] mb-2"
+                <label
+                  htmlFor="password"
+                  className="mb-2 block text-sm font-semibold text-[#0a0a0a]"
                 >
                   Password
                 </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full rounded-md border border-gray-300 px-4 py-2.5 pr-20 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] placeholder:text-gray-400"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-sm font-medium text-[#2b5a8a] hover:text-[#1e4167]"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </div>
 
               {/* Login Button */}

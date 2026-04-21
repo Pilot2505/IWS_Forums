@@ -52,7 +52,7 @@ export default function SearchResult() {
 
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
-      <Navbar user={user} showCreatePost={true} />
+      <Navbar user={user} setUser={setUser} showCreatePost={true} />
 
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-10">
         <h2 className="text-2xl font-semibold text-[#0C245E] mb-2">

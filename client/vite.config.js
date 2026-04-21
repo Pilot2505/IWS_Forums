@@ -12,15 +12,15 @@ export default defineConfig(() => ({
     },
     proxy: {
       "/api": {
-          target: "http://server:3000",
+          target: "http://localhost:3000",
           changeOrigin: true,
       },
       "/avatars": {
-        target: "http://server:3000",
+        target: "http://localhost:3000",
         changeOrigin: true,
       },
       "/post-images": {
-        target: "http://server:3000",
+        target: "http://localhost:3000",
         changeOrigin: true,
       },
     },
