@@ -46,3 +46,26 @@ export const usernameParamsSchema = z.object({
     username: z.string().trim().min(1).max(50),
   }),
 });
+
+export const requestDeleteAccountSchema = z.object({
+  body: z.object({}).default({}),
+});
+
+export const verifyDeleteAccountTokenSchema = z.object({
+  query: z.object({
+    token: z.string().trim().min(1),
+  }),
+});
+
+export const confirmDeleteAccountSchema = z.object({
+  body: z.object({
+    token: z.string().trim().min(1),
+    password: z.string().min(1).max(100),
+  }),
+});
+
+export const cancelDeleteAccountSchema = z.object({
+  body: z.object({
+    token: z.string().trim().min(1).optional(),
+  }).default({}),
+});

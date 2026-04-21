@@ -60,7 +60,7 @@ export default function SelectCategories() {
     JSON.stringify(normalizeCategories(selected)) !==
     JSON.stringify(normalizeCategories(initialSelected)); // So sánh mảng đã chọn hiện tại với mảng ban đầu để xác định xem có thay đổi nào không
 
-  const canContinue = selected.length > 0 && hasChanges; // Cho phép tiếp tục nếu đã chọn ít nhất 1 category và có sự thay đổi so với ban đầu. Nếu user đã có categories và không thay đổi gì thì sẽ không cho submit nữa, tránh việc gửi request update không cần thiết.
+  const canContinue = hasChanges; // Cho phép tiếp tục nếu có sự thay đổi so với ban đầu. Nếu user đã có categories và không thay đổi gì thì sẽ không cho submit, tránh việc gửi request update không cần thiết.
 
 
   const handleSkip = async () => {
@@ -68,13 +68,8 @@ export default function SelectCategories() {
   };
 
   const handleSubmit = async () => {
-    if (selected.length === 0) {
-      toast.error("Please select at least 1 category or skip.");
-      return;
-    }
     await saveCategories(selected);
   };
-
   const saveCategories = async (cats) => {
     setLoading(true);
     try {
@@ -91,7 +86,7 @@ export default function SelectCategories() {
       setUser(updatedUser);
       setInitialSelected(cats);
 
-      toast.success(cats.length > 0 ? "Categories saved!" : "Skipped!");
+      toast.success("Categories saved!");
       navigate("/home");
     } catch (err) {
       console.error(err);
@@ -107,7 +102,7 @@ export default function SelectCategories() {
     <div className="min-h-screen bg-[#d4e4ec] flex flex-col">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-        <h1 className="text-xl font-bold text-[#1a2332]">Technical Forum</h1>
+        <h1 className="text-xl font-bold text-[#1a2332]">Tech Pulse</h1>
       </header>
 
       {/* Content */}
