@@ -134,22 +134,21 @@ export const requestAccountDeletion = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const user = rows[0];
+    const user = rows[0]; 
     const token = createDeleteToken();
     const tokenHash = hashDeleteToken(token);
-    const tokenExpiresAt = new Date(Date.now() + DELETE_TOKEN_EXPIRES_HOURS * 60 * 60 * 1000);
-
+    
     await pool.execute(
       `
       UPDATE users
-      SET delete_requested_at = NOW(),
+      SET delete_requested_at = UTC_TIMESTAMP(),
           delete_confirmed_at = NULL,
           delete_after_at = NULL,
           delete_token_hash = ?,
-          delete_token_expires_at = ?
+          delete_token_expires_at = DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? HOUR)
       WHERE id = ?
       `,
-      [tokenHash, tokenExpiresAt, userId]
+      [tokenHash, DELETE_TOKEN_EXPIRES_HOURS, userId]
     );
 
     const link = buildDeleteLink(token);
@@ -185,7 +184,7 @@ export const verifyDeleteAccountToken = async (req, res) => {
       SELECT id
       FROM users
       WHERE delete_token_hash = ?
-        AND delete_token_expires_at > NOW()
+        AND delete_token_expires_at > UTC_TIMESTAMP()
       LIMIT 1
       `,
       [tokenHash]
@@ -213,7 +212,7 @@ export const confirmDeleteAccount = async (req, res) => {
       SELECT id, password
       FROM users
       WHERE delete_token_hash = ?
-        AND delete_token_expires_at > NOW()
+        AND delete_token_expires_at > UTC_TIMESTAMP()
       LIMIT 1
       `,
       [tokenHash]
@@ -233,8 +232,8 @@ export const confirmDeleteAccount = async (req, res) => {
     await pool.execute(
       `
       UPDATE users
-      SET delete_confirmed_at = NOW(),
-          delete_after_at = DATE_ADD(NOW(), INTERVAL ? DAY),
+      SET delete_confirmed_at = UTC_TIMESTAMP(),
+          delete_after_at = DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY),
           delete_token_hash = NULL,
           delete_token_expires_at = NULL
       WHERE id = ?
