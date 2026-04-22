@@ -45,15 +45,15 @@ DB_USER=root
 DB_PASSWORD=root
 DB_NAME=IWS
 
-JWT_SECRET=your_secret_here
-REFRESH_TOKEN_SECRET=your_refresh_secret_here
-JWT_EXPIRES_IN=1d
+JWT_SECRET=i9cJYEatC77+/KpvbEgfBOldxEnMyT+kDJwZqE2bSOE4dWaDtJJUajwgzh4zCIeC
+REFRESH_TOKEN_SECRET=Tl/JOWywNWrdrsl/dFVYmY9UAnYsVa3+Yx+97ntNsKDp0hIxpuet+nMJ39PVN4ca
+JWT_EXPIRES_IN=1h
 
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
-SMTP_FROM="Tech Pulse"
+SMTP_USER=pilot250504@gmail.com
+SMTP_PASS=wloo zehv egfg iyml
+SMTP_FROM="Tech Pulse <pilot250504@gmail.com>"
 CLIENT_URL=http://localhost:8080
 ```
 
