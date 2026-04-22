@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { User } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/navigation/Navbar";
 import { authFetch } from "../services/api";
 import PostVoteControls from "../components/PostVoteControls";
+import PostCard from "../components/posts/PostCard";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 // Map category id -> label hiển thị
 const CATEGORY_LABELS = {
@@ -23,7 +25,11 @@ const CATEGORY_LABELS = {
 
 export default function Home() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user, setUser, ready } = useRequireAuth({
+    redirectTo: "/login",
+    requireToken: true,
+  });
+
   const [posts, setPosts] = useState([]);
   const [following, setFollowing] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,25 +38,16 @@ export default function Home() {
   const [loadingPosts, setLoadingPosts] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-
-    if (!storedUser) {
-      navigate("/register");
-      return;
-    }
-
-    const parsedUser = JSON.parse(storedUser);
-    setUser(parsedUser);
-
-    // Fetch following + newPosts
-    authFetch(`/api/follow/${parsedUser.id}`)
+    if (!user) return;
+    
+    authFetch(`/api/follow/${user.id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch following");
         return res.json();
       })
       .then((data) => setFollowing(data))
       .catch((err) => console.error("Error loading following:", err));
-  }, [navigate]);
+  }, [user]);
 
   // Fetch posts mỗi khi user hoặc currentPage thay đổi
   useEffect(() => {
@@ -59,7 +56,6 @@ export default function Home() {
     const fetchPosts = async () => {
       setLoadingPosts(true);
       try {
-        // Lấy categories từ localStorage (đã được cập nhật sau khi chọn)
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         const cats = storedUser.categories;
         const hasCategories = Array.isArray(cats) && cats.length > 0;
@@ -89,19 +85,37 @@ export default function Home() {
     fetchPosts();
   }, [user, currentPage]);
 
-  const handleOpenProfile = (person) => {
-    setFollowing((prev) =>
-      prev.map((p) =>
-        p.id === Number(person.id) ? { ...p, newPosts: 0 } : p
-      )
-    );
-    navigate(`/profile/${encodeURIComponent(person.username)}`);
-  };
+  if (!ready || !user) return null;
 
-  function stripHtml(html) {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    return doc.body.textContent || "";
-  }
+  const handleOpenProfile = async (person) => {
+    try {
+      const response = await authFetch("/api/follow/seen", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          followerId: user.id,
+          followingId: person.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update last_seen");
+      }
+
+      setFollowing((prev) =>
+        prev.map((p) =>
+          p.id === Number(person.id) ? { ...p, newPosts: 0 } : p
+        )
+      );
+
+      navigate(`/profile/${encodeURIComponent(person.username)}`);
+    } catch (err) {
+      console.error("Failed to update last_seen:", err);
+      navigate(`/profile/${encodeURIComponent(person.username)}`);
+    }
+  };
 
   const handlePostVoteChange = ({ postId, voteCount, currentUserVote }) => {
     setPosts((prev) =>
@@ -144,19 +158,19 @@ export default function Home() {
             </h2>
 
             {isRecommended && userCategories.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2 items-center">
+              <div className="mt-3 flex items-center gap-2">
                 <span className="text-sm text-gray-500">Based on:</span>
                 {userCategories.map((cat) => (
                   <span
                     key={cat}
-                    className="rounded-full bg-[#1E56A0]/10 px-3 py-1 text-xs font-medium text-[#1E56A0] border border-[#1E56A0]/20"
+                    className="rounded-full border border-[#1E56A0]/20 bg-[#1E56A0]/10 px-3 py-1 text-xs font-medium text-[#1E56A0]"
                   >
                     {CATEGORY_LABELS[cat] || cat}
                   </span>
                 ))}
                 <Link
                   to="/select-categories"
-                  className="ml-2 text-xs text-gray-400 hover:text-[#1E56A0] underline"
+                  className="ml-2 text-xs text-gray-400 underline hover:text-[#1E56A0]"
                 >
                   Change
                 </Link>
@@ -167,7 +181,7 @@ export default function Home() {
               <p className="mt-2 text-sm text-gray-500">
                 <Link
                   to="/select-categories"
-                  className="text-[#1E56A0] hover:underline font-medium"
+                  className="font-medium text-[#1E56A0] hover:underline"
                 >
                   Select your interests
                 </Link>{" "}
@@ -182,11 +196,11 @@ export default function Home() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="rounded-lg bg-[#F6F6F6] p-6 lg:p-8 animate-pulse"
+                  className="animate-pulse rounded-lg bg-[#F6F6F6] p-6 lg:p-8"
                 >
-                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-3" />
-                  <div className="h-4 bg-gray-200 rounded w-full mb-2" />
-                  <div className="h-4 bg-gray-200 rounded w-5/6" />
+                  <div className="mb-3 h-6 w-3/4 rounded bg-gray-200" />
+                  <div className="mb-2 h-4 w-full rounded bg-gray-200" />
+                  <div className="h-4 w-5/6 rounded bg-gray-200" />
                 </div>
               ))}
             </div>
@@ -199,27 +213,32 @@ export default function Home() {
           ) : (
             <div className="space-y-5 sm:space-y-6 lg:space-y-8">
               {posts.map((post) => (
-                <div
+                <PostCard
                   key={post.id}
-                  className="rounded-lg border-b-[0.5px] border-r-[0.5px] border-black bg-[#F6F6F6] p-4 sm:p-6 lg:p-8"
-                >
-                  <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-start sm:justify-between">
-                    <h3 className="text-2xl font-semibold text-black sm:text-3xl lg:text-4xl">
-                      {post.title}
-                    </h3>
-                    <p className="text-base text-black sm:text-lg lg:text-2xl">
+                  post={post}
+                  authorNode={
+                    <>
                       By{" "}
-                      <Link
-                        to={`/profile/${encodeURIComponent(post.username)}`}
-                        className="text-[#1E56A0] font-medium hover:underline"
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleOpenProfile({
+                            id: post.user_id,
+                            username: post.username,
+                            fullname: post.fullname,
+                            avatar: post.avatar,
+                          })
+                        }
+                        className="font-medium text-[#1E56A0] hover:underline"
                       >
                         {post.username}
-                      </Link>
-                    </p>
-                  </div>
-                  <p className="mb-6 line-clamp-3 text-base leading-relaxed text-black sm:text-lg lg:mb-8 lg:text-2xl">
-                    {stripHtml(post.content)}
-                  </p>
+                      </button>
+                    </>
+                  }
+                  meta={new Date(post.created_at).toLocaleString()}
+                  readMoreTo={`/post/${post.id}`}
+                  className="border-b-[0.5px] border-r-[0.5px] border-black bg-[#F6F6F6]"
+                >
                   <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <PostVoteControls
                       postId={post.id}
@@ -227,19 +246,8 @@ export default function Home() {
                       initialCurrentUserVote={post.current_user_vote ?? 0}
                       onChange={handlePostVoteChange}
                     />
-                    <Link
-                      to={`/post/${post.id}`}
-                      className="text-base font-medium text-[#1E56A0] sm:text-lg lg:text-[22px]"
-                    >
-                      Read More
-                    </Link>
                   </div>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm font-light text-black sm:text-base lg:text-xl">
-                      {new Date(post.created_at).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
+                </PostCard>
               ))}
             </div>
           )}
@@ -254,7 +262,7 @@ export default function Home() {
                     window.scrollTo(0, 0);
                     setCurrentPage(index + 1);
                   }}
-                  className={`px-4 py-2 rounded-md ${
+                  className={`rounded-md px-4 py-2 ${
                     currentPage === index + 1
                       ? "bg-[#1E56A0] text-white"
                       : "bg-gray-200"
@@ -282,7 +290,7 @@ export default function Home() {
                   <div className="flex items-center gap-4">
                     <div
                       onClick={() => handleOpenProfile(person)}
-                      className={`h-12 w-12 rounded-full p-[3px] transition-transform hover:scale-105 cursor-pointer sm:h-[52px] sm:w-[52px] lg:h-[60px] lg:w-[60px]
+                      className={`h-12 w-12 cursor-pointer rounded-full p-[3px] transition-transform hover:scale-105 sm:h-[52px] sm:w-[52px] lg:h-[60px] lg:w-[60px]
                         ${
                           person.newPosts > 0
                             ? "bg-gradient-to-tr from-blue-500 to-cyan-400"
@@ -290,14 +298,14 @@ export default function Home() {
                         }
                       `}
                     >
-                      <div className="w-full h-full rounded-full overflow-hidden bg-[#21005D]/10 flex items-center justify-center">
+                      <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#21005D]/10">
                         {person.avatar ? (
                           <img
                             src={person.avatar}
-                            className="w-full h-full object-cover rounded-full"
+                            className="h-full w-full rounded-full object-cover"
                           />
                         ) : (
-                          <User className="w-8 h-8" />
+                          <User className="h-8 w-8" />
                         )}
                       </div>
                     </div>
@@ -318,7 +326,7 @@ export default function Home() {
                   </div>
 
                   {index < following.length - 1 && (
-                    <div className="h-px bg-black/50 mt-6" />
+                    <div className="mt-6 h-px bg-black/50" />
                   )}
                 </div>
               ))}

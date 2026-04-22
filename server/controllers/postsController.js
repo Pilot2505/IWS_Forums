@@ -203,7 +203,7 @@ export const createPost = async (req, res) => {
     const safeContent = sanitizeRichText(content);
 
     const [result] = await pool.execute(
-      "INSERT INTO posts (title, content, user_id, created_at) VALUES (?, ?, ?, NOW())",
+      "INSERT INTO posts (title, content, user_id, created_at) VALUES (?, ?, ?, UTC_TIMESTAMP())",
       [safeTitle, safeContent, userId]
     );
 
@@ -315,7 +315,7 @@ export const createComment = async (req, res) => {
     const [result] = await pool.execute(
       `
       INSERT INTO comments (post_id, user_id, content, parent_id, created_at)
-      VALUES (?, ?, ?, ?, NOW())
+      VALUES (?, ?, ?, ?, UTC_TIMESTAMP())
       `,
       [postId, user_id, safeContent, parent_id || null]
     );

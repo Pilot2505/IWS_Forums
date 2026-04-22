@@ -30,7 +30,7 @@ export async function runAccountDeletionCleanup() {
     SELECT id, avatar
     FROM users
     WHERE delete_after_at IS NOT NULL
-      AND delete_after_at <= NOW()
+      AND delete_after_at <= UTC_TIMESTAMP()
     `
   );
 
