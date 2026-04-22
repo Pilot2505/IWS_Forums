@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { authFetch } from "../services/api";
+import { authFetch } from "../../services/api";
 
 export default function DeleteAccountButton({ className, pendingDeletion = false, onDeletionChange,}) {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);

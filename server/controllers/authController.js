@@ -25,7 +25,7 @@ export const handleRegister = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const [result] = await pool.execute(
-      "INSERT INTO users (username, email, password, fullname, avatar) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO users (username, email, password, fullname, avatar, created_at) VALUES (?, ?, ?, ?, ?, UTC_TIMESTAMP())",
       [trimmedUsername, normalizedEmail, hashedPassword, cleanFullname, avatar]
     );
 
