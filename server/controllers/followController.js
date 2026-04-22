@@ -7,7 +7,7 @@ export const followUser = async (req, res) => {
     await pool.execute(
       `
       INSERT INTO followers (follower_id, following_id, last_seen)
-      VALUES (?, ?, NOW())
+      VALUES (?, ?, UTC_TIMESTAMP())
       `,
       [followerId, followingId]
     );
@@ -117,14 +117,18 @@ export const updateLastSeen = async (req, res) => {
   const { followerId, followingId } = req.validated.body;
 
   try {
-    await pool.execute(
+    const [result] = await pool.execute(
       `
       UPDATE followers
-      SET last_seen = NOW()
+      SET last_seen = UTC_TIMESTAMP()
       WHERE follower_id = ? AND following_id = ?
       `,
       [followerId, followingId]
     );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Follow relation not found" });
+    }
 
     res.json({ success: true });
   } catch (err) {
