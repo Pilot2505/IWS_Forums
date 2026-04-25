@@ -9,6 +9,22 @@ import PostVoteControls from "../components/PostVoteControls";
 import { Editor } from "@tinymce/tinymce-react";
 import { authFetch } from "../services/api";
 
+const POSTS_LIMIT = 5;
+
+const buildProfilePostsUrl = ({ username, cursor = null, sortBy, sortDir }) => {
+  const params = new URLSearchParams({
+    limit: String(POSTS_LIMIT),
+    sortBy,
+    sortDir,
+  });
+
+  if (cursor) {
+    params.set("cursor", cursor);
+  }
+
+  return `/api/posts/user/${encodeURIComponent(username)}?${params.toString()}`;
+};
+
 export default function Profile() {
   const { username } = useParams();
   const navigate = useNavigate();
@@ -37,6 +53,15 @@ export default function Profile() {
   const [editFormData, setEditFormData] = useState("");
 
   const [posts, setPosts] = useState([]);
+  const [postsCursor, setPostsCursor] = useState(null);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [loadingMorePosts, setLoadingMorePosts] = useState(false);
+  const [totalPostsCount, setTotalPostsCount] = useState(0);
+  const [sortBy, setSortBy] = useState("date");
+  const [sortDir, setSortDir] = useState("desc");
+
+  const profileUsername = username || user?.username || null;
 
   // Load current user
   useEffect(() => {
@@ -50,19 +75,22 @@ export default function Profile() {
     }
   }, [navigate]);
 
-  // Fetch profile user ID based on username
   useEffect(() => {
-    if (!username) return;
+    if (!user) return;
+
+    if (!username) {
+      setProfileUser(user);
+      return;
+    }
 
     const fetchProfileUser = async () => {
       const res = await authFetch(`/api/users/${username}`);
       const data = await res.json();
-
       setProfileUser(data);
     };
 
     fetchProfileUser();
-  }, [username]);
+  }, [username, user]);
 
   // Fetch followers/following counts
   useEffect(() => {
@@ -78,25 +106,44 @@ export default function Profile() {
     fetchFollowCounts();
   }, [targetUserId]);
 
-  // Load posts for this profile
   useEffect(() => {
-    if (!username) return;
+    if (!profileUsername) return;
 
-    const fetchPosts = async () => {
-      const res = await authFetch(`/api/posts/user/${username}`);
+    const fetchInitialPosts = async () => {
+      setLoadingPosts(true);
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Server error:", text);
-        return;
+      try {
+        const res = await authFetch(
+          buildProfilePostsUrl({
+            username: profileUsername,
+            sortBy,
+            sortDir,
+          })
+        );
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Server error:", text);
+          return;
+        }
+
+        const data = await res.json();
+        setPosts(data.posts ?? []);
+        setPostsCursor(data.nextCursor ?? null);
+        setHasMorePosts(Boolean(data.hasMore));
+        setTotalPostsCount(Number(data.totalPosts ?? 0));
+      } catch (err) {
+        console.error("Failed to load profile posts:", err);
+      } finally {
+        setLoadingPosts(false);
       }
-      
-      const data = await res.json();
-      setPosts(data);
     };
 
-    fetchPosts();
-  }, [username]);
+    setPosts([]);
+    setPostsCursor(null);
+    setHasMorePosts(true);
+    fetchInitialPosts();
+  }, [profileUsername, sortBy, sortDir]);
 
   // Mark posts as seen when visiting profile
   useEffect(() => {
@@ -224,6 +271,7 @@ export default function Profile() {
       toast.success("Post deleted successfully!");
 
       setPosts(prev => prev.filter(p => p.id !== deletePostId));
+      setTotalPostsCount((prev) => Math.max(prev - 1, 0));
 
       setShowDeleteDialog(false);
       setDeletePostId(null);
@@ -246,6 +294,45 @@ export default function Profile() {
           : post
       )
     );
+  };
+
+  const handleLoadMorePosts = async () => {
+    if (!profileUsername || !postsCursor || !hasMorePosts || loadingMorePosts) {
+      return;
+    }
+
+    setLoadingMorePosts(true);
+
+    try {
+      const res = await authFetch(
+        buildProfilePostsUrl({
+          username: profileUsername,
+          cursor: postsCursor,
+          sortBy,
+          sortDir,
+        })
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Server error:", text);
+        return;
+      }
+
+      const data = await res.json();
+      setPosts((prev) => {
+        const existingIds = new Set(prev.map((post) => post.id));
+        const incoming = (data.posts ?? []).filter((post) => !existingIds.has(post.id));
+        return [...prev, ...incoming];
+      });
+      setPostsCursor(data.nextCursor ?? null);
+      setHasMorePosts(Boolean(data.hasMore));
+      setTotalPostsCount((prev) => Number(data.totalPosts ?? prev));
+    } catch (err) {
+      console.error("Failed to load more profile posts:", err);
+    } finally {
+      setLoadingMorePosts(false);
+    }
   };
 
   const uploadEditorImage = async (blob, index) => {
@@ -365,7 +452,7 @@ export default function Profile() {
                 <p className="text-base text-gray-700 sm:text-lg">{displayUser?.username}</p>
                 <div className="mt-3 grid grid-cols-3 gap-4 sm:flex sm:gap-8">
                   <div className="text-center">
-                    <div className="text-2xl font-semibold">{posts.length}</div>
+                    <div className="text-2xl font-semibold">{totalPostsCount}</div>
                     <div className="text-sm text-gray-700">Posts</div>
                   </div>
                   <div className="text-center">
@@ -399,12 +486,63 @@ export default function Profile() {
 
         {/* Posts Section */}
         <div className="rounded-b-lg bg-white p-5 sm:p-6 lg:p-8">
-          <h2 className="mb-6 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
-            {isOwnProfile ? "Your Posts" : `${username}'s Posts`}
-          </h2>
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="text-2xl font-semibold text-[#0C245E] sm:text-3xl">
+              {isOwnProfile ? "Your Posts" : `${displayUser?.username}'s Posts`}
+            </h2>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-600">Sort by</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => {
+                    const nextSortBy = e.target.value;
+                    setSortBy(nextSortBy);
+                    setSortDir("desc");
+                  }}
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="date">Date</option>
+                  <option value="upvotes">Upvotes</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-600">Order</span>
+                <select
+                  value={sortDir}
+                  onChange={(e) => setSortDir(e.target.value)}
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+                >
+                  {sortBy === "date" ? (
+                    <>
+                      <option value="desc">Newest first</option>
+                      <option value="asc">Oldest first</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="desc">Most upvoted</option>
+                      <option value="asc">Least upvoted</option>
+                    </>
+                  )}
+                </select>
+              </div>
+            </div>
+          </div>
 
           <div className="space-y-6">
-            {posts.length === 0 ? (
+            {loadingPosts ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="animate-pulse rounded-lg border border-gray-200 p-4 sm:p-6">
+                    <div className="mb-3 h-6 w-1/2 rounded bg-gray-200" />
+                    <div className="mb-2 h-4 w-full rounded bg-gray-200" />
+                    <div className="h-4 w-5/6 rounded bg-gray-200" />
+                  </div>
+                ))}
+              </div>
+            ) : posts.length === 0 ? (
               <div className="text-center text-gray-500 py-10 text-lg">
                 No posts yet.
               </div>
@@ -433,7 +571,9 @@ export default function Profile() {
                     </div>
                   )}
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-sm text-gray-500">{post.timeAgo}</span>
+                    <span className="text-sm text-gray-500">
+                      {new Date(post.created_at).toLocaleString()}
+                    </span>
                     <div className="flex flex-wrap gap-4">
                       <Link
                         to={`/post/${post.id}`}
@@ -470,6 +610,18 @@ export default function Profile() {
               ))
             )}
           </div>
+
+          {!loadingPosts && posts.length > 0 && hasMorePosts && (
+            <div className="mt-8 flex justify-center">
+              <button
+                onClick={handleLoadMorePosts}
+                disabled={loadingMorePosts}
+                className="rounded-md bg-[#1E56A0] px-6 py-3 text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loadingMorePosts ? "Loading..." : "Load More"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -100,7 +100,7 @@ export default function CreatePost() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ title: trimmedTitle, content, userId: user.id }),
+      body: JSON.stringify({ title: trimmedTitle, content }),
     });
 
     if (!res.ok) throw new Error("Failed to create post");

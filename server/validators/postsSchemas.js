@@ -19,8 +19,10 @@ const categoryIds = [
 
 export const postsListSchema = z.object({
   query: z.object({
-    page: z.coerce.number().int().min(1).optional().default(1),
+    cursor: z.string().trim().min(1).nullable().optional().default(null),
     limit: z.coerce.number().int().min(1).max(50).optional().default(5),
+    sortBy: z.enum(["date", "upvotes"]).optional().default("date"),
+    sortDir: z.enum(["asc", "desc"]).optional().default("desc"),
   }),
 });
 
@@ -32,9 +34,23 @@ export const searchSchema = z.object({
 
 export const recommendedSchema = z.object({
   query: z.object({
-    page: z.coerce.number().int().min(1).optional().default(1),
+    cursor: z.string().trim().min(1).nullable().optional().default(null),
     limit: z.coerce.number().int().min(1).max(50).optional().default(5),
+    sortBy: z.enum(["date", "upvotes"]).optional().default("date"),
+    sortDir: z.enum(["asc", "desc"]).optional().default("desc"),
     categories: z.string().trim().min(1),
+  }),
+});
+
+export const postsByUsernameSchema = z.object({
+  params: z.object({
+    username: z.string().trim().min(1),
+  }),
+  query: z.object({
+    cursor: z.string().trim().min(1).nullable().optional().default(null),
+    limit: z.coerce.number().int().min(1).max(50).optional().default(5),
+    sortBy: z.enum(["date", "upvotes"]).optional().default("date"),
+    sortDir: z.enum(["asc", "desc"]).optional().default("desc"),
   }),
 });
 
@@ -48,7 +64,6 @@ export const createPostSchema = z.object({
   body: z.object({
     title: z.string().trim().min(1).max(255),
     content: z.string().trim().min(1),
-    userId: z.coerce.number().int().positive(),
   }),
 });
 
