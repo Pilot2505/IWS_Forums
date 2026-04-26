@@ -40,9 +40,7 @@ export default function SearchResult() {
 
     fetchResults();
   }, [query]);
-
-  if (!user) return null;
-
+  
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
       <Navbar user={user} setUser={setUser} showCreatePost={true} />
