@@ -303,7 +303,7 @@ export default function PostDetail() {
     return createdDate.toLocaleDateString("vi-VN");
   };
 
-  if (!user || !post) return null;
+  if (!post) return null;
 
   return (
     <div className="min-h-screen bg-[#C8CFD8]">

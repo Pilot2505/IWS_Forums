@@ -131,8 +131,6 @@ export default function Home() {
     );
   };
 
-  if (!user) return null;
-
   // Lấy label categories để hiển thị
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const userCategories = Array.isArray(storedUser.categories) ? storedUser.categories : [];
