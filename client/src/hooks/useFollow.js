@@ -6,7 +6,7 @@ export default function useFollow(currentUserId, targetUserId) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!currentUserId || !targetUserId) return;
+    if (!currentUserId || !targetUserId || currentUserId === targetUserId) return;
 
     const checkFollow = async () => {
       try {

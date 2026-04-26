@@ -7,12 +7,20 @@ export default function Register() {
   const [username, setUsername] = useState("");
   const [fullname, setFullname] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     const formData = new FormData();
@@ -35,13 +43,11 @@ export default function Register() {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        // Lưu user với categories rỗng để biết là new user chưa chọn
         localStorage.setItem(
           "user",
           JSON.stringify({ ...data.user, categories: null })
         );
         toast.success("Account created successfully!");
-        // Redirect sang trang chọn categories
         navigate("/select-categories");
       } else {
         toast.error(data.error || "Registration failed");
@@ -56,18 +62,16 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-[#d4e4ec]">
-      {/* Header */}
       <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-        <h1 className="text-xl font-bold text-[#1a2332]">Technical Forum</h1>
-        <Link 
-          to="/login" 
+        <h1 className="text-xl font-bold text-[#1a2332]">Tech Pulse</h1>
+        <Link
+          to="/login"
           className="text-[#2b5a8a] hover:text-[#1e4167] font-medium transition-colors"
         >
           Login
         </Link>
       </header>
 
-      {/* Register Form */}
       <div className="flex items-center justify-center px-4 pt-4 pb-12">
         <div className="w-full max-w-md">
           <h2 className="mb-6 text-center text-3xl font-bold text-[#0a0a0a] sm:mb-8 sm:text-4xl">
@@ -76,10 +80,9 @@ export default function Register() {
 
           <div className="rounded-lg bg-white p-5 shadow-sm sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email Field */}
               <div>
-                <label 
-                  htmlFor="email" 
+                <label
+                  htmlFor="email"
                   className="block text-sm font-semibold text-[#0a0a0a] mb-2"
                 >
                   Email
@@ -95,10 +98,9 @@ export default function Register() {
                 />
               </div>
 
-              {/* Username Field */}
               <div>
-                <label 
-                  htmlFor="username" 
+                <label
+                  htmlFor="username"
                   className="block text-sm font-semibold text-[#0a0a0a] mb-2"
                 >
                   Username
@@ -114,10 +116,9 @@ export default function Register() {
                 />
               </div>
 
-              {/* Full Name Field */}
               <div>
-                <label 
-                  htmlFor="fullname" 
+                <label
+                  htmlFor="fullname"
                   className="block text-sm font-semibold text-[#0a0a0a] mb-2"
                 >
                   Full Name
@@ -133,26 +134,51 @@ export default function Register() {
                 />
               </div>
 
-              {/* Password Field */}
               <div>
-                <label 
-                  htmlFor="password" 
+                <label
+                  htmlFor="password"
                   className="block text-sm font-semibold text-[#0a0a0a] mb-2"
                 >
                   Password
                 </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-sm font-medium text-[#2b5a8a] hover:text-[#1e4167]"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="mb-2 block text-sm font-semibold text-[#0a0a0a]"
+                >
+                  Confirm Password
+                </label>
                 <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
+                  type={showPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
+                  className="w-full rounded-md border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
                   required
                 />
               </div>
 
-              {/* Avatar Upload */}
               <div>
                 <label className="block text-sm font-semibold text-[#0a0a0a] mb-2">
                   Profile Picture (optional)
@@ -165,7 +191,6 @@ export default function Register() {
                 />
               </div>
 
-              {/* Register Button */}
               <button
                 type="submit"
                 disabled={loading}
@@ -175,11 +200,10 @@ export default function Register() {
               </button>
             </form>
 
-            {/* Login Link */}
             <p className="text-center mt-5 text-sm text-[#0a0a0a]">
               Already have an account?{" "}
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="text-[#2b5a8a] hover:text-[#1e4167] font-medium transition-colors"
               >
                 Login

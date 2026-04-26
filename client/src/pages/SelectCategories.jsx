@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import Navbar from "../components/navigation/Navbar";
 import { authFetch } from "../services/api";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 const CATEGORIES = [
   { id: "javascript", label: "JavaScript" },
@@ -20,59 +22,50 @@ const CATEGORIES = [
 
 export default function SelectCategories() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user, setUser, ready } = useRequireAuth({
+    redirectTo: "/login",
+    requireToken: true,
+  });
+  
   const [selected, setSelected] = useState([]);
   const [initialSelected, setInitialSelected] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  if (!ready || !user) return null;
+  
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    if (!storedUser || !token) {
-      navigate("/login");
-      return;
-    }
-    const parsed = JSON.parse(storedUser);
-    setUser(parsed);
+    if (!user) return;
 
-    // Nếu user đã có categories, load lên để có thể chỉnh sửa
-    const savedCategories = Array.isArray(parsed.categories) ? parsed.categories : [];
+    const savedCategories = Array.isArray(user.categories) ? user.categories : [];
     setSelected(savedCategories);
     setInitialSelected(savedCategories);
-  }, [navigate]);
+  }, [user]);
 
   const toggleCategory = (id) => {
     setSelected((prev) => {
       if (prev.includes(id)) {
         return prev.filter((c) => c !== id);
       }
+
       if (prev.length >= 3) {
         toast.error("You can select up to 3 categories only!");
         return prev;
       }
+
       return [...prev, id];
     });
   };
 
-  const normalizeCategories = (arr) => [...arr].sort(); // Để so sánh không bị ảnh hưởng bởi thứ tự chọn categories
+  const normalizeCategories = (arr) => [...arr].sort();
 
   const hasChanges =
     JSON.stringify(normalizeCategories(selected)) !==
-    JSON.stringify(normalizeCategories(initialSelected)); // So sánh mảng đã chọn hiện tại với mảng ban đầu để xác định xem có thay đổi nào không
+    JSON.stringify(normalizeCategories(initialSelected));
 
-  const canContinue = selected.length > 0 && hasChanges; // Cho phép tiếp tục nếu đã chọn ít nhất 1 category và có sự thay đổi so với ban đầu. Nếu user đã có categories và không thay đổi gì thì sẽ không cho submit nữa, tránh việc gửi request update không cần thiết.
+  const canContinue = hasChanges;
 
-
-  const handleSkip = async () => {
-    navigate("/home"); // Không thay đổi gì, chuyển hướng về home
-  };
-
-  const handleSubmit = async () => {
-    if (selected.length === 0) {
-      toast.error("Please select at least 1 category or skip.");
-      return;
-    }
-    await saveCategories(selected);
+  const handleSkip = () => {
+    navigate("/home");
   };
 
   const saveCategories = async (cats) => {
@@ -91,7 +84,7 @@ export default function SelectCategories() {
       setUser(updatedUser);
       setInitialSelected(cats);
 
-      toast.success(cats.length > 0 ? "Categories saved!" : "Skipped!");
+      toast.success("Categories saved!");
       navigate("/home");
     } catch (err) {
       console.error(err);
@@ -101,35 +94,33 @@ export default function SelectCategories() {
     }
   };
 
-  if (!user) return null;
+  const handleSubmit = async () => {
+    await saveCategories(selected);
+  };
 
   return (
-    <div className="min-h-screen bg-[#d4e4ec] flex flex-col">
-      {/* Header */}
+    <div className="min-h-screen flex flex-col bg-[#d4e4ec]">
       <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-        <h1 className="text-xl font-bold text-[#1a2332]">Technical Forum</h1>
+        <h1 className="text-xl font-bold text-[#1a2332]">Tech Pulse</h1>
       </header>
 
       {/* Content */}
       <div className="flex flex-1 items-center justify-center px-4 py-8">
         <div className="w-full max-w-2xl">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-[#0a0a0a] sm:text-4xl mb-2">
+          <div className="mb-8 text-center">
+            <h2 className="mb-2 text-3xl font-bold text-[#0a0a0a] sm:text-4xl">
               {user?.categories && Array.isArray(user.categories) && user.categories.length > 0
                 ? "Update your interests"
                 : "What are you interested in?"}
             </h2>
-            <p className="text-gray-600 text-sm sm:text-base">
+            <p className="text-sm text-gray-600 sm:text-base">
               Select up to <span className="font-semibold text-[#2b5a8a]">3 categories</span> to personalize your feed.
             </p>
           </div>
 
           <div className="rounded-lg bg-white p-5 shadow-sm sm:p-8">
-            {/* Selected count */}
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm text-gray-500">
-                {selected.length}/3 selected
-              </span>
+              <span className="text-sm text-gray-500">{selected.length}/3 selected</span>
               <div className="flex gap-1">
                 {[0, 1, 2].map((i) => (
                   <div
@@ -142,14 +133,15 @@ export default function SelectCategories() {
               </div>
             </div>
 
-            {/* Category grid */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 mb-6">
+            <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {CATEGORIES.map((cat) => {
                 const isSelected = selected.includes(cat.id);
                 const isDisabled = !isSelected && selected.length >= 3;
+
                 return (
                   <button
                     key={cat.id}
+                    type="button"
                     onClick={() => toggleCategory(cat.id)}
                     disabled={isDisabled}
                     className={`rounded-lg border-2 px-4 py-3 text-sm font-medium transition-all
@@ -157,7 +149,7 @@ export default function SelectCategories() {
                         isSelected
                           ? "border-[#2b5a8a] bg-[#2b5a8a] text-white shadow-md scale-105"
                           : isDisabled
-                          ? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                          ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
                           : "border-gray-300 bg-white text-gray-700 hover:border-[#2b5a8a] hover:text-[#2b5a8a]"
                       }
                     `}
@@ -171,16 +163,18 @@ export default function SelectCategories() {
             {/* Actions */}
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={loading || !canContinue}
-                className="flex-1 bg-[#2b5a8a] hover:bg-[#1e4167] disabled:bg-gray-400 text-white font-semibold py-3 rounded-md transition-colors"
+                className="flex-1 rounded-md bg-[#2b5a8a] py-3 font-semibold text-white transition-colors hover:bg-[#1e4167] disabled:bg-gray-400"
               >
                 {loading ? "Saving..." : "Continue"}
               </button>
               <button
+                type="button"
                 onClick={handleSkip}
                 disabled={loading}
-                className="flex-1 border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-3 rounded-md transition-colors"
+                className="flex-1 rounded-md border border-gray-300 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-50"
               >
                 Skip for now
               </button>

@@ -1,70 +1,105 @@
-# IWS Forums Docker Guide
+# IWS Forums
 
-## Prerequisites
+A technical forum app built with a React client, an Express server, and MySQL.
 
-Make sure Docker Desktop is installed and running.
+## Project Structure
 
-## Start the project
+- `client/` - React frontend
+- `server/` - Express API
+- `schema.sql` - database schema and seed data
+- `docker-compose.yml` - MySQL container setup
 
-From the project root, run:
+## Requirements
 
+- Node.js 20+
+- npm
+- Docker Desktop, if you want to run MySQL in Docker
+
+## Setup
+
+### 1. Install dependencies
+
+From the project root:
 ```bash
-docker compose up --build
+cd server
+npm install
+
+cd ../client
+npm install
 ```
 
-This will build the images, start MySQL, and launch both the server and client.
-
-## Open the app
-
-- Frontend: http://localhost:8080
-- Backend API: http://localhost:3000
-
-## Restart or rerun containers
-
-If the containers are already running and you only want to bring them back up without rebuilding, use:
-
+### 2. Start MySQL
 ```bash
 docker compose up -d
 ```
 
-To restart everything:
+This starts the MySQL container defined in `docker-compose.yml`.
 
-```bash
-docker compose restart
+### 3. Configure the server
+
+Make sure `server/.env` is set for local development:
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=root
+DB_NAME=IWS
+
+JWT_SECRET=i9cJYEatC77+/KpvbEgfBOldxEnMyT+kDJwZqE2bSOE4dWaDtJJUajwgzh4zCIeC
+REFRESH_TOKEN_SECRET=Tl/JOWywNWrdrsl/dFVYmY9UAnYsVa3+Yx+97ntNsKDp0hIxpuet+nMJ39PVN4ca
+JWT_EXPIRES_IN=1h
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=pilot250504@gmail.com
+SMTP_PASS=wloo zehv egfg iyml
+SMTP_FROM="Tech Pulse <pilot250504@gmail.com>"
+CLIENT_URL=http://localhost:8080
 ```
 
-To restart only the backend server:
+## Run the App Locally
 
+Open two terminals.
+
+### Server
 ```bash
-docker compose restart server
+cd server
+npm run dev
 ```
 
-## Hot reload
+The server runs with nodemon.
 
-The server uses nodemon and the compose file mounts the server source into the container, so saving files in `server/` should restart the backend automatically.
-
-If hot reload does not trigger on Windows, recreate the server container:
-
+### Client
 ```bash
-docker compose up -d --force-recreate server
+cd client
+npm run dev
 ```
 
-## Reset the database after schema changes
+The client runs on Vite.
 
-If the database schema is changed in `schema.sql`, stop the `iws-mysql` container in Docker Desktop, then remove the MySQL volume and recreate the containers so Docker runs the updated init script.
+## Access the App
 
+- Frontend: http://localhost:8080
+- Backend API: http://localhost:3000
+
+## Database Notes
+
+The database schema and seed data are in `schema.sql`.
+
+If the MySQL volume already exists, the seed inserts will not run again automatically.
+
+To reset the Docker MySQL database and reload the schema:
 ```bash
-docker volume rm iws_forums_mysql_data
-docker compose up --build
+docker compose down -v
+docker compose up -d
 ```
 
-## Stop the project
+## Stop the App
 
-To stop the containers:
-
+- Stop the server with `Ctrl + C`
+- Stop the client with `Ctrl + C`
+- Stop MySQL Docker container with:
 ```bash
 docker compose down
 ```
-
-This removes the running containers but keeps the database volume.
 

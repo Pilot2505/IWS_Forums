@@ -1,25 +1,23 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import Navbar from "../components/navigation/Navbar";
 import { authFetch } from "../services/api";
+import PostCard from "../components/posts/PostCard";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 export default function SearchResult() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user, setUser, ready } = useRequireAuth({
+    redirectTo: "/login",
+    requireToken: true,
+  });
+
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      navigate("/login");
-      return;
-    }
-    setUser(JSON.parse(storedUser));
-  }, [navigate]);
+  if (!ready || !user) return null;
 
   useEffect(() => {
     if (!query) return;
@@ -43,74 +41,52 @@ export default function SearchResult() {
     fetchResults();
   }, [query]);
 
-  function stripHtml(html) {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    return doc.body.textContent || "";
-  }
-
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
-      <Navbar user={user} showCreatePost={true} />
+      <Navbar user={user} setUser={setUser} showCreatePost={true} />
 
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-10">
-        <h2 className="text-2xl font-semibold text-[#0C245E] mb-2">
+        <h2 className="mb-2 text-2xl font-semibold text-[#0C245E]">
           Search results for:{" "}
           <span className="text-[#1E56A0]">&ldquo;{query}&rdquo;</span>
         </h2>
 
-        {loading && (
-          <p className="text-gray-500 mt-6">Searching...</p>
-        )}
+        {loading && <p className="mt-6 text-gray-500">Searching...</p>}
 
         {!loading && results.length === 0 && (
-          <p className="text-gray-500 mt-6">No posts found for &ldquo;{query}&rdquo;.</p>
+          <p className="mt-6 text-gray-500">
+            No posts found for &ldquo;{query}&rdquo;.
+          </p>
         )}
 
         {!loading && results.length > 0 && (
-          <p className="text-gray-500 mb-6 text-sm">
+          <p className="mb-6 text-sm text-gray-500">
             Found {results.length} result{results.length !== 1 ? "s" : ""}
           </p>
         )}
 
         <div className="space-y-5">
           {results.map((post) => (
-            <div
+            <PostCard
               key={post.id}
-              className="rounded-lg bg-white border-b border-r border-black p-5 sm:p-6"
-            >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-2">
-                <h3 className="text-xl font-semibold text-black sm:text-2xl">
-                  {post.title}
-                </h3>
-                <p className="text-sm text-gray-600">
+              post={post}
+              authorNode={
+                <>
                   By{" "}
                   <Link
                     to={`/profile/${encodeURIComponent(post.username)}`}
-                    className="text-[#1E56A0] font-medium hover:underline"
+                    className="font-medium text-[#1E56A0] hover:underline"
                   >
                     {post.username}
                   </Link>
-                </p>
-              </div>
-
-              <p className="text-gray-700 text-sm line-clamp-3 mb-4">
-                {stripHtml(post.content)}
-              </p>
-
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">
-                  {new Date(post.created_at).toLocaleString()}
-                </span>
-                <Link
-                  to={`/post/${post.id}`}
-                  className="text-[#1E56A0] font-medium text-sm hover:underline"
-                >
-                  Read More
-                </Link>
-              </div>
-            </div>
+                </>
+              }
+              meta={new Date(post.created_at).toLocaleString()}
+              readMoreTo={`/post/${post.id}`}
+              className="border-b border-r border-black"
+            />
           ))}
         </div>
       </div>
