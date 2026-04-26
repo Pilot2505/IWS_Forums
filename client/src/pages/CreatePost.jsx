@@ -20,7 +20,6 @@ export default function CreatePost() {
   const [editorLoaded, setEditorLoaded] = useState(false);
 
   if (!ready || !user) return null;
-
     const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -58,8 +57,6 @@ export default function CreatePost() {
       toast.error("Something went wrong");
     }
   };
-
-  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
