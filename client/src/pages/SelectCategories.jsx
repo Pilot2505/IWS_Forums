@@ -30,8 +30,6 @@ export default function SelectCategories() {
   const [selected, setSelected] = useState([]);
   const [initialSelected, setInitialSelected] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  if (!ready || !user) return null;
   
   useEffect(() => {
     if (!user) return;
@@ -97,6 +95,8 @@ export default function SelectCategories() {
   const handleSubmit = async () => {
     await saveCategories(selected);
   };
+
+  if (!ready || !user) return null;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#d4e4ec]">

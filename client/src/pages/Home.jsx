@@ -85,8 +85,6 @@ export default function Home() {
     fetchPosts();
   }, [user, currentPage]);
 
-  if (!ready || !user) return null;
-
   const handleOpenProfile = async (person) => {
     try {
       const response = await authFetch("/api/follow/seen", {
@@ -131,7 +129,7 @@ export default function Home() {
     );
   };
 
-  if (!user) return null;
+  if (!ready || !user) return null;
 
   // Lấy label categories để hiển thị
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
