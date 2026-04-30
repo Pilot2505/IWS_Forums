@@ -19,8 +19,7 @@ export default function CreatePost() {
   const [title, setTitle] = useState("");
   const [editorLoaded, setEditorLoaded] = useState(false);
 
-  if (!ready || !user) return null;
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const trimmedTitle = title.trim();
@@ -57,6 +56,8 @@ export default function CreatePost() {
       toast.error("Something went wrong");
     }
   };
+
+  if (!ready || !user) return null;
 
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
