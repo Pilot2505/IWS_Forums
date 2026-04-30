@@ -17,8 +17,6 @@ export default function SearchResult() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  if (!ready || !user) return null;
-
   useEffect(() => {
     if (!query) return;
 
@@ -40,7 +38,9 @@ export default function SearchResult() {
 
     fetchResults();
   }, [query]);
-  
+
+  if (!ready || !user) return null;
+
   return (
     <div className="min-h-screen bg-[#D6E4F0]">
       <Navbar user={user} setUser={setUser} showCreatePost={true} />
