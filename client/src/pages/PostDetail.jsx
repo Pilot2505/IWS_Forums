@@ -32,8 +32,6 @@ export default function PostDetail() {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
-  if (!ready || !user) return null;
-
   useEffect(() => {
     // Fetch post
     authFetch(`/api/posts/${id}`)
@@ -303,7 +301,7 @@ export default function PostDetail() {
     return createdDate.toLocaleDateString("vi-VN");
   };
 
-  if (!user || !post) return null;
+  if (!ready || !user || !post) return null;
 
   return (
     <div className="min-h-screen bg-[#C8CFD8]">

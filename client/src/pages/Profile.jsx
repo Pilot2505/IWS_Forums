@@ -45,9 +45,6 @@ export default function Profile() {
 
   const [posts, setPosts] = useState([]);
 
-  if (!ready || !user) return null;
-
-
   useEffect(() => {
     if (!username) return;
 
@@ -280,8 +277,8 @@ export default function Profile() {
     setEditorLoaded(false);
   };
 
-  if (!user) return null;
-
+  if (!ready || !user) return null;
+  
   const displayUser = isOwnProfile ? profileUser || user : profileUser;
   if (!displayUser) return null;
 
