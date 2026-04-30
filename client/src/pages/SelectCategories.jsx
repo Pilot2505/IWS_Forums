@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import Navbar from "../components/navigation/Navbar";
 import { authFetch } from "../services/api";
 import useRequireAuth from "../hooks/useRequireAuth";
 
