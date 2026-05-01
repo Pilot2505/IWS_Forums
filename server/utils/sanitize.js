@@ -47,3 +47,13 @@ export const sanitizeRichText = (value) => {
     },
   });
 };
+
+export const sanitizeTitleRichText = (value) => {
+  if (typeof value !== "string") return "";
+
+  return sanitizeHtml(value, {
+    allowedTags: ["b", "strong", "i", "em", "u", "s", "br"],
+    allowedAttributes: {},
+    allowedSchemes: [],
+  });
+};

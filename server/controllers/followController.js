@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { createNotification } from "../utils/notifications.js";
 
 export const followUser = async (req, res) => {
   const { followerId, followingId } = req.validated.body;
@@ -11,6 +12,13 @@ export const followUser = async (req, res) => {
       `,
       [followerId, followingId]
     );
+
+    await createNotification({
+      userId: followingId,
+      actorUserId: followerId,
+      type: "follow",
+      message: "started following you",
+    });
 
     res.json({ isFollowing: true });
   } catch (err) {
