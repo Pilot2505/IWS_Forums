@@ -6,6 +6,7 @@ import {
   postsListSchema,
   searchSchema,
   recommendedSchema,
+  userPostsListSchema,
   postIdParamsSchema,
   createPostSchema,
   updatePostSchema,
@@ -13,7 +14,6 @@ import {
   deleteCommentSchema,
   votePostSchema,
 } from "../validators/postsSchemas.js";
-import { usernameParamsSchema } from "../validators/usersSchemas.js";
 import {
   getPosts,
   searchPosts,
@@ -36,7 +36,7 @@ const postImageUpload = createUploadHandler("post-images");
 router.get("/", auth, validate(postsListSchema), getPosts); // Get list of posts with pagination and optional category filter
 router.get("/search", auth, validate(searchSchema), searchPosts); // Search posts by keyword in title or content
 router.get("/recommended", auth, validate(recommendedSchema), getRecommendedPosts); // Get recommended posts based on user's followed categories
-router.get("/user/:username", auth, validate(usernameParamsSchema), getPostsByUsername); // Get posts by username
+router.get("/user/:username", auth, validate(userPostsListSchema), getPostsByUsername); // Get posts by username
 router.get("/:id", auth, validate(postIdParamsSchema), getPostById); // Get post details by ID, including comments and author info
 router.post("/", auth, validate(createPostSchema), createPost); // Create a new post
 router.post("/upload-image", auth, withMulter400(postImageUpload.single("image")), uploadPostImage); // Upload an image for a post
