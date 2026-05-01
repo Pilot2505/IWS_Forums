@@ -32,10 +32,12 @@ export default function Home() {
 
   const [posts, setPosts] = useState([]);
   const [following, setFollowing] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
   const [isRecommended, setIsRecommended] = useState(false);
   const [loadingPosts, setLoadingPosts] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [sortDir, setSortDir] = useState("desc");
 
   useEffect(() => {
     if (!user) return;
@@ -59,21 +61,25 @@ export default function Home() {
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         const cats = storedUser.categories;
         const hasCategories = Array.isArray(cats) && cats.length > 0;
+        const params = new URLSearchParams({
+          limit: "5",
+          sortBy: "date",
+          sortDir,
+        });
 
-        let url = "";
+        let endpoint = "/api/posts";
         if (hasCategories) {
-          const catParam = cats.join(",");
-          url = `/api/posts/recommended?categories=${encodeURIComponent(catParam)}&page=${currentPage}&limit=5`;
-        } else {
-          url = `/api/posts?page=${currentPage}&limit=5`;
+          endpoint = "/api/posts/recommended";
+          params.set("categories", cats.join(","));
         }
 
-        const res = await authFetch(url);
+        const res = await authFetch(`${endpoint}?${params.toString()}`);
         if (!res.ok) throw new Error("Failed to fetch posts");
         const data = await res.json();
 
         setPosts(data.posts);
-        setTotalPages(data.totalPages);
+        setCursor(data.nextCursor ?? null);
+        setHasMore(Boolean(data.hasMore));
         setIsRecommended(hasCategories);
       } catch (err) {
         console.error("Error loading posts:", err);
@@ -82,8 +88,46 @@ export default function Home() {
       }
     };
 
+    setPosts([]);
+    setCursor(null);
+    setHasMore(false);
     fetchPosts();
-  }, [user, currentPage]);
+  }, [user, sortDir]);
+
+  const handleLoadMore = async () => {
+    if (!cursor || loadingMore) return;
+
+    setLoadingMore(true);
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const cats = storedUser.categories;
+      const hasCategories = Array.isArray(cats) && cats.length > 0;
+      const params = new URLSearchParams({
+        limit: "5",
+        sortBy: "date",
+        sortDir,
+        cursor,
+      });
+
+      let endpoint = "/api/posts";
+      if (hasCategories) {
+        endpoint = "/api/posts/recommended";
+        params.set("categories", cats.join(","));
+      }
+
+      const res = await authFetch(`${endpoint}?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to fetch posts");
+
+      const data = await res.json();
+      setPosts((prev) => [...prev, ...data.posts]);
+      setCursor(data.nextCursor ?? null);
+      setHasMore(Boolean(data.hasMore));
+    } catch (err) {
+      console.error("Error loading more posts:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handleOpenProfile = async (person) => {
     try {
@@ -186,6 +230,20 @@ export default function Home() {
                 to get personalized recommendations.
               </p>
             )}
+
+            <div className="mt-4 flex flex-col gap-2 rounded-lg border border-[#1E56A0]/10 bg-[#F6F9FC] p-4 sm:flex-row sm:items-end sm:justify-between">
+              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
+                Sort by date
+                <select
+                  value={sortDir}
+                  onChange={(e) => setSortDir(e.target.value)}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
+                >
+                  <option value="desc">Newest first</option>
+                  <option value="asc">Oldest first</option>
+                </select>
+              </label>
+            </div>
           </div>
 
           {/* Posts list */}
@@ -250,25 +308,16 @@ export default function Home() {
             </div>
           )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              {Array.from({ length: totalPages }, (_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    window.scrollTo(0, 0);
-                    setCurrentPage(index + 1);
-                  }}
-                  className={`rounded-md px-4 py-2 ${
-                    currentPage === index + 1
-                      ? "bg-[#1E56A0] text-white"
-                      : "bg-gray-200"
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
+          {hasMore && posts.length > 0 && (
+            <div className="mt-8 flex justify-center">
+              <button
+                type="button"
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="rounded-md bg-[#1E56A0] px-6 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loadingMore ? "Loading..." : "Load More"}
+              </button>
             </div>
           )}
         </div>
