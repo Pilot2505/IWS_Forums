@@ -11,6 +11,10 @@ import { Editor } from "@tinymce/tinymce-react";
 import { authFetch } from "../services/api";
 import { uploadEmbeddedImages } from "../utils/editorImages";
 import useRequireAuth from "../hooks/useRequireAuth";
+import BookmarkButton from "../components/BookmarkButton";
+import { stripHtml } from "../utils/content";
+import { normalizeTagsInput, parseTagsValue } from "../utils/postMeta";
+import { containsBlockedWord } from "../utils/moderation";
 
 export default function Profile() {
   const { username } = useParams();
@@ -34,6 +38,7 @@ export default function Profile() {
 
   const [editingPost, setEditingPost] = useState(null);
   const [editTitle, setEditTitle] = useState("");
+  const [editTagsInput, setEditTagsInput] = useState("");
   const [editContent, setEditContent] = useState("");
   const [editorLoaded, setEditorLoaded] = useState(false);
 
@@ -300,7 +305,9 @@ export default function Profile() {
   };
 
   const handleUpdatePost = async () => {
-    if (!editTitle.trim()) {
+    const trimmedTitle = stripHtml(editTitle).trim();
+
+    if (!trimmedTitle) {
       toast.error("Title is required");
       return;
     }
@@ -310,23 +317,38 @@ export default function Profile() {
       return;
     }
 
+    if (containsBlockedWord(trimmedTitle) || containsBlockedWord(editContent)) {
+      toast.error("This post contains language that violates community standards. Please edit it!");
+      return;
+    }
+
     if (!editingPost) return;
 
     try {
       const content = await uploadEmbeddedImages(editContent);
+      const nextTags = normalizeTagsInput(editTagsInput);
 
-      await updatePost(editingPost, editTitle, content);
+      const updatedPost = await updatePost(editingPost, editTitle, content, nextTags);
 
       setPosts((prev) =>
         prev.map((p) =>
           p.id === editingPost
-            ? { ...p, title: editTitle, content }
+            ? {
+                ...p,
+                title: updatedPost.title || editTitle,
+                content,
+                tags: updatedPost.tags || nextTags,
+                primary_category: updatedPost.primary_category ?? p.primary_category,
+                primary_category_label:
+                  updatedPost.primary_category_label ?? p.primary_category_label,
+              }
             : p
         )
       );
 
       setEditingPost(null);
       setEditTitle("");
+      setEditTagsInput("");
       setEditContent("");
       setEditorLoaded(false);
 
@@ -491,6 +513,7 @@ export default function Profile() {
                           initialCurrentUserVote={post.current_user_vote ?? 0}
                           onChange={handlePostVoteChange}
                         />
+                        <BookmarkButton postId={post.id} initialBookmarked={Boolean(post.is_bookmarked)} />
                       </div>
                     )}
 
@@ -501,6 +524,7 @@ export default function Profile() {
                           onClick={() => {
                             setEditingPost(post.id);
                             setEditTitle(post.title);
+                            setEditTagsInput(parseTagsValue(post.tags).join(", "));
                             setEditContent(post.content);
                             setEditorLoaded(false);
                           }}
@@ -564,20 +588,61 @@ export default function Profile() {
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-2">
               <div>
-                <label className="mb-3 block text-lg font-semibold text-black">
+                <label htmlFor="profile-post-title-editor" className="mb-1 block text-lg font-semibold text-black">
                   Title
                 </label>
-                <input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[#1E56A0]"
-                />
+                <div className="relative min-h-[112px] [&_.tox-edit-area__iframe]:max-h-[112px] [&_.tox-edit-area__iframe]:overflow-y-auto">
+                  <Editor
+                    id="profile-post-title-editor"
+                    value={editTitle}
+                    onEditorChange={(newTitle) => setEditTitle(newTitle)}
+                    tinymceScriptSrc="/tinymce/tinymce.min.js"
+                    init={{
+                      license_key: "gpl",
+                      promotion: false,
+                      branding: false,
+                      menubar: false,
+                      statusbar: false,
+                      placeholder: "Format your title here",
+                      height: 100,
+                      forced_root_block: false,
+                      toolbar: "bold italic underline strikethrough",
+                      plugins: [],
+                      toolbar_sticky: false,
+                      skin_url: "/tinymce/skins/ui/oxide",
+                      valid_elements: "b,strong,i,em,u,s,br",
+                      element_format: "html",
+                      entity_encoding: "raw",
+                      content_style: `
+                        body {
+                          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                          font-size: 1rem;
+                        }
+                      `,
+                    }}
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="mb-3 block text-lg font-semibold text-black">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Tags
+                </label>
+                <input
+                  value={editTagsInput}
+                  onChange={(e) => setEditTagsInput(e.target.value)}
+                  placeholder="React, performance, UI"
+                  className="w-full rounded border p-3 text-base"
+                />
+                <p className="mt-0.5 text-xs text-gray-500">
+                  Add multiple tags with commas. Example: React, performance, UI.
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-lg font-semibold text-black">
                   Content
                 </label>
                 <div className="relative min-h-[420px] [&_.tox-edit-area__iframe]:max-h-[420px] [&_.tox-edit-area__iframe]:overflow-y-auto sm:min-h-[560px] sm:[&_.tox-edit-area__iframe]:max-h-[560px] lg:min-h-[700px] lg:[&_.tox-edit-area__iframe]:max-h-[700px]">
@@ -681,7 +746,7 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-4 pt-2">
+              <div className="flex justify-end gap-2 pt-1">
                 <button
                   onClick={closeEditPostModal}
                   className="rounded-md border border-gray-300 px-6 py-2 font-medium"

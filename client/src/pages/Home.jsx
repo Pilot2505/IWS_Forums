@@ -6,6 +6,7 @@ import { authFetch } from "../services/api";
 import PostVoteControls from "../components/PostVoteControls";
 import PostCard from "../components/posts/PostCard";
 import useRequireAuth from "../hooks/useRequireAuth";
+import BookmarkButton from "../components/BookmarkButton";
 
 // Map category id -> label hiển thị
 const CATEGORY_LABELS = {
@@ -302,6 +303,7 @@ export default function Home() {
                       initialCurrentUserVote={post.current_user_vote ?? 0}
                       onChange={handlePostVoteChange}
                     />
+                    <BookmarkButton postId={post.id} initialBookmarked={Boolean(post.is_bookmarked)} />
                   </div>
                 </PostCard>
               ))}
