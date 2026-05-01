@@ -106,6 +106,14 @@ export default function Login() {
                     {showPassword ? "Hide" : "Show"}
                   </button>
                 </div>
+                <div className="mt-2 flex justify-end">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm font-medium text-[#2b5a8a] transition-colors hover:text-[#1e4167]"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
 
               {/* Login Button */}
