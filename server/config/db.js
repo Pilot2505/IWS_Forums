@@ -1,3 +1,4 @@
+import "dotenv/config";
 import mysql from "mysql2/promise";
 
 const pool = mysql.createPool({
@@ -11,6 +12,8 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 });
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const ensurePostVotesTable = async () => {
   const connection = await pool.getConnection();
@@ -34,14 +37,25 @@ const ensurePostVotesTable = async () => {
   }
 };
 
-(async () => {
-  try {
-    await ensurePostVotesTable();
-    const connection = await pool.getConnection();
-    console.log("MySQL connected successfully");
-    connection.release();
-  } catch (err) {
-    console.error("MySQL connection failed:", err);
+export const dbReady = (async () => {
+  const maxRetries = 30;
+  const retryDelayMs = 1000;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
+    try {
+      await ensurePostVotesTable();
+      const connection = await pool.getConnection();
+      connection.release();
+      console.log("MySQL connected successfully");
+      return;
+    } catch (err) {
+      if (attempt === maxRetries) {
+        console.error("MySQL connection failed:", err);
+        throw err;
+      }
+
+      await delay(retryDelayMs);
+    }
   }
 })();
 
