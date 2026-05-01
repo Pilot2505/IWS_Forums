@@ -17,7 +17,9 @@ CREATE TABLE IF NOT EXISTS users (
   delete_confirmed_at DATETIME DEFAULT NULL,
   delete_after_at DATETIME DEFAULT NULL,
   delete_token_hash VARCHAR(255) DEFAULT NULL,
-  delete_token_expires_at DATETIME DEFAULT NULL
+  delete_token_expires_at DATETIME DEFAULT NULL,
+  password_reset_token_hash VARCHAR(255) DEFAULT NULL,
+  password_reset_token_expires_at DATETIME DEFAULT NULL
 ) ENGINE=InnoDB;
 
 -- Posts
