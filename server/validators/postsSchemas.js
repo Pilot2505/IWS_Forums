@@ -62,16 +62,18 @@ export const postIdParamsSchema = z.object({
 
 export const createPostSchema = z.object({
   body: z.object({
-    title: z.string().trim().min(1).max(255),
+    title: z.string().trim().min(1).max(500),
     content: z.string().trim().min(1),
     userId: z.coerce.number().int().positive(),
+    tags: z.array(z.string().trim().min(1).max(40)).max(10).optional().default([]),
   }),
 });
 
 export const updatePostSchema = z.object({
   body: z.object({
-    title: z.string().trim().min(1).max(255),
+    title: z.string().trim().min(1).max(500),
     content: z.string().trim().min(1),
+    tags: z.array(z.string().trim().min(1).max(40)).max(10).optional().default([]),
   }),
   params: z.object({
     id: z.coerce.number().int().positive(),

@@ -7,6 +7,8 @@ import authRouter from "./routes/auth.js";
 import postsRouter from "./routes/posts.js";
 import followsRouter from "./routes/follow.js";
 import usersRouter from "./routes/users.js";
+import bookmarksRouter from "./routes/bookmarks.js";
+import notificationsRouter from "./routes/notifications.js";
 
 export function createServer() {
   const app = express();
@@ -39,6 +41,8 @@ export function createServer() {
   app.use("/api/users", usersRouter);
   app.use("/api/posts", postsRouter);
   app.use("/api/follow", followsRouter);
+  app.use("/api/bookmarks", bookmarksRouter);
+  app.use("/api/notifications", notificationsRouter);
 
   return app;
 }
