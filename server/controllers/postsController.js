@@ -17,35 +17,152 @@ const voteJoinClause = `
 `;
 
 const postSelectFields = `posts.*, users.username, users.avatar, ${voteSelectFields}`;
-export const getPosts = async (req, res) => {
-  const page = Number(req.validated.query.page);
-  const limit = Number(req.validated.query.limit);
-  const offset = (page - 1) * limit;
-  const userId = Number(req.user?.id)
+
+const decodeCursor = (cursor) => {
+  if (!cursor) return null;
 
   try {
-    const [countRows] = await pool.query("SELECT COUNT(*) as total FROM posts");
-    const totalPosts = countRows[0].total;
-    const totalPages = Math.ceil(totalPosts / limit);
+    return JSON.parse(Buffer.from(cursor, "base64").toString("utf8"));
+  } catch {
+    return null;
+  }
+};
 
-    const [rows] = await pool.query(
-      `
-      SELECT ${postSelectFields}
-      FROM posts
-      JOIN users ON posts.user_id = users.id
-      ${voteJoinClause}
-      ORDER BY posts.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
+const encodeCursor = (post, sortBy) => {
+  const payload =
+    sortBy === "upvotes"
+      ? {
+          voteCount: Number(post.vote_count) || 0,
+          id: Number(post.id),
+        }
+      : {
+          createdAt: new Date(post.created_at).toISOString(),
+          id: Number(post.id),
+        };
+
+  return Buffer.from(JSON.stringify(payload)).toString("base64");
+};
+
+const buildCursorClause = (sortBy, sortDir, cursor) => {
+  const decodedCursor = decodeCursor(cursor);
+  if (!decodedCursor) {
+    return { clause: "", params: [] };
+  }
+
+  const comparison = sortDir === "asc" ? ">" : "<";
+
+  if (sortBy === "upvotes") {
+    const voteCount = Number(decodedCursor.voteCount);
+    const postId = Number(decodedCursor.id);
+
+    if (!Number.isFinite(voteCount) || !Number.isInteger(postId)) {
+      return { clause: "", params: [] };
+    }
+
+    return {
+      clause: `
+        AND (
+          COALESCE(vote_stats.vote_count, 0) ${comparison} ?
+          OR (
+            COALESCE(vote_stats.vote_count, 0) = ?
+            AND posts.id ${comparison} ?
+          )
+        )
       `,
-      [userId]
-    );
+      params: [voteCount, voteCount, postId],
+    };
+  }
 
-    res.json({
-      posts: rows,
-      currentPage: page,
-      totalPages,
-      totalPosts,
+  const createdAt = new Date(decodedCursor.createdAt);
+  const postId = Number(decodedCursor.id);
+
+  if (Number.isNaN(createdAt.getTime()) || !Number.isInteger(postId)) {
+    return { clause: "", params: [] };
+  }
+
+  return {
+    clause: `
+      AND (
+        posts.created_at ${comparison} ?
+        OR (
+          posts.created_at = ?
+          AND posts.id ${comparison} ?
+        )
+      )
+    `,
+    params: [createdAt, createdAt, postId],
+  };
+};
+
+const getOrderByClause = (sortBy, sortDir) => {
+  const direction = sortDir === "asc" ? "ASC" : "DESC";
+
+  if (sortBy === "upvotes") {
+    return `COALESCE(vote_stats.vote_count, 0) ${direction}, posts.id ${direction}`;
+  }
+
+  return `posts.created_at ${direction}, posts.id ${direction}`;
+};
+
+const listPostsWithCursor = async ({
+  userId,
+  limit,
+  cursor,
+  sortBy,
+  sortDir,
+  whereClause = "",
+  whereParams = [],
+}) => {
+  const { clause: cursorClause, params: cursorParams } = buildCursorClause(
+    sortBy,
+    sortDir,
+    cursor
+  );
+  const orderByClause = getOrderByClause(sortBy, sortDir);
+
+  const [rows] = await pool.query(
+    `
+    SELECT ${postSelectFields}
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    ${voteJoinClause}
+    WHERE 1 = 1
+    ${whereClause}
+    ${cursorClause}
+    ORDER BY ${orderByClause}
+    LIMIT ?
+    `,
+    [userId, ...whereParams, ...cursorParams, limit + 1]
+  );
+
+  const hasMore = rows.length > limit;
+  const posts = hasMore ? rows.slice(0, limit) : rows;
+  const nextCursor =
+    hasMore && posts.length > 0
+      ? encodeCursor(posts[posts.length - 1], sortBy)
+      : null;
+
+  return {
+    posts,
+    nextCursor,
+    hasMore,
+  };
+};
+
+export const getPosts = async (req, res) => {
+  const { cursor, limit, sortBy, sortDir } = req.validated.query;
+  const userId = Number(req.user?.id);
+
+  try {
+    const result = await listPostsWithCursor({
+      userId,
+      limit: Number(limit),
+      cursor,
+      sortBy,
+      sortDir,
     });
+
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -82,8 +199,7 @@ export const searchPosts = async (req, res) => {
 };
 
 export const getRecommendedPosts = async (req, res) => {
-  const { page, limit, categories } = req.validated.query;
-  const offset = (page - 1) * limit;
+  const { cursor, limit, categories, sortBy, sortDir } = req.validated.query;
   const userId = req.user.id;
 
   try {
@@ -116,28 +232,17 @@ export const getRecommendedPosts = async (req, res) => {
     const conditions = keywords.map(() => "(posts.title LIKE ? OR posts.content LIKE ?)").join(" OR ");
     const params = keywords.flatMap((kw) => [`%${kw}%`, `%${kw}%`]);
 
-    const [countRows] = await pool.query(
-      `SELECT COUNT(*) as total FROM posts JOIN users ON posts.user_id = users.id WHERE ${conditions}`,
-      params
-    );
+    const result = await listPostsWithCursor({
+      userId,
+      limit: Number(limit),
+      cursor,
+      sortBy,
+      sortDir,
+      whereClause: `AND (${conditions})`,
+      whereParams: params,
+    });
 
-    const totalPosts = countRows[0].total;
-    const totalPages = Math.ceil(totalPosts / limit);
-
-    const [rows] = await pool.query(
-      `
-      SELECT ${postSelectFields}
-      FROM posts
-      JOIN users ON posts.user_id = users.id
-      ${voteJoinClause}
-      WHERE ${conditions}
-      ORDER BY posts.created_at DESC
-      LIMIT ? OFFSET ?
-      `,
-      [userId, ...params, limit, offset]
-    );
-
-    res.json({ posts: rows, currentPage: page, totalPages, totalPosts });
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -146,22 +251,34 @@ export const getRecommendedPosts = async (req, res) => {
 
 export const getPostsByUsername = async (req, res) => {
   const { username } = req.validated.params;
+  const { cursor, limit, sortBy, sortDir } = req.validated.query;
   const userId = req.user.id;
 
   try {
-    const [rows] = await pool.execute(
+    const [countRows] = await pool.query(
       `
-      SELECT ${postSelectFields}
+      SELECT COUNT(*) AS totalCount
       FROM posts
       JOIN users ON posts.user_id = users.id
-      ${voteJoinClause}
       WHERE users.username = ?
-      ORDER BY posts.created_at DESC
       `,
-      [userId, username]
+      [username]
     );
 
-    res.json(rows);
+    const result = await listPostsWithCursor({
+      userId,
+      limit: Number(limit),
+      cursor,
+      sortBy,
+      sortDir,
+      whereClause: "AND users.username = ?",
+      whereParams: [username],
+    });
+
+    res.json({
+      ...result,
+      totalCount: Number(countRows[0]?.totalCount) || 0,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
