@@ -26,7 +26,8 @@ export default function Profile() {
   const [errors, setErrors] = useState({});
 
   const [profileUser, setProfileUser] = useState(null);
-  const targetUserId = profileUser?.id;
+  const effectiveUsername = username || user?.username;
+  const targetUserId = profileUser?.id || (isOwnProfile ? user?.id : null);
 
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -44,18 +45,25 @@ export default function Profile() {
   const [editFormData, setEditFormData] = useState("");
 
   const [posts, setPosts] = useState([]);
+  const [postsCount, setPostsCount] = useState(0);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [sortBy, setSortBy] = useState("date");
+  const [sortDir, setSortDir] = useState("desc");
 
   useEffect(() => {
-    if (!username) return;
+    if (!effectiveUsername) return;
 
     const fetchProfileUser = async () => {
-      const res = await authFetch(`/api/users/${username}`);
+      const res = await authFetch(`/api/users/${effectiveUsername}`);
       const data = await res.json();
       setProfileUser(data);
     };
 
     fetchProfileUser();
-  }, [username]);
+  }, [effectiveUsername]);
 
   useEffect(() => {
     if (!targetUserId) return;
@@ -71,23 +79,42 @@ export default function Profile() {
   }, [targetUserId]);
 
   useEffect(() => {
-    if (!username) return;
+    if (!effectiveUsername) return;
 
     const fetchPosts = async () => {
-      const res = await authFetch(`/api/posts/user/${username}`);
+      setLoadingPosts(true);
+      try {
+        const params = new URLSearchParams({
+          limit: "5",
+          sortBy,
+          sortDir,
+        });
+        const res = await authFetch(
+          `/api/posts/user/${encodeURIComponent(effectiveUsername)}?${params.toString()}`
+        );
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Server error:", text);
-        return;
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Server error:", text);
+          return;
+        }
+
+        const data = await res.json();
+        setPosts(data.posts);
+        setPostsCount(data.totalCount ?? data.posts.length);
+        setCursor(data.nextCursor ?? null);
+        setHasMore(Boolean(data.hasMore));
+      } finally {
+        setLoadingPosts(false);
       }
-
-      const data = await res.json();
-      setPosts(data);
     };
 
+    setPosts([]);
+    setPostsCount(0);
+    setCursor(null);
+    setHasMore(false);
     fetchPosts();
-  }, [username]);
+  }, [effectiveUsername, sortBy, sortDir]);
 
   useEffect(() => {
     if (!user || !targetUserId || isOwnProfile) return;
@@ -124,6 +151,42 @@ export default function Profile() {
     const data = await res.json();
     setFollowersCount(data.followers);
     setFollowingCount(data.following);
+  };
+
+  const handleLoadMore = async () => {
+    if (!effectiveUsername || !cursor || loadingMore) return;
+
+    setLoadingMore(true);
+    try {
+      const params = new URLSearchParams({
+        limit: "5",
+        sortBy,
+        sortDir,
+        cursor,
+      });
+      const res = await authFetch(
+        `/api/posts/user/${encodeURIComponent(effectiveUsername)}?${params.toString()}`
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Server error:", text);
+        return;
+      }
+
+      const data = await res.json();
+      setPosts((prev) => [...prev, ...data.posts]);
+      setPostsCount(data.totalCount ?? postsCount);
+      setCursor(data.nextCursor ?? null);
+      setHasMore(Boolean(data.hasMore));
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleSortChange = (nextSortBy, nextSortDir) => {
+    setSortBy(nextSortBy);
+    setSortDir(nextSortDir);
   };
 
   const handleSaveProfile = async (e) => {
@@ -212,6 +275,7 @@ export default function Profile() {
       toast.success("Post deleted successfully!");
 
       setPosts((prev) => prev.filter((p) => p.id !== deletePostId));
+      setPostsCount((prev) => Math.max(0, prev - 1));
 
       setShowDeleteDialog(false);
       setDeletePostId(null);
@@ -311,7 +375,7 @@ export default function Profile() {
 
                 <div className="mt-3 grid grid-cols-3 gap-4 sm:flex sm:gap-8">
                   <div className="text-center">
-                    <div className="text-2xl font-semibold">{posts.length}</div>
+                    <div className="text-2xl font-semibold">{postsCount}</div>
                     <div className="text-sm text-gray-700">Posts</div>
                   </div>
                   <div className="text-center">
@@ -336,7 +400,7 @@ export default function Profile() {
             ) : (
               <FollowButton
                 currentUserId={user.id}
-                targetUserId={profileUser?.id}
+                targetUserId={targetUserId}
                 onChange={() => refetchFollowCounts()}
               />
             )}
@@ -349,60 +413,127 @@ export default function Profile() {
 
         <div className="rounded-b-lg bg-white p-5 sm:p-6 lg:p-8">
           <h2 className="mb-6 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
-            {isOwnProfile ? "Your Posts" : `${username}'s Posts`}
+            {isOwnProfile ? "Your Posts" : `${effectiveUsername}'s Posts`}
           </h2>
 
+          <div className="mb-6 flex flex-col gap-3 rounded-lg border border-gray-200 bg-[#F7F9FC] p-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
+                Sort by
+                <select
+                  value={sortBy}
+                  onChange={(e) =>
+                    handleSortChange(e.target.value, e.target.value === "upvotes" ? sortDir : "desc")
+                  }
+                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
+                >
+                  <option value="date">Date</option>
+                  <option value="upvotes">Upvotes</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
+                Order
+                <select
+                  value={sortDir}
+                  onChange={(e) => handleSortChange(sortBy, e.target.value)}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
+                >
+                  {sortBy === "date" ? (
+                    <>
+                      <option value="desc">Newest first</option>
+                      <option value="asc">Oldest first</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="desc">Most upvotes</option>
+                      <option value="asc">Least upvotes</option>
+                    </>
+                  )}
+                </select>
+              </label>
+            </div>
+          </div>
+
           <div className="space-y-6">
-            {posts.length === 0 ? (
+            {loadingPosts ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((item) => (
+                  <div
+                    key={item}
+                    className="animate-pulse rounded-lg border border-gray-200 bg-white p-6"
+                  >
+                    <div className="mb-3 h-6 w-2/3 rounded bg-gray-200" />
+                    <div className="mb-2 h-4 w-full rounded bg-gray-200" />
+                    <div className="h-4 w-5/6 rounded bg-gray-200" />
+                  </div>
+                ))}
+              </div>
+            ) : posts.length === 0 ? (
               <div className="py-10 text-center text-lg text-gray-500">
                 No posts yet.
               </div>
             ) : (
-              posts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  meta={post.timeAgo}
-                  readMoreTo={`/post/${post.id}`}
-                  className="border-gray-200"
-                >
-                  {editingPost !== post.id && (
-                    <div className="mb-4 flex flex-wrap items-center gap-4">
-                      <PostVoteControls
-                        postId={post.id}
-                        initialVoteCount={post.vote_count ?? 0}
-                        initialCurrentUserVote={post.current_user_vote ?? 0}
-                        onChange={handlePostVoteChange}
-                      />
-                    </div>
-                  )}
+              <>
+                {posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    meta={new Date(post.created_at).toLocaleString()}
+                    readMoreTo={`/post/${post.id}`}
+                    className="border-gray-200"
+                  >
+                    {editingPost !== post.id && (
+                      <div className="mb-4 flex flex-wrap items-center gap-4">
+                        <PostVoteControls
+                          postId={post.id}
+                          initialVoteCount={post.vote_count ?? 0}
+                          initialCurrentUserVote={post.current_user_vote ?? 0}
+                          onChange={handlePostVoteChange}
+                        />
+                      </div>
+                    )}
 
-                  {isOwnProfile && editingPost !== post.id && (
-                    <div className="flex flex-wrap gap-4">
-                      <button
-                        className="font-medium text-[#1E56A0]"
-                        onClick={() => {
-                          setEditingPost(post.id);
-                          setEditTitle(post.title);
-                          setEditContent(post.content);
-                          setEditorLoaded(false);
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => {
-                          setDeletePostId(post.id);
-                          setShowDeleteDialog(true);
-                        }}
-                        className="font-medium text-red-600"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </PostCard>
-              ))
+                    {isOwnProfile && editingPost !== post.id && (
+                      <div className="flex flex-wrap gap-4">
+                        <button
+                          className="font-medium text-[#1E56A0]"
+                          onClick={() => {
+                            setEditingPost(post.id);
+                            setEditTitle(post.title);
+                            setEditContent(post.content);
+                            setEditorLoaded(false);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            setDeletePostId(post.id);
+                            setShowDeleteDialog(true);
+                          }}
+                          className="font-medium text-red-600"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </PostCard>
+                ))}
+
+                {hasMore && (
+                  <div className="flex justify-center pt-2">
+                    <button
+                      type="button"
+                      onClick={handleLoadMore}
+                      disabled={loadingMore}
+                      className="rounded-md bg-[#1E56A0] px-6 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {loadingMore ? "Loading..." : "Load More"}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
