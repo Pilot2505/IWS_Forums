@@ -392,7 +392,7 @@ export default function Profile() {
                   {displayUser?.fullname}
                 </h1>
                 <p className="text-base text-gray-700 sm:text-lg">
-                  {displayUser?.username}
+                  @{displayUser?.username}
                 </p>
 
                 <div className="mt-3 grid grid-cols-3 gap-4 sm:flex sm:gap-8">
