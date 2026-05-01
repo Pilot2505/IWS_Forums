@@ -1,5 +1,14 @@
 import pool from "../config/db.js";
 import { sanitizeRichText } from "../utils/sanitize.js";
+import { sanitizeTitleRichText } from "../utils/sanitize.js";
+import { createNotification } from "../utils/notifications.js";
+import {
+  categoryLabels,
+  derivePrimaryCategory,
+  enrichPostRow,
+  normalizeTags,
+} from "../utils/postMeta.js";
+const stripHtmlTags = (value = "") => String(value).replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
 const voteSelectFields = `
   COALESCE(vote_stats.vote_count, 0) AS vote_count,
   COALESCE(user_vote.vote, 0) AS current_user_vote
@@ -16,7 +25,18 @@ const voteJoinClause = `
    AND user_vote.user_id = ?
 `;
 
-const postSelectFields = `posts.*, users.username, users.avatar, ${voteSelectFields}`;
+const bookmarkJoinClause = `
+  LEFT JOIN bookmarks user_bookmark
+    ON user_bookmark.post_id = posts.id
+   AND user_bookmark.user_id = ?
+`;
+
+const postSelectFields = `
+  posts.*, users.username, users.avatar, ${voteSelectFields},
+  CASE WHEN user_bookmark.user_id IS NULL THEN 0 ELSE 1 END AS is_bookmarked
+`;
+
+const mapPosts = (rows) => rows.map(enrichPostRow);
 
 const decodeCursor = (cursor) => {
   if (!cursor) return null;
@@ -126,13 +146,14 @@ const listPostsWithCursor = async ({
     FROM posts
     JOIN users ON posts.user_id = users.id
     ${voteJoinClause}
+    ${bookmarkJoinClause}
     WHERE 1 = 1
     ${whereClause}
     ${cursorClause}
     ORDER BY ${orderByClause}
     LIMIT ?
     `,
-    [userId, ...whereParams, ...cursorParams, limit + 1]
+    [userId, userId, ...whereParams, ...cursorParams, limit + 1]
   );
 
   const hasMore = rows.length > limit;
@@ -143,7 +164,7 @@ const listPostsWithCursor = async ({
       : null;
 
   return {
-    posts,
+    posts: mapPosts(posts),
     nextCursor,
     hasMore,
   };
@@ -181,17 +202,19 @@ export const searchPosts = async (req, res) => {
 
     const [rows] = await pool.execute(
       `
-      SELECT posts.*, users.username, users.avatar
+      SELECT ${postSelectFields}
       FROM posts
       JOIN users ON posts.user_id = users.id
-      WHERE posts.title LIKE ? OR posts.content LIKE ?
+      ${voteJoinClause}
+      ${bookmarkJoinClause}
+      WHERE posts.title LIKE ? OR posts.content LIKE ? OR CAST(posts.tags AS CHAR) LIKE ?
       ORDER BY posts.created_at DESC
       LIMIT 50
       `,
-      [keyword, keyword]
+      [req.user.id, req.user.id, keyword, keyword, keyword]
     );
 
-    res.json(rows);
+    res.json(mapPosts(rows));
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -229,8 +252,10 @@ export const getRecommendedPosts = async (req, res) => {
       return res.status(400).json({ message: "Invalid categories" });
     }
 
-    const conditions = keywords.map(() => "(posts.title LIKE ? OR posts.content LIKE ?)").join(" OR ");
-    const params = keywords.flatMap((kw) => [`%${kw}%`, `%${kw}%`]);
+    const conditions = keywords
+      .map(() => "(posts.title LIKE ? OR posts.content LIKE ? OR CAST(posts.tags AS CHAR) LIKE ?)")
+      .join(" OR ");
+    const params = keywords.flatMap((kw) => [`%${kw}%`, `%${kw}%`, `%${kw}%`]);
 
     const result = await listPostsWithCursor({
       userId,
@@ -296,16 +321,17 @@ export const getPostById = async (req, res) => {
       FROM posts
       JOIN users ON posts.user_id = users.id
       ${voteJoinClause}
+      ${bookmarkJoinClause}
       WHERE posts.id = ?
       `,
-      [userId, id]
+      [userId, userId, id]
     );
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    res.json(rows[0]);
+    res.json(enrichPostRow(rows[0]));
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -313,15 +339,21 @@ export const getPostById = async (req, res) => {
 };
 
 export const createPost = async (req, res) => {
-  const { title, content, userId } = req.validated.body;
+  const { title, content, userId, tags = [] } = req.validated.body;
 
   try {
-    const safeTitle = title.trim();
+    const safeTitle = sanitizeTitleRichText(title).trim();
+    if (!stripHtmlTags(safeTitle)) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
     const safeContent = sanitizeRichText(content);
+    const safeTags = normalizeTags(tags);
+    const primaryCategory = derivePrimaryCategory(safeTags);
 
     const [result] = await pool.execute(
-      "INSERT INTO posts (title, content, user_id, created_at) VALUES (?, ?, ?, UTC_TIMESTAMP())",
-      [safeTitle, safeContent, userId]
+      "INSERT INTO posts (title, content, user_id, tags, created_at) VALUES (?, ?, ?, ?, UTC_TIMESTAMP())",
+      [safeTitle, safeContent, userId, JSON.stringify(safeTags)]
     );
 
     res.status(201).json({
@@ -329,6 +361,10 @@ export const createPost = async (req, res) => {
       title: safeTitle,
       content: safeContent,
       user_id: userId,
+      tags: safeTags,
+      primary_category: primaryCategory,
+      primary_category_label: primaryCategory ? categoryLabels[primaryCategory] || primaryCategory : null,
+      is_bookmarked: false,
     });
   } catch (err) {
     console.error(err);
@@ -377,23 +413,35 @@ export const deletePost = async (req, res) => {
 };
 
 export const updatePost = async (req, res) => {
-  const { title, content } = req.validated.body;
+  const { title, content, tags = [] } = req.validated.body;
   const { id } = req.validated.params;
 
   try {
-    const safeTitle = title.trim();
+    const safeTitle = sanitizeTitleRichText(title).trim();
+    if (!stripHtmlTags(safeTitle)) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
     const safeContent = sanitizeRichText(content);
+    const safeTags = normalizeTags(tags);
+    const primaryCategory = derivePrimaryCategory(safeTags);
 
     const [result] = await pool.execute(
-      "UPDATE posts SET title = ?, content = ? WHERE id = ?",
-      [safeTitle, safeContent, id]
+      "UPDATE posts SET title = ?, content = ?, tags = ? WHERE id = ?",
+      [safeTitle, safeContent, JSON.stringify(safeTags), id]
     );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    res.json({ message: "Post updated successfully" });
+    res.json({
+      message: "Post updated successfully",
+      title: safeTitle,
+      tags: safeTags,
+      primary_category: primaryCategory,
+      primary_category_label: primaryCategory ? categoryLabels[primaryCategory] || primaryCategory : null,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -446,6 +494,46 @@ export const createComment = async (req, res) => {
       `,
       [result.insertId]
     );
+
+    if (parent_id) {
+      const [replyRows] = await pool.execute(
+        `
+        SELECT user_id
+        FROM comments
+        WHERE id = ?
+        LIMIT 1
+        `,
+        [parent_id]
+      );
+
+      await createNotification({
+        userId: replyRows[0]?.user_id,
+        actorUserId: user_id,
+        type: "comment_reply",
+        postId,
+        commentId: result.insertId,
+        message: "replied to your comment",
+      });
+    } else {
+      const [postRows] = await pool.execute(
+        `
+        SELECT user_id
+        FROM posts
+        WHERE id = ?
+        LIMIT 1
+        `,
+        [postId]
+      );
+
+      await createNotification({
+        userId: postRows[0]?.user_id,
+        actorUserId: user_id,
+        type: "comment",
+        postId,
+        commentId: result.insertId,
+        message: "commented on your post",
+      });
+    }
 
     res.status(201).json(rows[0]);
   } catch (err) {

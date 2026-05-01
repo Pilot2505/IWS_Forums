@@ -1,15 +1,34 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User } from "lucide-react";
+import { Bell, Bookmark, User } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 import DeleteAccountButton from "./DeleteAccountButton";
 import SearchBar from "./SearchBar";
+import { getNotifications } from "../../services/notificationService";
 
 export default function Navbar({ user, setUser, showCreatePost = true }) {
   const navigate = useNavigate();
   const menuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const data = await getNotifications(1, false);
+        setUnreadCount(data.unreadCount || 0);
+      } catch {
+        setUnreadCount(0);
+      }
+    };
+
+    fetchUnreadCount();
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -43,24 +62,24 @@ export default function Navbar({ user, setUser, showCreatePost = true }) {
   };
 
   return (
-    <header className="bg-[#F6F6F6] px-4 py-3 sm:px-6 lg:px-12">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-[#F6F6F6] px-4 py-3 shadow-sm sm:px-6 lg:px-12">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Logo */}
         <Link to="/" className="text-2xl font-semibold text-[#163172] font-['Poppins'] sm:text-3xl lg:text-4xl">
           Tech Pulse
         </Link>
 
-      {/* Navigation Items */}
-      <div className="flex flex-wrap items-center gap-3 self-end sm:self-auto sm:gap-5 lg:gap-6">
-        {/* Search Bar */}
-        <SearchBar />
+        {/* Navigation Items */}
+        <div className="flex flex-wrap items-center gap-3 self-end sm:self-auto sm:gap-5 lg:gap-6">
+          {/* Search Bar */}
+          <SearchBar />
 
-        {/* shown on all pages except Create Post page */}
-        {showCreatePost && (
-          <Link to="/create-post" className="text-base font-medium text-[#1E56A0] transition-colors hover:text-[#163172] sm:text-lg lg:text-2xl">
-            Create Post
-          </Link>
-        )}
+          {/* shown on all pages except Create Post page */}
+          {showCreatePost && (
+            <Link to="/create-post" className="text-base font-medium text-[#1E56A0] transition-colors hover:text-[#163172] sm:text-lg lg:text-2xl">
+              Create Post
+            </Link>
+          )}
 
           {/* User Profile Avatar */}
           {user && (
@@ -93,6 +112,29 @@ export default function Navbar({ user, setUser, showCreatePost = true }) {
                   >
                     <User className="h-4 w-4" />
                     Profile
+                  </Link>
+
+                  <Link
+                    to="/bookmarks"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100"
+                  >
+                    <Bookmark className="h-4 w-4" />
+                    Bookmarks
+                  </Link>
+
+                  <Link
+                    to="/notifications"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100"
+                  >
+                    <Bell className="h-4 w-4" />
+                    Notifications
+                    {unreadCount > 0 && (
+                      <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                        {unreadCount}
+                      </span>
+                    )}
                   </Link>
 
                   <LogoutButton

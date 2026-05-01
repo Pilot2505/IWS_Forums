@@ -9,6 +9,8 @@ import PostDetail from "./pages/PostDetail";
 import CreatePost from "./pages/CreatePost";
 import Profile from "./pages/Profile";
 import SearchResult from "./pages/SearchResult";
+import Bookmarks from "./pages/Bookmarks";
+import Notifications from "./pages/Notifications";
 import SelectCategories from "./pages/SelectCategories";
 import ConfirmDeleteAccount from "./pages/ConfirmDeleteAccount";
 import NotFound from "./pages/NotFound";
@@ -27,6 +29,8 @@ const App = () => (
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:username" element={<Profile />} />
         <Route path="/search" element={<SearchResult />} />
+        <Route path="/bookmarks" element={<Bookmarks />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/select-categories" element={<SelectCategories />} />
         <Route path="/confirm-delete-account" element={<ConfirmDeleteAccount />} />
 
