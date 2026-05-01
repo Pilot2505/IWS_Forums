@@ -173,7 +173,7 @@ export const handleForgotPasswordRequest = async (req, res) => {
     }
 
     res.json({
-      message: "Email has been sent.",
+      message: "Password reset email has been sent.",
     });
   } catch (error) {
     console.error("Forgot password request error:", error);
