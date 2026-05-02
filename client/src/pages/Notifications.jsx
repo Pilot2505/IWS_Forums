@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/navigation/Navbar";
 import useRequireAuth from "../hooks/useRequireAuth";
@@ -16,14 +16,20 @@ export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const sentinelRef = useRef(null);
 
   useEffect(() => {
     const fetchNotifications = async () => {
       setLoading(true);
       try {
-        const data = await getNotifications(25, false);
+        const data = await getNotifications({ limit: 5, unreadOnly: false });
         setNotifications(data.notifications);
         setUnreadCount(data.unreadCount || 0);
+        setCursor(data.nextCursor ?? null);
+        setHasMore(Boolean(data.hasMore));
       } catch (err) {
         console.error(err);
       } finally {
@@ -33,6 +39,53 @@ export default function Notifications() {
 
     fetchNotifications();
   }, []);
+
+  useEffect(() => {
+    if (!hasMore || loading || loadingMore) {
+      return undefined;
+    }
+
+    const node = sentinelRef.current;
+    if (!node) {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          void handleLoadMore();
+        }
+      },
+      {
+        rootMargin: "120px",
+      }
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore, cursor]);
+
+  const handleLoadMore = async () => {
+    if (!cursor || loadingMore) return;
+
+    setLoadingMore(true);
+    try {
+      const data = await getNotifications({
+        limit: 5,
+        unreadOnly: false,
+        cursor,
+      });
+      setNotifications((prev) => [...prev, ...(data.notifications || [])]);
+      setUnreadCount(data.unreadCount || 0);
+      setCursor(data.nextCursor ?? null);
+      setHasMore(Boolean(data.hasMore));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handleMarkAllRead = async () => {
     await markAllNotificationsRead();
@@ -137,6 +190,13 @@ export default function Notifications() {
                 </Link>
               );
             })}
+
+            {hasMore && <div ref={sentinelRef} className="h-1 w-full" />}
+            {loadingMore && (
+              <div className="rounded-lg bg-white p-4 text-center text-sm text-gray-500">
+                Loading more notifications...
+              </div>
+            )}
           </div>
         )}
       </main>

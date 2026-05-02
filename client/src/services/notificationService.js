@@ -1,10 +1,14 @@
 import { authFetch } from "./api";
 
-export async function getNotifications(limit = 20, unreadOnly = false) {
+export async function getNotifications({ limit = 20, unreadOnly = false, cursor = null } = {}) {
   const params = new URLSearchParams({
     limit: String(limit),
     unreadOnly: unreadOnly ? "true" : "false",
   });
+
+  if (cursor) {
+    params.set("cursor", cursor);
+  }
 
   const res = await authFetch(`/api/notifications?${params.toString()}`);
 
