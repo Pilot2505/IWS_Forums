@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- Notifications
 CREATE TABLE IF NOT EXISTS notifications (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -183,7 +184,77 @@ JSON_ARRAY('upload', 'images', 'storage', 'backend'),
 <p>It also helps to keep your project setup simple during development. Running the client and server locally while using Docker only for the database is a practical choice because it reduces friction. You can edit files, see logs, and restart services without needing to rebuild everything every time.</p>
 <p>Good structure is not about making the project bigger. It is about making the project easier to understand, change, and maintain. That matters in any codebase, even a student project.</p>',
 JSON_ARRAY('full-stack', 'architecture', 'backend', 'frontend'),
-'2026-04-22 09:10:00');
+'2026-04-22 09:10:00'),
+
+(17, 4, 'Cursor Pagination for Infinite Scroll Feeds',
+'<img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80" alt="Code review on a laptop" />
+<p>Cursor pagination keeps feed requests stable as new records are added. Instead of relying on page numbers, the client asks for the next batch after the last item it already has.</p>
+<p>This sample row helps verify that the next cursor continues from the correct point when the list grows beyond the first page.</p>',
+JSON_ARRAY('pagination', 'cursor', 'feed', 'api'),
+'2026-04-22 09:20:00'),
+
+(18, 5, 'Designing Notification Lists That Stay Useful',
+'<img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80" alt="Notifications on a screen" />
+<p>A notification list works best when it stays readable and avoids unnecessary repetition. The cursor test is easier when there are enough rows to move past the first page and fetch a second one.</p>
+<p>Use this row to verify that older notifications still appear in the correct order after the first batch is loaded.</p>',
+JSON_ARRAY('notifications', 'ux', 'cursor', 'api'),
+'2026-04-22 09:25:00'),
+
+(19, 6, 'Bookmark Lists That Need Pagination',
+'<img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80" alt="Laptop with code" />
+<p>Saved posts often grow faster than a user expects, so bookmark lists need the same cursor behavior as feeds. This entry helps confirm that the load-more flow keeps working once the first page is full.</p>
+<p>It is useful for checking that the next cursor advances when the list contains more items than the initial limit.</p>',
+JSON_ARRAY('bookmarks', 'pagination', 'saved', 'cursor'),
+'2026-04-22 09:30:00'),
+
+(20, 4, 'Testing Cursor Based Lists with Seed Data',
+'<img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80" alt="Developer workspace" />
+<p>Seed data is most helpful when it is large enough to force edge cases. A list with only a few rows does not tell you much about cursor pagination.</p>
+<p>This row gives the bookmark page another item beyond the first ten so the second request can be verified in the UI.</p>',
+JSON_ARRAY('testing', 'seed', 'pagination', 'ui'),
+'2026-04-22 09:35:00'),
+
+(21, 5, 'Avoiding Noisy Notification Feeds',
+'<img src="https://images.unsplash.com/photo-1526378722484-bd91ca387e72?auto=format&fit=crop&w=1200&q=80" alt="Planning board" />
+<p>Notification feeds become much easier to test once they include more than one screenful of rows. That makes it possible to check whether the cursor points to the correct last record.</p>
+<p>This extra post is here so the notification samples can extend well beyond the default first load size.</p>',
+JSON_ARRAY('notifications', 'feed', 'cursor', 'testing'),
+'2026-04-22 09:40:00'),
+
+(22, 6, 'Making Saved Content Lists Easy to Browse',
+'<img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80" alt="Coding environment" />
+<p>Saved content lists should be predictable when the user returns later. A cursor test is more reliable when there are enough items to span two pages.</p>
+<p>This final post gives the bookmark dataset enough variety to load a second page with the next cursor.</p>',
+JSON_ARRAY('bookmarks', 'saved', 'ux', 'pagination'),
+'2026-04-22 09:45:00'),
+
+(23, 3, 'Building Reusable UI Components in a Forum App',
+'<img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80" alt="Reusable UI components" />
+<p>Reusable UI components help keep a forum codebase consistent as the number of screens grows. Buttons, cards, modals, and list rows can all share the same structure while still adapting to each page.</p>
+<p>Once a component is used in multiple places, even a small improvement can have a big impact on maintainability.</p>',
+JSON_ARRAY('react', 'ui', 'components', 'frontend'),
+'2026-04-22 09:50:00'),
+
+(24, 3, 'Writing Better API Responses for Cleaner Frontends',
+'<img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80" alt="API response design" />
+<p>Clear API responses make frontend code easier to read and easier to maintain. When the shape of the payload stays predictable, the UI can focus on rendering instead of defensive checks.</p>
+<p>That is especially useful in a forum app where lists, feeds, and detail pages all depend on consistent response data.</p>',
+JSON_ARRAY('api', 'backend', 'json', 'frontend'),
+'2026-04-22 10:00:00'),
+
+(25, 3, 'Managing Content Growth in a Forum Database',
+'<img src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=1200&q=80" alt="Database tables and growth" />
+<p>As a forum grows, the database starts carrying more responsibility. Posts, comments, votes, bookmarks, and notifications all add up, so it helps to keep the schema simple and the relationships clear.</p>
+<p>Good structure early on makes later changes much less painful.</p>',
+JSON_ARRAY('database', 'schema', 'sql', 'scaling'),
+'2026-04-22 10:10:00'),
+
+(26, 3, 'Keeping User Interactions Fast and Predictable',
+'<img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=1200&q=80" alt="Fast user interactions" />
+<p>Fast user interactions matter because people expect a forum to respond immediately. Small optimizations in fetch logic, pagination, and feedback states make the app feel much smoother.</p>
+<p>Even a simple loading state can make a screen feel more intentional.</p>',
+JSON_ARRAY('ux', 'performance', 'pagination', 'frontend'),
+'2026-04-22 10:20:00');
 
 -- =========================
 -- COMMENTS DATA
@@ -197,7 +268,27 @@ INSERT INTO comments (id, post_id, user_id, parent_id, content, created_at) VALU
 (36, 13, 5, NULL, 'Indexes make a huge difference once the table grows. Great explanation of the tradeoff between reads and writes.', '2026-04-22 09:25:00'),
 (37, 14, 3, NULL, 'The Vite proxy section is practical. It is one of those settings that removes a lot of development friction.', '2026-04-22 09:30:00'),
 (38, 15, 6, NULL, 'The cleanup reminder is important. Upload features always need a deletion strategy too.', '2026-04-22 09:35:00'),
-(39, 16, 4, NULL, 'This is a good summary of full-stack project structure. Separation of concerns really makes debugging easier.', '2026-04-22 09:40:00');
+(39, 16, 4, NULL, 'This is a good summary of full-stack project structure. Separation of concerns really makes debugging easier.', '2026-04-22 09:40:00'),
+(40, 9, 4, NULL, 'Good example for testing cursor pagination on the feed.', '2026-04-22 09:20:00'),
+(41, 13, 5, NULL, 'This post works well as a second page sample in the feed.', '2026-04-22 09:25:00'),
+(42, 9, 6, NULL, 'Helpful when checking that newer notifications appear first.', '2026-04-22 09:30:00'),
+(43, 13, 4, NULL, 'The cursor flow is easier to verify with extra rows like this.', '2026-04-22 09:35:00'),
+(44, 9, 5, NULL, 'Adding more seed data makes pagination bugs easier to catch.', '2026-04-22 09:40:00'),
+(45, 10, 4, 33, 'Nice reference point for reply notifications.', '2026-04-22 09:45:00'),
+(46, 10, 5, 33, 'This should create another notification for the same comment.', '2026-04-22 09:50:00'),
+(47, 10, 6, 33, 'Good for testing repeated reply activity.', '2026-04-22 09:55:00'),
+(48, 23, 4, NULL, 'Nice example of a reusable component focused post.', '2026-04-22 10:05:00'),
+(49, 23, 5, 48, 'This reply makes a good nested comment sample.', '2026-04-22 10:08:00'),
+(50, 24, 6, NULL, 'Clear API responses make the frontend much easier to maintain.', '2026-04-22 10:12:00'),
+(51, 24, 4, 50, 'Agree. Consistent payload shapes save a lot of time.', '2026-04-22 10:16:00'),
+(52, 25, 5, NULL, 'The database structure section is useful for a growing forum.', '2026-04-22 10:20:00'),
+(53, 25, 6, 52, 'A clean schema matters once the app has more traffic.', '2026-04-22 10:24:00'),
+(54, 26, 4, NULL, 'Good reminder that UI feedback changes how a product feels.', '2026-04-22 10:28:00'),
+(55, 17, 5, NULL, 'Cursor pagination is a solid choice for long feeds.', '2026-04-22 10:32:00'),
+(56, 18, 6, NULL, 'Notification lists get messy fast without a clear structure.', '2026-04-22 10:36:00'),
+(57, 19, 4, NULL, 'Bookmarks are one of the easiest places to test load-more behavior.', '2026-04-22 10:40:00'),
+(58, 20, 5, NULL, 'Seed data like this is great for catching edge cases.', '2026-04-22 10:44:00'),
+(59, 21, 6, NULL, 'Adding more rows makes pagination behavior easier to trust.', '2026-04-22 10:48:00');
 
 -- =========================
 -- FOLLOWERS DATA
@@ -235,6 +326,17 @@ INSERT INTO bookmarks (user_id, post_id, created_at) VALUES
 (3, 10, '2026-04-22 08:15:00'),
 (3, 13, '2026-04-22 08:45:00'),
 (3, 15, '2026-04-22 09:05:00'),
+(3, 9, '2026-04-22 09:15:00'),
+(3, 11, '2026-04-22 09:20:00'),
+(3, 12, '2026-04-22 09:25:00'),
+(3, 14, '2026-04-22 09:30:00'),
+(3, 16, '2026-04-22 09:35:00'),
+(3, 17, '2026-04-22 09:40:00'),
+(3, 18, '2026-04-22 09:45:00'),
+(3, 19, '2026-04-22 09:50:00'),
+(3, 20, '2026-04-22 09:55:00'),
+(3, 21, '2026-04-22 10:00:00'),
+(3, 22, '2026-04-22 10:05:00'),
 (4, 9, '2026-04-22 08:08:00'),
 (4, 14, '2026-04-22 08:55:00'),
 (5, 12, '2026-04-22 08:35:00'),
@@ -251,4 +353,22 @@ INSERT INTO notifications (id, user_id, actor_user_id, type, post_id, comment_id
 (3, 3, 4, 'comment', 9, 31, 'commented on your post', 0, '2026-04-22 09:00:00'),
 (4, 4, 5, 'comment', 10, 33, 'commented on your post', 0, '2026-04-22 09:10:00'),
 (5, 5, 6, 'comment', 11, 34, 'commented on your post', 1, '2026-04-22 09:15:00'),
-(6, 4, 5, 'comment_reply', 9, 32, 'replied to your comment', 0, '2026-04-22 09:05:00');
+(6, 4, 5, 'comment_reply', 9, 32, 'replied to your comment', 0, '2026-04-22 09:05:00'),
+(7, 3, 4, 'comment', 9, 40, 'commented on your post', 0, '2026-04-22 09:20:00'),
+(8, 3, 5, 'comment', 13, 41, 'commented on your post', 1, '2026-04-22 09:25:00'),
+(9, 3, 6, 'comment', 9, 42, 'commented on your post', 0, '2026-04-22 09:30:00'),
+(10, 3, 4, 'comment', 13, 43, 'commented on your post', 0, '2026-04-22 09:35:00'),
+(11, 3, 5, 'comment', 9, 44, 'commented on your post', 1, '2026-04-22 09:40:00'),
+(12, 3, 4, 'comment_reply', 10, 45, 'replied to your comment', 0, '2026-04-22 09:45:00'),
+(13, 3, 5, 'comment_reply', 10, 46, 'replied to your comment', 0, '2026-04-22 09:50:00'),
+(14, 3, 6, 'comment_reply', 10, 47, 'replied to your comment', 1, '2026-04-22 09:55:00'),
+(15, 3, 4, 'follow', NULL, NULL, 'started following you', 0, '2026-04-22 10:00:00'),
+(16, 3, 5, 'comment', 9, 40, 'commented on your post', 0, '2026-04-22 10:05:00'),
+(17, 3, 6, 'comment_reply', 10, 45, 'replied to your comment', 1, '2026-04-22 10:10:00'),
+(18, 3, 4, 'comment', 13, 41, 'commented on your post', 0, '2026-04-22 10:15:00'),
+(19, 3, 5, 'follow', NULL, NULL, 'started following you', 1, '2026-04-22 10:20:00'),
+(20, 3, 6, 'comment_reply', 10, 46, 'replied to your comment', 0, '2026-04-22 10:25:00'),
+(21, 3, 4, 'comment', 9, 42, 'commented on your post', 0, '2026-04-22 10:30:00'),
+(22, 3, 5, 'comment', 13, 43, 'commented on your post', 1, '2026-04-22 10:35:00'),
+(23, 3, 6, 'follow', NULL, NULL, 'started following you', 0, '2026-04-22 10:40:00'),
+(24, 3, 4, 'comment_reply', 10, 47, 'replied to your comment', 0, '2026-04-22 10:45:00');

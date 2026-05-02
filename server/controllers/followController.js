@@ -1,6 +1,18 @@
 import pool from "../config/db.js";
 import { createNotification } from "../utils/notifications.js";
 
+const requireOwnFollowListAccess = (req, res, userId) => {
+  const viewerId = Number(req.user?.id);
+  const targetUserId = Number(userId);
+
+  if (!Number.isInteger(viewerId) || !Number.isInteger(targetUserId) || viewerId !== targetUserId) {
+    res.status(403).json({ error: "You can only view your own followers and following" });
+    return null;
+  }
+
+  return targetUserId;
+};
+
 export const followUser = async (req, res) => {
   const { followerId, followingId } = req.validated.body;
 
@@ -91,7 +103,11 @@ export const isFollowing = async (req, res) => {
 };
 
 export const getFollowingUsers = async (req, res) => {
-  const { userId } = req.validated.params;
+  const userId = requireOwnFollowListAccess(req, res, req.validated.params.userId);
+
+  if (userId === null) {
+    return;
+  }
 
   try {
     const [rows] = await pool.execute(
@@ -101,6 +117,7 @@ export const getFollowingUsers = async (req, res) => {
           u.username,
           u.fullname,
           u.avatar,
+          MAX(f.created_at) AS followed_at,
           COUNT(p.id) AS newPosts
       FROM followers f
       JOIN users u 
@@ -110,6 +127,7 @@ export const getFollowingUsers = async (req, res) => {
           AND p.created_at > COALESCE(f.last_seen, '1970-01-01')
       WHERE f.follower_id = ?
       GROUP BY u.id, u.username, u.fullname, u.avatar
+      ORDER BY followed_at DESC, u.id DESC
       `,
       [userId]
     );
@@ -117,6 +135,38 @@ export const getFollowingUsers = async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error("Get following users error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const getFollowersUsers = async (req, res) => {
+  const userId = requireOwnFollowListAccess(req, res, req.validated.params.userId);
+
+  if (userId === null) {
+    return;
+  }
+
+  try {
+    const [rows] = await pool.execute(
+      `
+        SELECT
+          u.id,
+          u.username,
+          u.fullname,
+          u.avatar,
+          f.created_at AS followed_at
+      FROM followers f
+        JOIN users u
+          ON f.follower_id = u.id
+      WHERE f.following_id = ?
+      ORDER BY f.created_at DESC, u.id DESC
+      `,
+      [userId]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Get followers users error:", err);
     res.status(500).json({ error: "Server error" });
   }
 };
