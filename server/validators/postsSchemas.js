@@ -29,6 +29,8 @@ export const postsListSchema = z.object({
 export const searchSchema = z.object({
   query: z.object({
     q: z.string().trim().max(200).optional().default(""),
+    sortBy: z.enum(["date", "upvotes"]).optional().default("date"),
+    sortDir: z.enum(["asc", "desc"]).optional().default("desc"),
   }),
 });
 

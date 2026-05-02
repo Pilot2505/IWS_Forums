@@ -14,13 +14,18 @@ export default function Bookmarks() {
 
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
     const fetchBookmarks = async () => {
       setLoading(true);
       try {
-        const data = await getBookmarks();
-        setBookmarks(data);
+        const data = await getBookmarks({ limit: 10 });
+        setBookmarks(data.bookmarks || []);
+        setCursor(data.nextCursor ?? null);
+        setHasMore(Boolean(data.hasMore));
       } catch (err) {
         console.error(err);
       } finally {
@@ -30,6 +35,22 @@ export default function Bookmarks() {
 
     fetchBookmarks();
   }, []);
+
+  const handleLoadMore = async () => {
+    if (!cursor || loadingMore) return;
+
+    setLoadingMore(true);
+    try {
+      const data = await getBookmarks({ limit: 10, cursor });
+      setBookmarks((prev) => [...prev, ...(data.bookmarks || [])]);
+      setCursor(data.nextCursor ?? null);
+      setHasMore(Boolean(data.hasMore));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   if (!ready || !user) {
     return null;
@@ -93,6 +114,19 @@ export default function Bookmarks() {
                 </div>
               </PostCard>
             ))}
+          </div>
+        )}
+
+        {hasMore && bookmarks.length > 0 && (
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="rounded-md bg-[#1E56A0] px-6 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {loadingMore ? "Loading..." : "Load More"}
+            </button>
           </div>
         )}
       </main>

@@ -1,7 +1,10 @@
 import express from "express";
 import auth from "../middlewares/authMiddleware.js";
 import { validate } from "../middlewares/validate.js";
-import { notificationIdParamsSchema } from "../validators/notificationsSchemas.js";
+import {
+  notificationIdParamsSchema,
+  notificationsListSchema,
+} from "../validators/notificationsSchemas.js";
 import {
   getNotifications,
   markNotificationRead,
@@ -10,7 +13,7 @@ import {
 
 const router = express.Router();
 
-router.get("/", auth, getNotifications);
+router.get("/", auth, validate(notificationsListSchema), getNotifications);
 router.put("/read-all", auth, markAllNotificationsRead);
 router.put("/:id/read", auth, validate(notificationIdParamsSchema), markNotificationRead);
 
