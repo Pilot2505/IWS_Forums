@@ -38,6 +38,7 @@ export default function Home() {
   const [isRecommended, setIsRecommended] = useState(false);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export default function Home() {
         const hasCategories = Array.isArray(cats) && cats.length > 0;
         const params = new URLSearchParams({
           limit: "5",
-          sortBy: "date",
+          sortBy,
           sortDir,
         });
 
@@ -93,7 +94,7 @@ export default function Home() {
     setCursor(null);
     setHasMore(false);
     fetchPosts();
-  }, [user, sortDir]);
+  }, [user, sortBy, sortDir]);
 
   const handleLoadMore = async () => {
     if (!cursor || loadingMore) return;
@@ -105,7 +106,7 @@ export default function Home() {
       const hasCategories = Array.isArray(cats) && cats.length > 0;
       const params = new URLSearchParams({
         limit: "5",
-        sortBy: "date",
+        sortBy,
         sortDir,
         cursor,
       });
@@ -174,6 +175,11 @@ export default function Home() {
     );
   };
 
+  const handleSortChange = (nextSortBy, nextSortDir) => {
+    setSortBy(nextSortBy);
+    setSortDir(nextSortDir);
+  };
+
   if (!ready || !user) return null;
 
   // Lấy label categories để hiển thị
@@ -232,16 +238,42 @@ export default function Home() {
               </p>
             )}
 
-            <div className="mt-4 flex flex-col gap-2 rounded-lg border border-[#1E56A0]/10 bg-[#F6F9FC] p-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mt-4 flex flex-col gap-3 rounded-lg border border-[#1E56A0]/10 bg-[#F6F9FC] p-4 sm:flex-row sm:items-end sm:justify-between">
               <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
-                Sort by date
+                Sort by
                 <select
-                  value={sortDir}
-                  onChange={(e) => setSortDir(e.target.value)}
+                  value={sortBy}
+                  onChange={(e) =>
+                    handleSortChange(
+                      e.target.value,
+                      e.target.value === "upvotes" ? sortDir : "desc"
+                    )
+                  }
                   className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
                 >
-                  <option value="desc">Newest first</option>
-                  <option value="asc">Oldest first</option>
+                  <option value="date">Date</option>
+                  <option value="upvotes">Upvotes</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
+                Order
+                <select
+                  value={sortDir}
+                  onChange={(e) => handleSortChange(sortBy, e.target.value)}
+                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
+                >
+                  {sortBy === "date" ? (
+                    <>
+                      <option value="desc">Newest first</option>
+                      <option value="asc">Oldest first</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="desc">Most upvotes</option>
+                      <option value="asc">Least upvotes</option>
+                    </>
+                  )}
                 </select>
               </label>
             </div>
