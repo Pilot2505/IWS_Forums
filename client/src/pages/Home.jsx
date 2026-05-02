@@ -44,7 +44,7 @@ export default function Home() {
   useEffect(() => {
     if (!user) return;
     
-    authFetch(`/api/follow/${user.id}`)
+    authFetch(`/api/follow/following/${user.id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch following");
         return res.json();

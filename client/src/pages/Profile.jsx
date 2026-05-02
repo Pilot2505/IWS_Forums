@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
-import { User, X, Trash2 } from "lucide-react";
+import { Search, User, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { updatePost, deletePost } from "../services/postService";
 import Navbar from "../components/navigation/Navbar";
@@ -35,6 +35,12 @@ export default function Profile() {
 
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [followersList, setFollowersList] = useState([]);
+  const [followingList, setFollowingList] = useState([]);
+  const [connectionsLoading, setConnectionsLoading] = useState(false);
+  const [connectionsError, setConnectionsError] = useState("");
+  const [activeConnectionsView, setActiveConnectionsView] = useState(null);
+  const [connectionsQuery, setConnectionsQuery] = useState("");
 
   const [editingPost, setEditingPost] = useState(null);
   const [editTitle, setEditTitle] = useState("");
@@ -82,6 +88,73 @@ export default function Profile() {
 
     fetchFollowCounts();
   }, [targetUserId]);
+
+  useEffect(() => {
+    if (!isOwnProfile || !targetUserId) {
+      setFollowersList([]);
+      setFollowingList([]);
+      setConnectionsError("");
+      setConnectionsLoading(false);
+      setActiveConnectionsView(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    const fetchFollowLists = async () => {
+      setConnectionsLoading(true);
+      setConnectionsError("");
+
+      try {
+        const [followersRes, followingRes] = await Promise.all([
+          authFetch(`/api/follow/followers/${targetUserId}`),
+          authFetch(`/api/follow/following/${targetUserId}`),
+        ]);
+
+        if (!followersRes.ok) {
+          throw new Error("Failed to fetch followers");
+        }
+
+        if (!followingRes.ok) {
+          throw new Error("Failed to fetch following");
+        }
+
+        const [followersData, followingData] = await Promise.all([
+          followersRes.json(),
+          followingRes.json(),
+        ]);
+
+        if (cancelled) return;
+
+        setFollowersList(followersData || []);
+        setFollowingList(followingData || []);
+      } catch (err) {
+        if (cancelled) return;
+
+        console.error("Error loading follow lists:", err);
+        setConnectionsError("Unable to load your followers and following right now.");
+      } finally {
+        if (!cancelled) {
+          setConnectionsLoading(false);
+        }
+      }
+    };
+
+    fetchFollowLists();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOwnProfile, targetUserId]);
+
+  useEffect(() => {
+    if (!activeConnectionsView) {
+      setConnectionsQuery("");
+      return;
+    }
+
+    setConnectionsQuery("");
+  }, [activeConnectionsView]);
 
   useEffect(() => {
     if (!effectiveUsername) return;
@@ -363,6 +436,61 @@ export default function Profile() {
     setEditorLoaded(false);
   };
 
+  const closeConnectionsPanel = () => {
+      setConnectionsQuery("");
+    setActiveConnectionsView(null);
+  };
+
+  const selectedConnectionsLabel =
+    activeConnectionsView === "followers"
+      ? "Followers"
+      : activeConnectionsView === "following"
+        ? "Following"
+        : null;
+
+  const selectedConnectionsList =
+    activeConnectionsView === "followers"
+      ? followersList
+      : activeConnectionsView === "following"
+        ? followingList
+        : [];
+
+  const normalizedConnectionsQuery = connectionsQuery.trim().toLowerCase();
+  const visibleConnectionsList = normalizedConnectionsQuery
+    ? selectedConnectionsList.filter((person) => {
+        const haystack = `${person.fullname || ""} ${person.username || ""}`.toLowerCase();
+        return haystack.includes(normalizedConnectionsQuery);
+      })
+    : selectedConnectionsList;
+
+  const renderConnectionUser = (person, showNewPosts = false) => (
+    <Link
+      to={`/profile/${encodeURIComponent(person.username)}`}
+      className="flex w-full items-center gap-3 rounded-2xl px-1 py-3 transition-colors hover:bg-gray-50"
+    >
+      <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-[#1E56A0]/10 text-[#1E56A0]">
+        {person.avatar ? (
+          <img src={person.avatar} alt={person.username} className="h-full w-full object-cover" />
+        ) : (
+          <User className="h-5 w-5" />
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-semibold text-[#0C245E]">
+          {person.fullname || person.username}
+        </div>
+        <div className="truncate text-xs text-gray-500">@{person.username}</div>
+      </div>
+
+      {showNewPosts && Number(person.newPosts) > 0 && (
+        <span className="shrink-0 rounded-full bg-[#1E56A0]/10 px-2.5 py-1 text-xs font-medium text-[#1E56A0]">
+          {person.newPosts} new
+        </span>
+      )}
+    </Link>
+  );
+
   if (!ready || !user) return null;
   
   const displayUser = isOwnProfile ? profileUser || user : profileUser;
@@ -400,14 +528,32 @@ export default function Profile() {
                     <div className="text-2xl font-semibold">{postsCount}</div>
                     <div className="text-sm text-gray-700">Posts</div>
                   </div>
-                  <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setActiveConnectionsView("followers")}
+                    aria-pressed={activeConnectionsView === "followers"}
+                    className={`text-center transition-colors ${
+                      activeConnectionsView === "followers"
+                        ? "rounded-2xl border border-[#1E56A0]/25 bg-[#1E56A0]/5 px-3 py-2 shadow-sm"
+                        : "rounded-2xl px-3 py-2 hover:bg-white/60"
+                    }`}
+                  >
                     <div className="text-2xl font-semibold">{followersCount}</div>
                     <div className="text-sm text-gray-700">Followers</div>
-                  </div>
-                  <div className="text-center">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveConnectionsView("following")}
+                    aria-pressed={activeConnectionsView === "following"}
+                    className={`text-center transition-colors ${
+                      activeConnectionsView === "following"
+                        ? "rounded-2xl border border-[#1E56A0]/25 bg-[#1E56A0]/5 px-3 py-2 shadow-sm"
+                        : "rounded-2xl px-3 py-2 hover:bg-white/60"
+                    }`}
+                  >
                     <div className="text-2xl font-semibold">{followingCount}</div>
                     <div className="text-sm text-gray-700">Following</div>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -432,6 +578,116 @@ export default function Profile() {
             {displayUser?.bio || "No bio yet"}
           </p>
         </div>
+
+        {isOwnProfile && activeConnectionsView && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <div
+              className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm"
+              onClick={closeConnectionsPanel}
+              aria-hidden="true"
+            />
+
+            <aside className="relative z-10 flex h-full w-full max-w-xl flex-col border-l border-gray-200 bg-white shadow-2xl">
+              <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-5 sm:px-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E56A0]">
+                    Connections panel
+                  </p>
+                  <h2 className="mt-1 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
+                    {selectedConnectionsLabel}
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-500">Only you can see these lists.</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeConnectionsPanel}
+                  className="rounded-full border border-gray-200 bg-white p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  aria-label="Close connections panel"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="border-b border-gray-200 px-5 py-4 sm:px-6">
+                <div className="grid grid-cols-2 gap-3 rounded-2xl bg-[#F7F9FC] p-1">
+                  <button
+                    type="button"
+                    onClick={() => setActiveConnectionsView("followers")}
+                    className={`rounded-xl px-4 py-3 text-left transition-colors ${
+                      activeConnectionsView === "followers"
+                        ? "bg-white shadow-sm"
+                        : "text-gray-600 hover:bg-white/70"
+                    }`}
+                  >
+                    <div className="text-sm font-semibold text-[#0C245E]">Followers</div>
+                    <div className="text-xs text-gray-500">{followersCount} total</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveConnectionsView("following")}
+                    className={`rounded-xl px-4 py-3 text-left transition-colors ${
+                      activeConnectionsView === "following"
+                        ? "bg-white shadow-sm"
+                        : "text-gray-600 hover:bg-white/70"
+                    }`}
+                  >
+                    <div className="text-sm font-semibold text-[#0C245E]">Following</div>
+                    <div className="text-xs text-gray-500">{followingCount} total</div>
+                  </button>
+                </div>
+
+                <label className="mt-4 flex items-center gap-3 rounded-2xl bg-[#F7F9FC] px-4 py-3 text-sm text-gray-500">
+                  <Search className="h-4 w-4 shrink-0 text-gray-400" />
+                  <input
+                    type="text"
+                    value={connectionsQuery}
+                    onChange={(e) => setConnectionsQuery(e.target.value)}
+                    placeholder={`Search ${selectedConnectionsLabel?.toLowerCase() || "connections"}`}
+                    className="w-full bg-transparent text-sm text-[#0C245E] outline-none placeholder:text-gray-400"
+                  />
+                </label>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+                {connectionsError ? (
+                  <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {connectionsError}
+                  </div>
+                ) : connectionsLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((item) => (
+                      <div key={item} className="animate-pulse rounded-xl border border-gray-200 bg-white px-3 py-2">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-gray-200" />
+                          <div className="flex-1 space-y-2">
+                            <div className="h-3 w-1/2 rounded bg-gray-200" />
+                            <div className="h-3 w-1/3 rounded bg-gray-200" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : selectedConnectionsList.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-gray-300 bg-[#F7F9FC] px-4 py-8 text-sm text-gray-500">
+                    {normalizedConnectionsQuery
+                      ? "No results found."
+                      : activeConnectionsView === "followers"
+                        ? "No one is following you yet."
+                        : "You are not following anyone yet."}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {visibleConnectionsList.map((person) => (
+                      <div key={person.id}>{renderConnectionUser(person, activeConnectionsView === "following")}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </aside>
+          </div>
+        )}
 
         <div className="rounded-b-lg bg-white p-5 sm:p-6 lg:p-8">
           <h2 className="mb-6 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
