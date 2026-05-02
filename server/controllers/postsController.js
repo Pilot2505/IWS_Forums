@@ -191,7 +191,7 @@ export const getPosts = async (req, res) => {
 };
 
 export const searchPosts = async (req, res) => {
-  const { q } = req.validated.query;
+  const { q, sortBy, sortDir } = req.validated.query;
 
   try {
     if (!q.trim()) {
@@ -199,8 +199,9 @@ export const searchPosts = async (req, res) => {
     }
 
     const keyword = `%${q.trim()}%`;
+    const orderByClause = getOrderByClause(sortBy, sortDir);
 
-    const [rows] = await pool.execute(
+    const [rows] = await pool.query(
       `
       SELECT ${postSelectFields}
       FROM posts
@@ -208,7 +209,7 @@ export const searchPosts = async (req, res) => {
       ${voteJoinClause}
       ${bookmarkJoinClause}
       WHERE posts.title LIKE ? OR posts.content LIKE ? OR CAST(posts.tags AS CHAR) LIKE ?
-      ORDER BY posts.created_at DESC
+      ORDER BY ${orderByClause}
       LIMIT 50
       `,
       [req.user.id, req.user.id, keyword, keyword, keyword]

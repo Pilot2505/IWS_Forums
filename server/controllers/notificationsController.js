@@ -1,7 +1,25 @@
 import pool from "../config/db.js";
 import { parseNotificationRow } from "../utils/notifications.js";
 
-const buildNotificationsQuery = (unreadOnly, limit) => {
+const decodeCursor = (cursor) => {
+  if (!cursor) return null;
+
+  try {
+    return JSON.parse(Buffer.from(cursor, "base64").toString("utf8"));
+  } catch {
+    return null;
+  }
+};
+
+const encodeCursor = (notification) =>
+  Buffer.from(
+    JSON.stringify({
+      createdAt: new Date(notification.created_at).toISOString(),
+      id: Number(notification.id),
+    })
+  ).toString("base64");
+
+const buildNotificationsQuery = (unreadOnly, cursorClause) => {
   const unreadClause = unreadOnly ? "AND n.is_read = 0" : "";
 
   return `
@@ -12,31 +30,66 @@ const buildNotificationsQuery = (unreadOnly, limit) => {
     LEFT JOIN posts ON n.post_id = posts.id
     WHERE n.user_id = ?
     ${unreadClause}
+    ${cursorClause}
     ORDER BY n.created_at DESC
-    LIMIT ${limit}
+    , n.id DESC
+    LIMIT ?
   `;
 };
 
 export const getNotifications = async (req, res) => {
   const userId = Number(req.user?.id);
-  const limit = Math.min(Math.max(Math.trunc(Number(req.query.limit) || 20), 1), 50);
-  const unreadOnly = String(req.query.unreadOnly || "false") === "true";
+  const { cursor, limit, unreadOnly } = req.validated.query;
 
   if (!Number.isInteger(userId)) {
     return res.status(401).json({ message: "Invalid user" });
   }
 
+  const decodedCursor = decodeCursor(cursor);
+  const parsedCreatedAt = decodedCursor?.createdAt ? new Date(decodedCursor.createdAt) : null;
+  const parsedId = Number(decodedCursor?.id);
+  const hasValidCursor =
+    parsedCreatedAt && !Number.isNaN(parsedCreatedAt.getTime()) && Number.isInteger(parsedId);
+
+  const cursorClause = hasValidCursor
+    ? `
+      AND (
+        n.created_at < ?
+        OR (
+          n.created_at = ?
+          AND n.id < ?
+        )
+      )
+    `
+    : "";
+
+  const cursorParams = hasValidCursor
+    ? [parsedCreatedAt, parsedCreatedAt, parsedId]
+    : [];
+
   try {
-    const [rows] = await pool.execute(buildNotificationsQuery(unreadOnly, limit), [userId]);
+    const [rows] = await pool.query(buildNotificationsQuery(unreadOnly, cursorClause), [
+      userId,
+      ...cursorParams,
+      Number(limit) + 1,
+    ]);
 
     const [countRows] = await pool.execute(
       "SELECT COUNT(*) AS unreadCount FROM notifications WHERE user_id = ? AND is_read = 0",
       [userId]
     );
 
+    const hasMore = rows.length > Number(limit);
+    const notifications = hasMore ? rows.slice(0, Number(limit)) : rows;
+
     res.json({
-      notifications: rows.map(parseNotificationRow),
+      notifications: notifications.map(parseNotificationRow),
       unreadCount: Number(countRows[0]?.unreadCount) || 0,
+      nextCursor:
+        hasMore && notifications.length > 0
+          ? encodeCursor(notifications[notifications.length - 1])
+          : null,
+      hasMore,
     });
   } catch (err) {
     console.error("Get notifications error:", err);

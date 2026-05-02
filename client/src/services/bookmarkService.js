@@ -12,8 +12,16 @@ export async function toggleBookmark(postId) {
   return res.json();
 }
 
-export async function getBookmarks() {
-  const res = await authFetch("/api/bookmarks");
+export async function getBookmarks({ limit = 10, cursor = null } = {}) {
+  const params = new URLSearchParams({
+    limit: String(limit),
+  });
+
+  if (cursor) {
+    params.set("cursor", cursor);
+  }
+
+  const res = await authFetch(`/api/bookmarks?${params.toString()}`);
 
   if (!res.ok) {
     throw new Error("Failed to load bookmarks");
