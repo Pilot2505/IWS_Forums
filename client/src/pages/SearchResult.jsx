@@ -31,7 +31,7 @@ export default function SearchResult() {
             q: query,
             sortBy,
             sortDir,
-          }).toString()}`
+          }).toString()}`,
         );
         if (!res.ok) throw new Error("Search failed");
         const data = await res.json();
@@ -60,47 +60,54 @@ export default function SearchResult() {
               vote_count: voteCount,
               current_user_vote: currentUserVote,
             }
-          : post
-      )
+          : post,
+      ),
     );
   };
 
   if (!ready || !user) return null;
 
   return (
-    <div className="min-h-screen bg-[#D6E4F0]">
+    <div className="min-h-screen bg-forum-bg">
       <Navbar user={user} setUser={setUser} showCreatePost={true} />
 
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-10">
-        <h2 className="mb-2 text-2xl font-semibold text-[#0C245E]">
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-10">
+        <h1 className="mb-3 text-4xl font-semibold tracking-tight text-forum-inkStrong sm:text-5xl">
           Search results for:{" "}
-          <span className="text-[#1E56A0]">&ldquo;{query}&rdquo;</span>
-        </h2>
+          <span className="text-forum-primary">&ldquo;{query}&rdquo;</span>
+        </h1>
 
-        <div className="mb-6 flex flex-col gap-3 rounded-lg border border-[#1E56A0]/10 bg-[#F6F9FC] p-4 sm:flex-row sm:items-end">
-          <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
+        {!loading && results.length > 0 && (
+          <p className="mb-6 text-lg text-forum-muted">
+            Found {results.length} result{results.length !== 1 ? "s" : ""}
+          </p>
+        )}
+
+        {/* Auto-styled: sorting controls are inferred because the Figma search screen only shows the result list state. */}
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label className="flex flex-col gap-2 text-sm font-medium text-forum-inkStrong">
             Sort by
             <select
               value={sortBy}
               onChange={(e) =>
                 handleSortChange(
                   e.target.value,
-                  e.target.value === "upvotes" ? sortDir : "desc"
+                  e.target.value === "upvotes" ? sortDir : "desc",
                 )
               }
-              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
+              className="h-12 rounded-2xl border border-forum-border bg-forum-surface px-4 text-sm text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15"
             >
               <option value="date">Date</option>
               <option value="upvotes">Upvotes</option>
             </select>
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
+          <label className="flex flex-col gap-2 text-sm font-medium text-forum-inkStrong">
             Order
             <select
               value={sortDir}
               onChange={(e) => handleSortChange(sortBy, e.target.value)}
-              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
+              className="h-12 rounded-2xl border border-forum-border bg-forum-surface px-4 text-sm text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15"
             >
               {sortBy === "date" ? (
                 <>
@@ -117,17 +124,11 @@ export default function SearchResult() {
           </label>
         </div>
 
-        {loading && <p className="mt-6 text-gray-500">Searching...</p>}
+        {loading && <p className="mt-6 text-forum-muted">Searching...</p>}
 
         {!loading && results.length === 0 && (
-          <p className="mt-6 text-gray-500">
+          <p className="mt-6 text-forum-muted">
             No posts found for &ldquo;{query}&rdquo;.
-          </p>
-        )}
-
-        {!loading && results.length > 0 && (
-          <p className="mb-6 text-sm text-gray-500">
-            Found {results.length} result{results.length !== 1 ? "s" : ""}
           </p>
         )}
 
@@ -141,7 +142,7 @@ export default function SearchResult() {
                   By{" "}
                   <Link
                     to={`/profile/${encodeURIComponent(post.username)}`}
-                    className="font-medium text-[#1E56A0] hover:underline"
+                    className="font-semibold text-forum-primary transition hover:text-forum-primaryDark"
                   >
                     {post.username}
                   </Link>
@@ -149,21 +150,23 @@ export default function SearchResult() {
               }
               meta={new Date(post.created_at).toLocaleString()}
               readMoreTo={`/post/${post.id}`}
-              className="border-b border-r border-black"
             >
-              <div className="mb-4 flex flex-wrap items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 <PostVoteControls
                   postId={post.id}
                   initialVoteCount={post.vote_count ?? 0}
                   initialCurrentUserVote={post.current_user_vote ?? 0}
                   onChange={handlePostVoteChange}
                 />
-                <BookmarkButton postId={post.id} initialBookmarked={Boolean(post.is_bookmarked)} />
+                <BookmarkButton
+                  postId={post.id}
+                  initialBookmarked={Boolean(post.is_bookmarked)}
+                />
               </div>
             </PostCard>
           ))}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Search Results - Tech Pulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffddb4",
+                        "surface-bright": "#f8f9fa",
+                        "on-secondary-container": "#485e7e",
+                        "on-primary-fixed-variant": "#004883",
+                        "tertiary-fixed-dim": "#ffb953",
+                        "surface-tint": "#0060ac",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c1c7d3",
+                        "on-surface-variant": "#414751",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-variant": "#e1e3e4",
+                        "secondary-container": "#c1d9fe",
+                        "inverse-on-surface": "#f0f1f2",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "on-surface": "#191c1d",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#291800",
+                        "surface-dim": "#d9dadb",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#d4e3ff",
+                        "inverse-primary": "#a4c9ff",
+                        "surface": "#f8f9fa",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#fdfcff",
+                        "on-primary-fixed": "#001c39",
+                        "background": "#f8f9fa",
+                        "tertiary-container": "#a06900",
+                        "tertiary": "#7f5300",
+                        "primary-container": "#2976c7",
+                        "on-background": "#191c1d",
+                        "on-secondary-fixed": "#001c39",
+                        "surface-container-highest": "#e1e3e4",
+                        "secondary": "#496080",
+                        "primary": "#005da7",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#314867",
+                        "inverse-surface": "#2e3132",
+                        "error": "#ba1a1a",
+                        "outline": "#717783",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-fixed-dim": "#b1c8ed",
+                        "on-tertiary-fixed-variant": "#633f00",
+                        "primary-fixed": "#d4e3ff",
+                        "surface-container": "#edeeef",
+                        "surface-container-high": "#e7e8e9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "xs": "4px",
+                        "base": "8px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen font-body-lg text-body-lg">
+<!-- TopAppBar Component (from JSON constraints) -->
+<header class="bg-surface-container-lowest shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-lg py-sm max-w-7xl mx-auto h-[64px]">
+<!-- Brand -->
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-[28px]" data-icon="terminal">terminal</span>
+<span class="font-headline-md text-headline-md text-primary tracking-tight">Tech Pulse</span>
+</div>
+<!-- Search & Actions -->
+<div class="flex items-center gap-md">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" data-icon="search">search</span>
+<input class="pl-xl pr-sm py-xs border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary w-[300px] font-body-lg text-body-lg" placeholder="Search" type="text" value="java"/>
+</div>
+<button class="hidden md:flex items-center text-primary hover:bg-surface-container rounded-lg px-sm py-xs transition-colors duration-200">
+<span class="font-label-md text-label-md">Create Post</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold overflow-hidden">
+<img alt="Profile Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a person looking directly at the camera. The lighting is bright and clean, reflecting a modern, corporate aesthetic. The background is a soft, out-of-focus neutral tone. The individual conveys confidence and approachability, aligning with the reliable and professional brand personality of a tech forum." src="https://lh3.googleusercontent.com/aida/ADBb0uismdaErg7rlHpBCtUTYktIN_5RsNoSCpyoWo16PaI8o8gFkXee3U1aHN-524lyTUamkIFFAV_unQ8wkWJ6a5jjYf4IpJqrTYIgPwAxzERnxAI3wPdnfd1ZTxW_FCaTwDw0pMm0BdZL-Yz9p-f13cNppQcr9lqdsYaz9P-kxc5UQuAOC4o6bfOAZ9cRMQoKv0G5yXn-YK1BR1d9eZXzguTpXvg7SDj6ZN1xLmgtX2OA8Lplzy9BbnDVnRY60JHXug37iuONa_fS"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-lg py-xl">
+<!-- Search Header -->
+<div class="mb-lg">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Search results for: “java”</h1>
+<p class="text-on-surface-variant text-[14px]">Found 2 results</p>
+</div>
+<!-- Results List -->
+<div class="flex flex-col gap-md">
+<!-- Result Card 1 -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col gap-sm">
+<h2 class="font-headline-md text-[20px] leading-[28px] font-semibold text-primary hover:underline cursor-pointer">Java 21 Virtual Threads vs Node.js Event Loop</h2>
+<div class="flex items-center gap-xs text-on-surface-variant text-[14px]">
+<span class="font-medium text-on-surface">Alex Dev</span>
+<span>•</span>
+<span>Oct 24, 2023</span>
+</div>
+<div class="flex gap-xs flex-wrap mt-xs">
+<span class="px-xs py-[2px] bg-secondary-container text-on-secondary-container rounded font-label-md text-[12px]">Java</span>
+<span class="px-xs py-[2px] bg-secondary-container text-on-secondary-container rounded font-label-md text-[12px]">Performance</span>
+<span class="px-xs py-[2px] bg-secondary-container text-on-secondary-container rounded font-label-md text-[12px]">Backend</span>
+</div>
+<p class="text-on-surface-variant mt-xs line-clamp-2">
+                    An in-depth comparison of highly concurrent workloads using Java's new Virtual Threads (Project Loom) compared to the traditional Node.js single-threaded event loop architecture. We benchmark typical IO-bound tasks and discuss the implications for microservice design.
+                </p>
+<div class="mt-sm">
+<a class="text-primary font-label-md text-label-md hover:underline inline-flex items-center gap-xs" href="#">
+                        Read More <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</article>
+<!-- Result Card 2 -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col gap-sm">
+<h2 class="font-headline-md text-[20px] leading-[28px] font-semibold text-primary hover:underline cursor-pointer">Migrating from Java 11 to 17: Lessons Learned</h2>
+<div class="flex items-center gap-xs text-on-surface-variant text-[14px]">
+<span class="font-medium text-on-surface">Sarah Coder</span>
+<span>•</span>
+<span>Sep 15, 2023</span>
+</div>
+<div class="flex gap-xs flex-wrap mt-xs">
+<span class="px-xs py-[2px] bg-secondary-container text-on-secondary-container rounded font-label-md text-[12px]">Java</span>
+<span class="px-xs py-[2px] bg-secondary-container text-on-secondary-container rounded font-label-md text-[12px]">Migration</span>
+<span class="px-xs py-[2px] bg-secondary-container text-on-secondary-container rounded font-label-md text-[12px]">Spring Boot</span>
+</div>
+<p class="text-on-surface-variant mt-xs line-clamp-2">
+                    A practical guide on moving large enterprise applications from Java 11 to the latest LTS release, Java 17. Covering common pitfalls, changes in the module system, and taking advantage of new language features like records and switch expressions.
+                </p>
+<div class="mt-sm">
+<a class="text-primary font-label-md text-label-md hover:underline inline-flex items-center gap-xs" href="#">
+                        Read More <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</article>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tech Pulse - Reset Password</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffddb4",
+                        "tertiary": "#7f5300",
+                        "surface-variant": "#e1e3e4",
+                        "primary": "#005da7",
+                        "on-tertiary-fixed": "#291800",
+                        "surface-container-highest": "#e1e3e4",
+                        "outline-variant": "#c1c7d3",
+                        "on-tertiary-fixed-variant": "#633f00",
+                        "inverse-primary": "#a4c9ff",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "background": "#f8f9fa",
+                        "surface-dim": "#d9dadb",
+                        "on-surface": "#191c1d",
+                        "on-secondary-fixed-variant": "#314867",
+                        "secondary-container": "#c1d9fe",
+                        "on-secondary-fixed": "#001c39",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-bright": "#f8f9fa",
+                        "tertiary-fixed-dim": "#ffb953",
+                        "surface-container-high": "#e7e8e9",
+                        "on-primary-fixed": "#001c39",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "surface-tint": "#0060ac",
+                        "surface-container-low": "#f3f4f5",
+                        "outline": "#717783",
+                        "primary-fixed": "#d4e3ff",
+                        "on-primary-container": "#fdfcff",
+                        "secondary-fixed-dim": "#b1c8ed",
+                        "on-surface-variant": "#414751",
+                        "surface-container": "#edeeef",
+                        "secondary-fixed": "#d4e3ff",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8f9fa",
+                        "primary-container": "#2976c7",
+                        "on-primary-fixed-variant": "#004883",
+                        "tertiary-container": "#a06900",
+                        "error": "#ba1a1a",
+                        "secondary": "#496080",
+                        "on-background": "#191c1d",
+                        "on-secondary-container": "#485e7e",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#ebf2fa] min-h-screen flex flex-col items-center justify-center font-body-lg text-on-surface">
+<!-- Top Navigation (Suppressed as per rules, but TopAppBar JSON requested execution) -->
+<!-- Executing JSON TopAppBar as a simple header layout since it's a linear transactional page -->
+<header class="w-full top-0 flex justify-between items-center px-6 py-4 max-w-7xl mx-auto absolute top-0 left-0 right-0">
+<div class="text-xl font-bold text-slate-900 dark:text-slate-50 font-headline-md text-primary">Tech Pulse</div>
+<a class="text-blue-600 dark:text-blue-400 font-inter text-sm font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer active:opacity-70 font-label-md text-primary hover:underline flex items-center gap-xs" href="#">
+            Back to login
+        </a>
+</header>
+<main class="w-full max-w-md px-lg w-full flex flex-col items-center mt-xl pt-xl">
+<h1 class="font-headline-lg text-on-surface mb-lg text-center w-full">Reset Password</h1>
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-lg w-full mb-lg">
+<p class="font-body-lg text-on-surface-variant mb-lg text-center leading-relaxed">
+                Enter your email or username and we will send a secure reset link. The link expires in 1 hour.
+            </p>
+<form class="flex flex-col gap-md">
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-on-surface-variant" for="emailOrUsername">Email or Username</label>
+<input class="w-full border border-outline-variant rounded-lg px-md py-sm font-body-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" id="emailOrUsername" placeholder="name@example.com" type="text"/>
+</div>
+<button class="w-full bg-primary text-on-primary rounded-lg py-sm px-md font-label-md hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm mt-sm" type="button">
+                    Send reset link
+                </button>
+</form>
+</div>
+<div class="font-body-lg text-on-surface-variant text-center">
+            Remembered your password? <a class="font-label-md text-primary hover:underline" href="#">Login</a>
+</div>
+</main>
+</body></html>

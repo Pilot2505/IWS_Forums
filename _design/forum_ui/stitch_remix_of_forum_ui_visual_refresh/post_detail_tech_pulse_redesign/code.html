@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tech Pulse - Post Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#d4e3ff",
+                      "primary-fixed-dim": "#a4c9ff",
+                      "on-secondary-container": "#485e7e",
+                      "on-primary-fixed-variant": "#004883",
+                      "primary-fixed": "#d4e3ff",
+                      "on-primary-container": "#fdfcff",
+                      "primary-container": "#2976c7",
+                      "tertiary": "#7f5300",
+                      "secondary-container": "#c1d9fe",
+                      "on-secondary": "#ffffff",
+                      "inverse-primary": "#a4c9ff",
+                      "secondary-fixed-dim": "#b1c8ed",
+                      "secondary": "#496080",
+                      "surface-container-high": "#e7e8e9",
+                      "on-background": "#191c1d",
+                      "surface-container-low": "#f3f4f5",
+                      "surface-dim": "#d9dadb",
+                      "on-tertiary-fixed-variant": "#633f00",
+                      "tertiary-container": "#a06900",
+                      "inverse-on-surface": "#f0f1f2",
+                      "on-tertiary-fixed": "#291800",
+                      "on-surface": "#191c1d",
+                      "on-error-container": "#93000a",
+                      "on-primary-fixed": "#001c39",
+                      "outline-variant": "#c1c7d3",
+                      "on-tertiary": "#ffffff",
+                      "tertiary-fixed": "#ffddb4",
+                      "surface-container": "#edeeef",
+                      "on-secondary-fixed": "#001c39",
+                      "on-surface-variant": "#414751",
+                      "on-tertiary-container": "#fffbff",
+                      "tertiary-fixed-dim": "#ffb953",
+                      "surface-tint": "#0060ac",
+                      "outline": "#717783",
+                      "error-container": "#ffdad6",
+                      "surface": "#f8f9fa",
+                      "inverse-surface": "#2e3132",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "primary": "#005da7",
+                      "on-secondary-fixed-variant": "#314867",
+                      "surface-container-highest": "#e1e3e4",
+                      "error": "#ba1a1a",
+                      "surface-bright": "#f8f9fa",
+                      "on-error": "#ffffff",
+                      "background": "#f8f9fa",
+                      "surface-variant": "#e1e3e4"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "md": "16px",
+                      "sm": "8px",
+                      "base": "8px",
+                      "xs": "4px",
+                      "xl": "32px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-lg min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-gray-900 font-inter text-sm antialiased docked full-width top-0 border-b border-b border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none sticky z-50">
+<div class="flex items-center justify-between px-4 md:px-8 h-16 w-full max-w-7xl mx-auto">
+<!-- Leading -->
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-blue-600 dark:text-blue-400" style="font-variation-settings: 'FILL' 1;">sensors</span>
+<span class="text-xl font-black tracking-tight text-blue-600 dark:text-blue-400">Tech Pulse</span>
+</div>
+<!-- Middle Actions (Search & Create) -->
+<div class="hidden md:flex items-center gap-md flex-1 max-w-xl mx-lg">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-lg text-body-lg" placeholder="Search..." type="text"/>
+</div>
+<button class="flex items-center gap-xs bg-primary text-on-primary px-4 py-2 rounded-lg hover:opacity-90 active:opacity-80 transition-opacity whitespace-nowrap">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+<span class="font-label-md text-label-md">Create Post</span>
+</button>
+</div>
+<!-- Trailing -->
+<div class="flex items-center gap-md">
+<!-- Mobile Search Icon -->
+<button class="md:hidden text-gray-600 dark:text-gray-400 hover:text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-sm transition-colors p-2">
+<span class="material-symbols-outlined">search</span>
+</button>
+<img alt="User avatar" class="w-8 h-8 rounded-full object-cover border border-outline-variant" data-alt="A close-up portrait of a professional individual serving as a user avatar. The image features soft, natural lighting against a neutral background. The subject wears modern business-casual attire, conveying a clean and corporate aesthetic consistent with a modern UI design system." src="https://lh3.googleusercontent.com/aida/ADBb0ugv5u7CIIiAYNtqpOwxGMAvu-D3onnbWTz1DNumWt2w1pthW08lynv3Se6BTPO3m1oZdJ2DwfC3Noi-ln0RwFwKQ9xxs6FMT7u8UPBnc23ZdlXtFCKqme1gJIKCu6YTbNcG3yfywjumRTWVqDj5ydQkx2-pFXc3P1h1vSf8q3__Pdu93n2iUjo1h0CL_g-5kphhkwZf71emZs2LU_Q4RggCZ4ZRsYqRw-oMS3mAB3lPDmNoWx3LXWQXMIbDhHqSE7p1ySHaIR_3UA"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-lg md:py-xl grid grid-cols-1 lg:grid-cols-12 gap-lg">
+<!-- Post Detail Column -->
+<article class="lg:col-span-8 space-y-lg">
+<!-- Header Section -->
+<div class="space-y-md">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">The Future of AI in Enterprise Architecture: A Pragmatic Approach to Integration and Scaling</h1>
+<div class="flex items-center justify-between flex-wrap gap-md">
+<!-- Author Info -->
+<div class="flex items-center gap-sm">
+<img alt="Author avatar" class="w-10 h-10 rounded-full object-cover" data-alt="A portrait of an industry expert to be used as an author avatar. The subject is well-lit with high-key lighting, set against a pristine, soft neutral background. They wear professional attire, exuding confidence and dependability, aligning with a professional and modern technological brand identity." src="https://lh3.googleusercontent.com/aida/ADBb0uhJwXYNwX9ra4mv6-wXcdUKPCTAp7-Cdm7x-J4aBTTlBFkLFryODXTlnDaWM1XcQW91xiynJhjba2lag9Q-zGC0G_6fHMz3d9SNMajpp2CYKRlgo5L1Gzywuh1ZbR833aDAZInwjxDJ7VeUH-pAIeSNAg6DKXZqCXGo9KrLjW3lAf9y6cmFh8-UyznM1A5e-pp9Dcnf3mG01D-hZhdT6COKJKFBxZ3WZomfAnGeTzVLLhFYmVaoeARV5idmllNkJlz1KfaKkFVY5Q"/>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Dr. Elena Rodriguez</div>
+<div class="font-body-lg text-sm text-on-surface-variant">Published 2 days ago · 8 min read</div>
+</div>
+<button class="ml-sm px-3 py-1 bg-surface-container border border-outline-variant rounded-full text-primary font-label-md text-sm hover:bg-surface-container-high transition-colors">
+                            Follow
+                        </button>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-md text-on-surface-variant">
+<div class="flex items-center gap-xs bg-surface-container-low rounded-full px-3 py-1 border border-outline-variant">
+<button class="hover:text-primary transition-colors flex items-center justify-center p-1"><span class="material-symbols-outlined text-[20px]">arrow_upward</span></button>
+<span class="font-label-md text-label-md text-on-surface">1.2k</span>
+<button class="hover:text-error transition-colors flex items-center justify-center p-1"><span class="material-symbols-outlined text-[20px]">arrow_downward</span></button>
+</div>
+<button class="hover:text-primary transition-colors flex items-center gap-xs p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">bookmark_border</span>
+<span class="sr-only">Save</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Tags -->
+<div class="flex flex-wrap gap-xs">
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-container rounded-full font-label-md text-sm">Artificial Intelligence</span>
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-container rounded-full font-label-md text-sm">Enterprise IT</span>
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-container rounded-full font-label-md text-sm">Architecture</span>
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-container rounded-full font-label-md text-sm">Cloud Computing</span>
+</div>
+<!-- Featured Image -->
+<div class="w-full aspect-[16/9] rounded-xl overflow-hidden bg-surface-container border border-outline-variant">
+<img alt="Featured post image" class="w-full h-full object-cover" data-alt="A striking digital illustration representing AI in enterprise architecture. Abstract geometric shapes and glowing nodes form a complex, interconnected network suspended in a modern, light-mode space. Deep navy blues and clean whites dominate the palette, with subtle accents of vibrant blue, conveying technological precision and corporate professionalism." src="https://lh3.googleusercontent.com/aida/ADBb0ugveizWgvVXfC8zWiqUZPBWiOfHTd6IHWiDGgokdRSjjngpJ48D4esBcQ2CyGk5KAPdh4BPLGHwHJIXSFjY7gfwSQp5KuDygwNxgzGEu_MUR5wbJ4vdlM2A2zXLnnaAjSlWFIOR-ggJLV4Ci5JUR95ombNDzppb4FaMqFuos0CzUUOOHMdUAY_m_RFX48VYF4TgvKXjfimDJLtsJoCvusG0nZMZgYuYjII2rQbfSg641f3xyIGonjQG9axepeN8Y3lE0GrN5vonsQ"/>
+</div>
+<!-- Post Body -->
+<div class="font-body-lg text-body-lg text-on-surface-variant space-y-md leading-relaxed">
+<p>
+                    As organizations move beyond the experimental phase of Generative AI, the challenge has shifted from 'what is possible' to 'how do we build this at scale'. Enterprise architecture must adapt to accommodate non-deterministic systems alongside traditional transactional databases.
+                </p>
+<p>
+                    The key lies in abstraction layers. By decoupling the core business logic from specific LLM providers, companies can mitigate vendor lock-in and optimize for cost and performance dynamically. This requires a fundamental rethink of API gateways and service meshes.
+                </p>
+<h2 class="font-headline-md text-headline-md text-on-surface mt-lg mb-sm">The Three Pillars of AI Readiness</h2>
+<ul class="list-disc pl-lg space-y-sm">
+<li><strong>Data Governance:</strong> Without clean, well-governed data, AI models hallucinate or produce biased results. A robust data catalog is no longer optional.</li>
+<li><strong>Infrastructure Flexibility:</strong> The ability to seamlessly route requests between cloud providers based on GPU availability and cost.</li>
+<li><strong>Security perimeters:</strong> Traditional IAM is insufficient. We need contextual access controls that understand the semantic intent of prompts.</li>
+</ul>
+<p>
+                    Implementing these pillars requires a cultural shift as much as a technical one. Engineering teams must collaborate closely with data science and legal to ensure compliance without stifling innovation.
+                </p>
+</div>
+</article>
+<!-- Comments Column -->
+<aside class="lg:col-span-4 flex flex-col gap-lg border-t lg:border-t-0 lg:border-l border-outline-variant pt-lg lg:pt-0 lg:pl-lg">
+<h3 class="font-headline-md text-[20px] font-semibold text-on-surface">Responses (24)</h3>
+<!-- Comment Input -->
+<div class="bg-surface rounded-xl border border-outline-variant p-md flex flex-col gap-sm shadow-sm">
+<textarea class="w-full bg-transparent border-none resize-none text-on-surface placeholder:text-outline focus:ring-0 font-body-lg text-sm p-0" placeholder="What are your thoughts?" rows="3"></textarea>
+<div class="flex justify-between items-center mt-2 border-t border-surface-variant pt-sm">
+<div class="flex gap-2 text-outline">
+<button class="hover:text-primary transition-colors p-1 rounded-sm hover:bg-surface-container"><span class="material-symbols-outlined text-[20px]">format_bold</span></button>
+<button class="hover:text-primary transition-colors p-1 rounded-sm hover:bg-surface-container"><span class="material-symbols-outlined text-[20px]">format_italic</span></button>
+<button class="hover:text-primary transition-colors p-1 rounded-sm hover:bg-surface-container"><span class="material-symbols-outlined text-[20px]">link</span></button>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-sm hover:opacity-90 active:opacity-80 transition-opacity">
+                        Submit Comment
+                    </button>
+</div>
+</div>
+<!-- Comments List -->
+<div class="space-y-lg">
+<!-- Thread 1 -->
+<div class="space-y-sm">
+<div class="flex gap-sm">
+<img alt="Commenter avatar" class="w-8 h-8 rounded-full object-cover flex-shrink-0" data-alt="A small circular avatar showing a professional user. The lighting is soft and natural, set against a light grey background. The person looks approachable yet professional, fitting a modern corporate platform." src="https://lh3.googleusercontent.com/aida/ADBb0uismdaErg7rlHpBCtUTYktIN_5RsNoSCpyoWo16PaI8o8gFkXee3U1aHN-524lyTUamkIFFAV_unQ8wkWJ6a5jjYf4IpJqrTYIgPwAxzERnxAI3wPdnfd1ZTxW_FCaTwDw0pMm0BdZL-Yz9p-f13cNppQcr9lqdsYaz9P-kxc5UQuAOC4o6bfOAZ9cRMQoKv0G5yXn-YK1BR1d9eZXzguTpXvg7SDj6ZN1xLmgtX2OA8Lplzy9BbnDVnRY60JHXug37iuONa_fS"/>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-md text-sm text-on-surface">Michael Chang</span>
+<span class="font-body-lg text-xs text-on-surface-variant">· 4 hours ago</span>
+</div>
+<p class="font-body-lg text-sm text-on-surface-variant">Excellent breakdown on the abstraction layers. We recently implemented a similar pattern using LangChain, but are struggling with latency when switching models dynamically. Any tips on managing the connection pooling?</p>
+<div class="flex items-center gap-md mt-2 text-on-surface-variant text-sm">
+<button class="hover:text-primary transition-colors flex items-center gap-xs"><span class="material-symbols-outlined text-[16px]">thumb_up</span> 12</button>
+<button class="hover:text-primary transition-colors font-label-md">Reply</button>
+</div>
+</div>
+</div>
+<!-- Reply -->
+<div class="flex gap-sm ml-xl border-l-2 border-surface-variant pl-sm">
+<img alt="Author avatar" class="w-6 h-6 rounded-full object-cover flex-shrink-0" data-alt="A very small circular avatar of the author. Professional lighting, neutral background, clean corporate aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0uhJwXYNwX9ra4mv6-wXcdUKPCTAp7-Cdm7x-J4aBTTlBFkLFryODXTlnDaWM1XcQW91xiynJhjba2lag9Q-zGC0G_6fHMz3d9SNMajpp2CYKRlgo5L1Gzywuh1ZbR833aDAZInwjxDJ7VeUH-pAIeSNAg6DKXZqCXGo9KrLjW3lAf9y6cmFh8-UyznM1A5e-pp9Dcnf3mG01D-hZhdT6COKJKFBxZ3WZomfAnGeTzVLLhFYmVaoeARV5idmllNkJlz1KfaKkFVY5Q"/>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-md text-xs text-on-surface">Dr. Elena Rodriguez</span>
+<span class="bg-secondary-fixed text-on-secondary-container px-1.5 py-0.5 rounded text-[10px] font-bold">Author</span>
+<span class="font-body-lg text-xs text-on-surface-variant">· 2 hours ago</span>
+</div>
+<p class="font-body-lg text-sm text-on-surface-variant">Great question, Michael. We ended up building a custom proxy layer in Rust to handle the pooling, rather than relying on the python-native libraries. Happy to share some gists if you're interested.</p>
+<div class="flex items-center gap-md mt-2 text-on-surface-variant text-sm">
+<button class="hover:text-primary transition-colors flex items-center gap-xs"><span class="material-symbols-outlined text-[16px]">thumb_up</span> 8</button>
+<button class="hover:text-primary transition-colors font-label-md">Reply</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Thread 2 -->
+<div class="flex gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center flex-shrink-0 text-on-surface font-label-md">SJ</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-md text-sm text-on-surface">Sarah Jenkins</span>
+<span class="font-body-lg text-xs text-on-surface-variant">· 1 day ago</span>
+</div>
+<p class="font-body-lg text-sm text-on-surface-variant">I completely agree on the data governance point. It's the unglamorous work that makes or breaks these initiatives. Too many teams rush to implement the shiny new LLM without sorting out their data swamps first.</p>
+<div class="flex items-center gap-md mt-2 text-on-surface-variant text-sm">
+<button class="hover:text-primary transition-colors flex items-center gap-xs"><span class="material-symbols-outlined text-[16px]">thumb_up</span> 45</button>
+<button class="hover:text-primary transition-colors font-label-md">Reply</button>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+</body></html>

@@ -132,7 +132,9 @@ export default function Profile() {
         if (cancelled) return;
 
         console.error("Error loading follow lists:", err);
-        setConnectionsError("Unable to load your followers and following right now.");
+        setConnectionsError(
+          "Unable to load your followers and following right now.",
+        );
       } finally {
         if (!cancelled) {
           setConnectionsLoading(false);
@@ -168,7 +170,7 @@ export default function Profile() {
           sortDir,
         });
         const res = await authFetch(
-          `/api/posts/user/${encodeURIComponent(effectiveUsername)}?${params.toString()}`
+          `/api/posts/user/${encodeURIComponent(effectiveUsername)}?${params.toString()}`,
         );
 
         if (!res.ok) {
@@ -243,7 +245,7 @@ export default function Profile() {
         cursor,
       });
       const res = await authFetch(
-        `/api/posts/user/${encodeURIComponent(effectiveUsername)}?${params.toString()}`
+        `/api/posts/user/${encodeURIComponent(effectiveUsername)}?${params.toString()}`,
       );
 
       if (!res.ok) {
@@ -372,8 +374,8 @@ export default function Profile() {
               vote_count: voteCount,
               current_user_vote: currentUserVote,
             }
-          : post
-      )
+          : post,
+      ),
     );
   };
 
@@ -391,7 +393,9 @@ export default function Profile() {
     }
 
     if (containsBlockedWord(trimmedTitle) || containsBlockedWord(editContent)) {
-      toast.error("This post contains language that violates community standards. Please edit it!");
+      toast.error(
+        "This post contains language that violates community standards. Please edit it!",
+      );
       return;
     }
 
@@ -401,7 +405,12 @@ export default function Profile() {
       const content = await uploadEmbeddedImages(editContent);
       const nextTags = normalizeTagsInput(editTagsInput);
 
-      const updatedPost = await updatePost(editingPost, editTitle, content, nextTags);
+      const updatedPost = await updatePost(
+        editingPost,
+        editTitle,
+        content,
+        nextTags,
+      );
 
       setPosts((prev) =>
         prev.map((p) =>
@@ -411,12 +420,14 @@ export default function Profile() {
                 title: updatedPost.title || editTitle,
                 content,
                 tags: updatedPost.tags || nextTags,
-                primary_category: updatedPost.primary_category ?? p.primary_category,
+                primary_category:
+                  updatedPost.primary_category ?? p.primary_category,
                 primary_category_label:
-                  updatedPost.primary_category_label ?? p.primary_category_label,
+                  updatedPost.primary_category_label ??
+                  p.primary_category_label,
               }
-            : p
-        )
+            : p,
+        ),
       );
 
       setEditingPost(null);
@@ -437,7 +448,7 @@ export default function Profile() {
   };
 
   const closeConnectionsPanel = () => {
-      setConnectionsQuery("");
+    setConnectionsQuery("");
     setActiveConnectionsView(null);
   };
 
@@ -458,7 +469,8 @@ export default function Profile() {
   const normalizedConnectionsQuery = connectionsQuery.trim().toLowerCase();
   const visibleConnectionsList = normalizedConnectionsQuery
     ? selectedConnectionsList.filter((person) => {
-        const haystack = `${person.fullname || ""} ${person.username || ""}`.toLowerCase();
+        const haystack =
+          `${person.fullname || ""} ${person.username || ""}`.toLowerCase();
         return haystack.includes(normalizedConnectionsQuery);
       })
     : selectedConnectionsList;
@@ -466,25 +478,31 @@ export default function Profile() {
   const renderConnectionUser = (person, showNewPosts = false) => (
     <Link
       to={`/profile/${encodeURIComponent(person.username)}`}
-      className="flex w-full items-center gap-3 rounded-2xl px-1 py-3 transition-colors hover:bg-gray-50"
+      className="flex w-full items-center gap-3 rounded-2xl px-1 py-3 transition hover:bg-forum-panel/70"
     >
-      <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-[#1E56A0]/10 text-[#1E56A0]">
+      <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-forum-border bg-forum-primarySoft text-forum-primary">
         {person.avatar ? (
-          <img src={person.avatar} alt={person.username} className="h-full w-full object-cover" />
+          <img
+            src={person.avatar}
+            alt={person.username}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <User className="h-5 w-5" />
         )}
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold text-[#0C245E]">
+        <div className="truncate text-sm font-semibold text-forum-inkStrong">
           {person.fullname || person.username}
         </div>
-        <div className="truncate text-xs text-gray-500">@{person.username}</div>
+        <div className="truncate text-xs text-forum-muted">
+          @{person.username}
+        </div>
       </div>
 
       {showNewPosts && Number(person.newPosts) > 0 && (
-        <span className="shrink-0 rounded-full bg-[#1E56A0]/10 px-2.5 py-1 text-xs font-medium text-[#1E56A0]">
+        <span className="shrink-0 rounded-full bg-forum-primarySoft px-2.5 py-1 text-xs font-medium text-forum-primary">
           {person.newPosts} new
         </span>
       )}
@@ -492,92 +510,241 @@ export default function Profile() {
   );
 
   if (!ready || !user) return null;
-  
+
   const displayUser = isOwnProfile ? profileUser || user : profileUser;
   if (!displayUser) return null;
 
   return (
-    <div className="min-h-screen bg-[#C8CFD8]">
+    <div className="min-h-screen bg-forum-bg">
       <Navbar user={user} setUser={setUser} showCreatePost={true} />
 
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-        <div className="rounded-t-lg bg-[#ACB8C9] p-5 sm:p-6 lg:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-[#D6E4F0] bg-[#21005D]/10 sm:h-24 sm:w-24">
-                {displayUser?.avatar ? (
-                  <img
-                    src={displayUser.avatar}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <User className="h-12 w-12" />
-                )}
+      <main className="mx-auto max-w-content px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+        <section className="overflow-hidden rounded-[28px] border border-forum-border bg-forum-surface shadow-panel">
+          <div className="border-b border-forum-border bg-forum-panel/70 p-5 sm:p-6 lg:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-forum-border bg-forum-primarySoft text-forum-primary shadow-sm sm:h-28 sm:w-28">
+                  {displayUser?.avatar ? (
+                    <img
+                      src={displayUser.avatar}
+                      alt={displayUser.username}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-12 w-12" />
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  <h1 className="text-3xl font-semibold tracking-tight text-forum-inkStrong sm:text-4xl">
+                    {displayUser?.fullname}
+                  </h1>
+                  <p className="mt-1 text-lg text-forum-muted">
+                    @{displayUser?.username}
+                  </p>
+
+                  <div className="mt-5 grid grid-cols-3 gap-3 sm:max-w-md">
+                    <div className="rounded-2xl border border-forum-border bg-forum-surface p-3 text-center">
+                      <div className="text-2xl font-semibold text-forum-inkStrong">
+                        {postsCount}
+                      </div>
+                      <div className="text-sm text-forum-muted">Posts</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveConnectionsView("followers")}
+                      aria-pressed={activeConnectionsView === "followers"}
+                      className={`text-center transition ${
+                        activeConnectionsView === "followers"
+                          ? "rounded-2xl border border-forum-primary/25 bg-forum-primarySoft/40 px-3 py-3 shadow-sm"
+                          : "rounded-2xl border border-forum-border bg-forum-surface px-3 py-3 hover:bg-forum-panel"
+                      }`}
+                    >
+                      <div className="text-2xl font-semibold text-forum-inkStrong">
+                        {followersCount}
+                      </div>
+                      <div className="text-sm text-forum-muted">Followers</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveConnectionsView("following")}
+                      aria-pressed={activeConnectionsView === "following"}
+                      className={`text-center transition ${
+                        activeConnectionsView === "following"
+                          ? "rounded-2xl border border-forum-primary/25 bg-forum-primarySoft/40 px-3 py-3 shadow-sm"
+                          : "rounded-2xl border border-forum-border bg-forum-surface px-3 py-3 hover:bg-forum-panel"
+                      }`}
+                    >
+                      <div className="text-2xl font-semibold text-forum-inkStrong">
+                        {followingCount}
+                      </div>
+                      <div className="text-sm text-forum-muted">Following</div>
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <h1 className="text-2xl font-semibold text-black sm:text-3xl">
-                  {displayUser?.fullname}
-                </h1>
-                <p className="text-base text-gray-700 sm:text-lg">
-                  @{displayUser?.username}
-                </p>
+              {isOwnProfile ? (
+                <button
+                  type="button"
+                  onClick={() => setShowEditProfile(true)}
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-forum-primary px-5 font-semibold text-white transition hover:bg-forum-primaryDark sm:w-auto"
+                >
+                  Edit Profile
+                </button>
+              ) : (
+                <FollowButton
+                  currentUserId={user.id}
+                  targetUserId={targetUserId}
+                  onChange={() => refetchFollowCounts()}
+                />
+              )}
+            </div>
 
-                <div className="mt-3 grid grid-cols-3 gap-4 sm:flex sm:gap-8">
-                  <div className="text-center">
-                    <div className="text-2xl font-semibold">{postsCount}</div>
-                    <div className="text-sm text-gray-700">Posts</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveConnectionsView("followers")}
-                    aria-pressed={activeConnectionsView === "followers"}
-                    className={`text-center transition-colors ${
-                      activeConnectionsView === "followers"
-                        ? "rounded-2xl border border-[#1E56A0]/25 bg-[#1E56A0]/5 px-3 py-2 shadow-sm"
-                        : "rounded-2xl px-3 py-2 hover:bg-white/60"
-                    }`}
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-forum-muted sm:text-base">
+              {displayUser?.bio || "No bio yet"}
+            </p>
+          </div>
+
+          <div className="p-5 sm:p-6 lg:p-8">
+            <h2 className="mb-6 text-3xl font-semibold tracking-tight text-forum-inkStrong">
+              {isOwnProfile ? "Your Posts" : `${effectiveUsername}'s Posts`}
+            </h2>
+
+            {/* Auto-styled: the sort toolbar is inferred from the profile-post management workflow because Figma only shows the base list state. */}
+            <div className="mb-6 flex flex-col gap-3 rounded-[24px] border border-forum-border bg-forum-panel/70 p-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex flex-col gap-2 text-sm font-medium text-forum-inkStrong">
+                  Sort by
+                  <select
+                    value={sortBy}
+                    onChange={(e) =>
+                      handleSortChange(
+                        e.target.value,
+                        e.target.value === "upvotes" ? sortDir : "desc",
+                      )
+                    }
+                    className="h-12 rounded-2xl border border-forum-border bg-white px-4 text-sm text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15"
                   >
-                    <div className="text-2xl font-semibold">{followersCount}</div>
-                    <div className="text-sm text-gray-700">Followers</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveConnectionsView("following")}
-                    aria-pressed={activeConnectionsView === "following"}
-                    className={`text-center transition-colors ${
-                      activeConnectionsView === "following"
-                        ? "rounded-2xl border border-[#1E56A0]/25 bg-[#1E56A0]/5 px-3 py-2 shadow-sm"
-                        : "rounded-2xl px-3 py-2 hover:bg-white/60"
-                    }`}
+                    <option value="date">Date</option>
+                    <option value="upvotes">Upvotes</option>
+                  </select>
+                </label>
+
+                <label className="flex flex-col gap-2 text-sm font-medium text-forum-inkStrong">
+                  Order
+                  <select
+                    value={sortDir}
+                    onChange={(e) => handleSortChange(sortBy, e.target.value)}
+                    className="h-12 rounded-2xl border border-forum-border bg-white px-4 text-sm text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15"
                   >
-                    <div className="text-2xl font-semibold">{followingCount}</div>
-                    <div className="text-sm text-gray-700">Following</div>
-                  </button>
-                </div>
+                    {sortBy === "date" ? (
+                      <>
+                        <option value="desc">Newest first</option>
+                        <option value="asc">Oldest first</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="desc">Most upvotes</option>
+                        <option value="asc">Least upvotes</option>
+                      </>
+                    )}
+                  </select>
+                </label>
               </div>
             </div>
 
-            {isOwnProfile ? (
-              <button
-                onClick={() => setShowEditProfile(true)}
-                className="w-full rounded-md bg-[#1E56A0] px-6 py-2 font-medium text-white sm:w-auto"
-              >
-                Edit Profile
-              </button>
-            ) : (
-              <FollowButton
-                currentUserId={user.id}
-                targetUserId={targetUserId}
-                onChange={() => refetchFollowCounts()}
-              />
-            )}
-          </div>
+            <div className="space-y-6">
+              {loadingPosts ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((item) => (
+                    <div
+                      key={item}
+                      className="animate-pulse rounded-[28px] border border-forum-border bg-white p-6 shadow-panel"
+                    >
+                      <div className="mb-3 h-6 w-2/3 rounded-full bg-slate-100" />
+                      <div className="mb-2 h-4 w-full rounded-full bg-slate-100" />
+                      <div className="h-4 w-5/6 rounded-full bg-slate-100" />
+                    </div>
+                  ))}
+                </div>
+              ) : posts.length === 0 ? (
+                <div className="rounded-[28px] border border-dashed border-forum-borderStrong bg-forum-panel/40 py-10 text-center text-lg text-forum-muted">
+                  No posts yet.
+                </div>
+              ) : (
+                <>
+                  {posts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      post={post}
+                      meta={new Date(post.created_at).toLocaleString()}
+                      readMoreTo={`/post/${post.id}`}
+                    >
+                      {editingPost !== post.id && (
+                        <div className="flex flex-wrap items-center gap-4">
+                          <PostVoteControls
+                            postId={post.id}
+                            initialVoteCount={post.vote_count ?? 0}
+                            initialCurrentUserVote={post.current_user_vote ?? 0}
+                            onChange={handlePostVoteChange}
+                          />
+                          <BookmarkButton
+                            postId={post.id}
+                            initialBookmarked={Boolean(post.is_bookmarked)}
+                          />
+                        </div>
+                      )}
 
-          <p className="mt-4 text-sm text-black sm:text-base">
-            {displayUser?.bio || "No bio yet"}
-          </p>
-        </div>
+                      {isOwnProfile && editingPost !== post.id && (
+                        <div className="flex flex-wrap gap-4">
+                          <button
+                            type="button"
+                            className="font-semibold text-forum-primary"
+                            onClick={() => {
+                              setEditingPost(post.id);
+                              setEditTitle(post.title);
+                              setEditTagsInput(
+                                parseTagsValue(post.tags).join(", "),
+                              );
+                              setEditContent(post.content);
+                              setEditorLoaded(false);
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDeletePostId(post.id);
+                              setShowDeleteDialog(true);
+                            }}
+                            className="font-semibold text-forum-danger"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </PostCard>
+                  ))}
+
+                  {hasMore && (
+                    <div className="flex justify-center pt-2">
+                      <button
+                        type="button"
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        className="inline-flex h-12 items-center justify-center rounded-2xl border border-forum-border bg-white px-5 font-semibold text-forum-inkStrong transition hover:border-forum-primary/30 hover:text-forum-primary disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {loadingMore ? "Loading..." : "Load More"}
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </section>
 
         {isOwnProfile && activeConnectionsView && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -587,41 +754,48 @@ export default function Profile() {
               aria-hidden="true"
             />
 
-            <aside className="relative z-10 flex h-full w-full max-w-xl flex-col border-l border-gray-200 bg-white shadow-2xl">
-              <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-5 sm:px-6">
+            {/* Auto-styled: the followers/following management panel is inferred from the existing feature because Figma only shows the top-level profile state. */}
+            <aside className="relative z-10 flex h-full w-full max-w-xl flex-col rounded-[28px] border border-forum-border bg-forum-surface shadow-dialog">
+              <div className="flex items-start justify-between gap-4 border-b border-forum-border px-5 py-5 sm:px-6">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E56A0]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forum-primary">
                     Connections panel
                   </p>
-                  <h2 className="mt-1 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
+                  <h2 className="mt-1 text-2xl font-semibold text-forum-inkStrong sm:text-3xl">
                     {selectedConnectionsLabel}
                   </h2>
-                  <p className="mt-1 text-sm text-gray-500">Only you can see these lists.</p>
+                  <p className="mt-1 text-sm text-forum-muted">
+                    Only you can see these lists.
+                  </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={closeConnectionsPanel}
-                  className="rounded-full border border-gray-200 bg-white p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  className="rounded-full border border-forum-border bg-white p-2 text-forum-subtle transition hover:bg-forum-panel hover:text-forum-inkStrong"
                   aria-label="Close connections panel"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="border-b border-gray-200 px-5 py-4 sm:px-6">
-                <div className="grid grid-cols-2 gap-3 rounded-2xl bg-[#F7F9FC] p-1">
+              <div className="border-b border-forum-border px-5 py-4 sm:px-6">
+                <div className="grid grid-cols-2 gap-3 rounded-2xl bg-forum-panel p-1">
                   <button
                     type="button"
                     onClick={() => setActiveConnectionsView("followers")}
                     className={`rounded-xl px-4 py-3 text-left transition-colors ${
                       activeConnectionsView === "followers"
                         ? "bg-white shadow-sm"
-                        : "text-gray-600 hover:bg-white/70"
+                        : "text-forum-muted hover:bg-white/70"
                     }`}
                   >
-                    <div className="text-sm font-semibold text-[#0C245E]">Followers</div>
-                    <div className="text-xs text-gray-500">{followersCount} total</div>
+                    <div className="text-sm font-semibold text-forum-inkStrong">
+                      Followers
+                    </div>
+                    <div className="text-xs text-forum-muted">
+                      {followersCount} total
+                    </div>
                   </button>
 
                   <button
@@ -630,47 +804,54 @@ export default function Profile() {
                     className={`rounded-xl px-4 py-3 text-left transition-colors ${
                       activeConnectionsView === "following"
                         ? "bg-white shadow-sm"
-                        : "text-gray-600 hover:bg-white/70"
+                        : "text-forum-muted hover:bg-white/70"
                     }`}
                   >
-                    <div className="text-sm font-semibold text-[#0C245E]">Following</div>
-                    <div className="text-xs text-gray-500">{followingCount} total</div>
+                    <div className="text-sm font-semibold text-forum-inkStrong">
+                      Following
+                    </div>
+                    <div className="text-xs text-forum-muted">
+                      {followingCount} total
+                    </div>
                   </button>
                 </div>
 
-                <label className="mt-4 flex items-center gap-3 rounded-2xl bg-[#F7F9FC] px-4 py-3 text-sm text-gray-500">
-                  <Search className="h-4 w-4 shrink-0 text-gray-400" />
+                <label className="mt-4 flex items-center gap-3 rounded-2xl bg-forum-panel px-4 py-3 text-sm text-forum-muted">
+                  <Search className="h-4 w-4 shrink-0 text-forum-subtle" />
                   <input
                     type="text"
                     value={connectionsQuery}
                     onChange={(e) => setConnectionsQuery(e.target.value)}
                     placeholder={`Search ${selectedConnectionsLabel?.toLowerCase() || "connections"}`}
-                    className="w-full bg-transparent text-sm text-[#0C245E] outline-none placeholder:text-gray-400"
+                    className="w-full bg-transparent text-sm text-forum-inkStrong outline-none placeholder:text-forum-subtle"
                   />
                 </label>
               </div>
 
               <div className="flex-1 overflow-y-auto p-5 sm:p-6">
                 {connectionsError ? (
-                  <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                     {connectionsError}
                   </div>
                 ) : connectionsLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map((item) => (
-                      <div key={item} className="animate-pulse rounded-xl border border-gray-200 bg-white px-3 py-2">
+                      <div
+                        key={item}
+                        className="animate-pulse rounded-xl border border-forum-border bg-white px-3 py-2"
+                      >
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-gray-200" />
+                          <div className="h-10 w-10 rounded-full bg-slate-100" />
                           <div className="flex-1 space-y-2">
-                            <div className="h-3 w-1/2 rounded bg-gray-200" />
-                            <div className="h-3 w-1/3 rounded bg-gray-200" />
+                            <div className="h-3 w-1/2 rounded-full bg-slate-100" />
+                            <div className="h-3 w-1/3 rounded-full bg-slate-100" />
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : selectedConnectionsList.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-gray-300 bg-[#F7F9FC] px-4 py-8 text-sm text-gray-500">
+                  <div className="rounded-2xl border border-dashed border-forum-borderStrong bg-forum-panel px-4 py-8 text-sm text-forum-muted">
                     {normalizedConnectionsQuery
                       ? "No results found."
                       : activeConnectionsView === "followers"
@@ -678,9 +859,14 @@ export default function Profile() {
                         : "You are not following anyone yet."}
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-100">
+                  <div className="divide-y divide-forum-border">
                     {visibleConnectionsList.map((person) => (
-                      <div key={person.id}>{renderConnectionUser(person, activeConnectionsView === "following")}</div>
+                      <div key={person.id}>
+                        {renderConnectionUser(
+                          person,
+                          activeConnectionsView === "following",
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}
@@ -688,330 +874,218 @@ export default function Profile() {
             </aside>
           </div>
         )}
-
-        <div className="rounded-b-lg bg-white p-5 sm:p-6 lg:p-8">
-          <h2 className="mb-6 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
-            {isOwnProfile ? "Your Posts" : `${effectiveUsername}'s Posts`}
-          </h2>
-
-          <div className="mb-6 flex flex-col gap-3 rounded-lg border border-gray-200 bg-[#F7F9FC] p-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
-                Sort by
-                <select
-                  value={sortBy}
-                  onChange={(e) =>
-                    handleSortChange(e.target.value, e.target.value === "upvotes" ? sortDir : "desc")
-                  }
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
-                >
-                  <option value="date">Date</option>
-                  <option value="upvotes">Upvotes</option>
-                </select>
-              </label>
-
-              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
-                Order
-                <select
-                  value={sortDir}
-                  onChange={(e) => handleSortChange(sortBy, e.target.value)}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
-                >
-                  {sortBy === "date" ? (
-                    <>
-                      <option value="desc">Newest first</option>
-                      <option value="asc">Oldest first</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="desc">Most upvotes</option>
-                      <option value="asc">Least upvotes</option>
-                    </>
-                  )}
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            {loadingPosts ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="animate-pulse rounded-lg border border-gray-200 bg-white p-6"
-                  >
-                    <div className="mb-3 h-6 w-2/3 rounded bg-gray-200" />
-                    <div className="mb-2 h-4 w-full rounded bg-gray-200" />
-                    <div className="h-4 w-5/6 rounded bg-gray-200" />
-                  </div>
-                ))}
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="py-10 text-center text-lg text-gray-500">
-                No posts yet.
-              </div>
-            ) : (
-              <>
-                {posts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    meta={new Date(post.created_at).toLocaleString()}
-                    readMoreTo={`/post/${post.id}`}
-                    className="border-gray-200"
-                  >
-                    {editingPost !== post.id && (
-                      <div className="mb-4 flex flex-wrap items-center gap-4">
-                        <PostVoteControls
-                          postId={post.id}
-                          initialVoteCount={post.vote_count ?? 0}
-                          initialCurrentUserVote={post.current_user_vote ?? 0}
-                          onChange={handlePostVoteChange}
-                        />
-                        <BookmarkButton postId={post.id} initialBookmarked={Boolean(post.is_bookmarked)} />
-                      </div>
-                    )}
-
-                    {isOwnProfile && editingPost !== post.id && (
-                      <div className="flex flex-wrap gap-4">
-                        <button
-                          className="font-medium text-[#1E56A0]"
-                          onClick={() => {
-                            setEditingPost(post.id);
-                            setEditTitle(post.title);
-                            setEditTagsInput(parseTagsValue(post.tags).join(", "));
-                            setEditContent(post.content);
-                            setEditorLoaded(false);
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDeletePostId(post.id);
-                            setShowDeleteDialog(true);
-                          }}
-                          className="font-medium text-red-600"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </PostCard>
-                ))}
-
-                {hasMore && (
-                  <div className="flex justify-center pt-2">
-                    <button
-                      type="button"
-                      onClick={handleLoadMore}
-                      disabled={loadingMore}
-                      className="rounded-md bg-[#1E56A0] px-6 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      {loadingMore ? "Loading..." : "Load More"}
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+      </main>
 
       {editingPost && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 py-6"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 px-4 py-6 sm:items-center"
           onClick={closeEditPostModal}
         >
           <div
-            className="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-xl bg-white p-4 shadow-2xl sm:p-6 lg:p-8"
+            className="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[28px] border border-forum-border bg-forum-surface p-4 shadow-dialog sm:p-6 lg:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <button
+              type="button"
               onClick={closeEditPostModal}
-              className="absolute right-4 top-4 text-gray-500 transition-colors hover:text-black"
+              className="absolute right-4 top-4 text-forum-subtle transition hover:text-forum-inkStrong"
             >
               <X className="h-6 w-6" />
             </button>
 
             <div className="mb-8">
-              <h3 className="text-2xl font-semibold text-[#0C245E] sm:text-3xl">
+              <h3 className="text-3xl font-semibold tracking-tight text-forum-inkStrong">
                 Edit Post
               </h3>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-forum-muted">
                 Changes are applied only when you save.
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-5">
               <div>
-                <label htmlFor="profile-post-title-editor" className="mb-1 block text-lg font-semibold text-black">
+                <label
+                  htmlFor="profile-post-title-editor"
+                  className="mb-3 block text-lg font-semibold text-forum-inkStrong"
+                >
                   Title
                 </label>
-                <div className="relative min-h-[112px] [&_.tox-edit-area__iframe]:max-h-[112px] [&_.tox-edit-area__iframe]:overflow-y-auto">
-                  <Editor
-                    id="profile-post-title-editor"
-                    value={editTitle}
-                    onEditorChange={(newTitle) => setEditTitle(newTitle)}
-                    tinymceScriptSrc="/tinymce/tinymce.min.js"
-                    init={{
-                      license_key: "gpl",
-                      promotion: false,
-                      branding: false,
-                      menubar: false,
-                      statusbar: false,
-                      placeholder: "Format your title here",
-                      height: 100,
-                      forced_root_block: false,
-                      toolbar: "bold italic underline strikethrough",
-                      plugins: [],
-                      toolbar_sticky: false,
-                      skin_url: "/tinymce/skins/ui/oxide",
-                      valid_elements: "b,strong,i,em,u,s,br",
-                      element_format: "html",
-                      entity_encoding: "raw",
-                      content_style: `
-                        body {
-                          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                          font-size: 1rem;
-                        }
-                      `,
-                    }}
-                  />
+                <div className="overflow-hidden rounded-2xl border border-forum-border bg-white shadow-sm">
+                  <div className="relative min-h-[112px] [&_.tox]:border-0 [&_.tox-editor-header]:border-b [&_.tox-editor-header]:border-forum-border [&_.tox-edit-area__iframe]:max-h-[112px] [&_.tox-edit-area__iframe]:overflow-y-auto">
+                    <Editor
+                      id="profile-post-title-editor"
+                      value={editTitle}
+                      onEditorChange={(newTitle) => setEditTitle(newTitle)}
+                      tinymceScriptSrc="/tinymce/tinymce.min.js"
+                      init={{
+                        license_key: "gpl",
+                        promotion: false,
+                        branding: false,
+                        menubar: false,
+                        statusbar: false,
+                        placeholder: "Format your title here",
+                        height: 100,
+                        forced_root_block: false,
+                        toolbar: "bold italic underline strikethrough",
+                        plugins: [],
+                        toolbar_sticky: false,
+                        skin_url: "/tinymce/skins/ui/oxide",
+                        valid_elements: "b,strong,i,em,u,s,br",
+                        element_format: "html",
+                        entity_encoding: "raw",
+                        content_style: `
+                          body {
+                            font-family: Inter, system-ui, sans-serif;
+                            font-size: 1rem;
+                            color: #191c1d;
+                          }
+                        `,
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-3 block text-lg font-semibold text-forum-inkStrong">
                   Tags
                 </label>
                 <input
                   value={editTagsInput}
                   onChange={(e) => setEditTagsInput(e.target.value)}
                   placeholder="React, performance, UI"
-                  className="w-full rounded border p-3 text-base"
+                  className="h-14 w-full rounded-2xl border border-forum-border bg-white px-4 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15"
                 />
-                <p className="mt-0.5 text-xs text-gray-500">
-                  Add multiple tags with commas. Example: React, performance, UI.
+                <p className="mt-3 text-sm leading-6 text-forum-muted">
+                  Add multiple tags with commas. Example: React, performance,
+                  UI.
                 </p>
               </div>
 
               <div>
-                <label className="mb-1 block text-lg font-semibold text-black">
+                <label className="mb-3 block text-lg font-semibold text-forum-inkStrong">
                   Content
                 </label>
-                <div className="relative min-h-[420px] [&_.tox-edit-area__iframe]:max-h-[420px] [&_.tox-edit-area__iframe]:overflow-y-auto sm:min-h-[560px] sm:[&_.tox-edit-area__iframe]:max-h-[560px] lg:min-h-[700px] lg:[&_.tox-edit-area__iframe]:max-h-[700px]">
-                  {!editorLoaded && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 text-gray-500">
-                      Loading editor...
-                    </div>
-                  )}
-                  <Editor
-                    ref={editEditorRef}
-                    tinymceScriptSrc="/tinymce/tinymce.min.js"
-                    value={editContent}
-                    onInit={(evt, editor) => {
-                      editEditorRef.current = editor;
-                      setEditorLoaded(true);
-                    }}
-                    onEditorChange={(newContent) => setEditContent(newContent)}
-                    init={{
-                      license_key: "gpl",
-                      promotion: false,
-                      branding: false,
-                      menubar: false,
-                      height:
-                        window.innerWidth < 640
-                          ? 420
-                          : window.innerWidth < 1024
-                          ? 560
-                          : 700,
-                      skin_url: "/tinymce/skins/ui/oxide",
-                      plugins: ["lists", "link", "image", "code"],
-                      toolbar:
-                        "undo redo | fontsize | bold italic underline strikethrough | forecolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | link | image | code",
-                      toolbar_sticky: true,
-                      toolbar_sticky_offset: 0,
-                      file_picker_types: "image",
-                      file_picker_callback: (callback) => {
-                        const input = document.createElement("input");
-                        input.type = "file";
-                        input.accept = "image/*";
+                <div className="overflow-hidden rounded-2xl border border-forum-border bg-white shadow-sm">
+                  <div className="relative min-h-[420px] [&_.tox]:border-0 [&_.tox-editor-header]:border-b [&_.tox-editor-header]:border-forum-border [&_.tox-edit-area__iframe]:max-h-[420px] [&_.tox-edit-area__iframe]:overflow-y-auto sm:min-h-[560px] sm:[&_.tox-edit-area__iframe]:max-h-[560px] lg:min-h-[700px] lg:[&_.tox-edit-area__iframe]:max-h-[700px]">
+                    {!editorLoaded && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center bg-forum-panel text-forum-muted">
+                        Loading editor...
+                      </div>
+                    )}
+                    <Editor
+                      ref={editEditorRef}
+                      tinymceScriptSrc="/tinymce/tinymce.min.js"
+                      value={editContent}
+                      onInit={(evt, editor) => {
+                        editEditorRef.current = editor;
+                        setEditorLoaded(true);
+                      }}
+                      onEditorChange={(newContent) =>
+                        setEditContent(newContent)
+                      }
+                      init={{
+                        license_key: "gpl",
+                        promotion: false,
+                        branding: false,
+                        menubar: false,
+                        height:
+                          window.innerWidth < 640
+                            ? 420
+                            : window.innerWidth < 1024
+                              ? 560
+                              : 700,
+                        skin_url: "/tinymce/skins/ui/oxide",
+                        plugins: ["lists", "link", "image", "code"],
+                        toolbar:
+                          "undo redo | fontsize | bold italic underline strikethrough | forecolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | link | image | code",
+                        toolbar_sticky: true,
+                        toolbar_sticky_offset: 0,
+                        file_picker_types: "image",
+                        file_picker_callback: (callback) => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*";
 
-                        input.onchange = () => {
-                          const file = input.files?.[0];
-                          if (!file) {
-                            return;
-                          }
+                          input.onchange = () => {
+                            const file = input.files?.[0];
+                            if (!file) {
+                              return;
+                            }
 
-                          const reader = new FileReader();
-                          reader.onload = () => {
-                            const image = new Image();
-                            image.onload = () => {
-                              const maxWidth = 800;
-                              const width =
-                                image.width > maxWidth ? maxWidth : image.width;
-                              const height =
-                                image.width > maxWidth
-                                  ? Math.round(
-                                      (image.height * maxWidth) / image.width
-                                    )
-                                  : image.height;
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              const image = new Image();
+                              image.onload = () => {
+                                const maxWidth = 800;
+                                const width =
+                                  image.width > maxWidth
+                                    ? maxWidth
+                                    : image.width;
+                                const height =
+                                  image.width > maxWidth
+                                    ? Math.round(
+                                        (image.height * maxWidth) / image.width,
+                                      )
+                                    : image.height;
 
-                              callback(reader.result, {
-                                title: file.name,
-                                width: String(width),
-                                height: String(height),
-                                style: `max-width: ${maxWidth}px; height: auto;`,
-                              });
+                                callback(reader.result, {
+                                  title: file.name,
+                                  width: String(width),
+                                  height: String(height),
+                                  style: `max-width: ${maxWidth}px; height: auto;`,
+                                });
+                              };
+                              image.src = reader.result;
                             };
-                            image.src = reader.result;
+                            reader.readAsDataURL(file);
                           };
-                          reader.readAsDataURL(file);
-                        };
 
-                        input.click();
-                      },
-                      image_title: true,
-                      image_dimensions: true,
-                      object_resizing: "img",
-                      extended_valid_elements: "img[src|alt|width|height|style]",
-                      valid_styles: { "*": "width,height,max-width" },
-                      convert_urls: false,
-                      remove_script_host: false,
-                      automatic_uploads: false,
-                      paste_data_images: true,
-                      allow_local_files: true,
-                      element_format: "html",
-                      schema: "html5",
-                      entity_encoding: "raw",
-                      autosave_ask_before_unload: false,
-                      statusbar: false,
-                      content_style: `
-                        body {
-                          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                        }
-                        img {
-                          max-width: 800px;
-                          height: auto;
-                        }
-                      `,
-                    }}
-                  />
+                          input.click();
+                        },
+                        image_title: true,
+                        image_dimensions: true,
+                        object_resizing: "img",
+                        extended_valid_elements:
+                          "img[src|alt|width|height|style]",
+                        valid_styles: { "*": "width,height,max-width" },
+                        convert_urls: false,
+                        remove_script_host: false,
+                        automatic_uploads: false,
+                        paste_data_images: true,
+                        allow_local_files: true,
+                        element_format: "html",
+                        schema: "html5",
+                        entity_encoding: "raw",
+                        autosave_ask_before_unload: false,
+                        statusbar: false,
+                        content_style: `
+                          body {
+                            font-family: Inter, system-ui, sans-serif;
+                          }
+                          img {
+                            max-width: 800px;
+                            height: auto;
+                          }
+                        `,
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-1">
+              <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
                 <button
+                  type="button"
                   onClick={closeEditPostModal}
-                  className="rounded-md border border-gray-300 px-6 py-2 font-medium"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-forum-border px-5 font-medium text-forum-inkStrong transition hover:bg-forum-panel"
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleUpdatePost}
-                  className="rounded-md bg-[#1E56A0] px-6 py-2 font-medium text-white"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-forum-primary px-5 font-medium text-white transition hover:bg-forum-primaryDark"
                 >
                   Save
                 </button>
@@ -1022,26 +1096,29 @@ export default function Profile() {
       )}
 
       {showEditProfile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-5 sm:p-6 lg:p-8">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 px-4 py-6 sm:items-center">
+          <div className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-forum-border bg-forum-surface p-5 shadow-dialog sm:p-6 lg:p-8">
             <button
+              type="button"
               onClick={() => setShowEditProfile(false)}
-              className="absolute right-4 top-4"
+              className="absolute right-4 top-4 text-forum-subtle"
             >
               <X className="h-6 w-6" />
             </button>
 
             <div className="mb-8 text-center">
               <div className="inline-flex flex-col items-center">
-                <div className="mb-4 h-24 w-24 overflow-hidden rounded-full border">
+                <div className="mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-forum-border bg-forum-primarySoft text-forum-primary">
                   {previewImage ? (
                     <img
                       src={previewImage}
+                      alt="Preview avatar"
                       className="h-full w-full object-cover"
                     />
                   ) : user?.avatar ? (
                     <img
                       src={user.avatar}
+                      alt={user.username}
                       className="h-full w-full object-cover"
                     />
                   ) : (
@@ -1065,19 +1142,19 @@ export default function Profile() {
 
                 <label
                   htmlFor="avatarUpload"
-                  className="cursor-pointer font-medium text-[#1E56A0]"
+                  className="cursor-pointer font-semibold text-forum-primary"
                 >
                   Change Image
                 </label>
               </div>
-              <h2 className="mt-4 text-2xl font-semibold sm:text-3xl">
+              <h2 className="mt-4 text-4xl font-semibold tracking-tight text-forum-inkStrong">
                 Edit Profile
               </h2>
             </div>
 
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
-                <label className="font-medium sm:pt-2 sm:text-right">
+                <label className="font-medium text-forum-inkStrong sm:pt-2 sm:text-right">
                   Fullname:
                 </label>
                 <div className="w-full">
@@ -1091,8 +1168,8 @@ export default function Profile() {
                       });
                       setErrors({ ...errors, fullname: "" });
                     }}
-                    className={`w-full rounded-md border px-4 py-2 ${
-                      errors.fullname ? "border-red-500" : "border-gray-300"
+                    className={`h-12 w-full rounded-2xl border bg-white px-4 text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15 ${
+                      errors.fullname ? "border-red-500" : "border-forum-border"
                     }`}
                   />
                   {errors.fullname && (
@@ -1104,7 +1181,7 @@ export default function Profile() {
               </div>
 
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
-                <label className="font-medium sm:pt-2 sm:text-right">
+                <label className="font-medium text-forum-inkStrong sm:pt-2 sm:text-right">
                   Email:
                 </label>
                 <div className="w-full">
@@ -1118,20 +1195,18 @@ export default function Profile() {
                       });
                       setErrors({ ...errors, email: "" });
                     }}
-                    className={`w-full rounded-md border px-4 py-2 ${
-                      errors.email ? "border-red-500" : "border-gray-300"
+                    className={`h-12 w-full rounded-2xl border bg-white px-4 text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15 ${
+                      errors.email ? "border-red-500" : "border-forum-border"
                     }`}
                   />
                   {errors.email && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.email}
-                    </p>
+                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
                   )}
                 </div>
               </div>
 
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
-                <label className="font-medium sm:pt-2 sm:text-right">
+                <label className="font-medium text-forum-inkStrong sm:pt-2 sm:text-right">
                   Username:
                 </label>
                 <div className="w-full">
@@ -1145,8 +1220,8 @@ export default function Profile() {
                       });
                       setErrors({ ...errors, username: "" });
                     }}
-                    className={`w-full rounded-md border px-4 py-2 ${
-                      errors.username ? "border-red-500" : "border-gray-300"
+                    className={`h-12 w-full rounded-2xl border bg-white px-4 text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15 ${
+                      errors.username ? "border-red-500" : "border-forum-border"
                     }`}
                   />
                   {errors.username && (
@@ -1158,7 +1233,9 @@ export default function Profile() {
               </div>
 
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
-                <label className="font-medium sm:pt-2 sm:text-right">Bio:</label>
+                <label className="font-medium text-forum-inkStrong sm:pt-2 sm:text-right">
+                  Bio:
+                </label>
                 <div className="w-full">
                   <textarea
                     value={editFormData.bio}
@@ -1167,8 +1244,8 @@ export default function Profile() {
                       setErrors({ ...errors, bio: "" });
                     }}
                     rows="4"
-                    className={`w-full resize-none rounded-md border px-4 py-2 ${
-                      errors.bio ? "border-red-500" : "border-gray-300"
+                    className={`w-full resize-none rounded-2xl border bg-white px-4 py-3 text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15 ${
+                      errors.bio ? "border-red-500" : "border-forum-border"
                     }`}
                   />
                   {errors.bio && (
@@ -1177,17 +1254,17 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="flex flex-col justify-center gap-3 pt-6 sm:flex-row sm:gap-4">
+              <div className="flex flex-col justify-center gap-3 pt-6 sm:flex-row sm:justify-end sm:gap-4">
                 <button
                   type="submit"
-                  className="rounded-md bg-[#1E56A0] px-8 py-2 font-medium text-white"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-forum-primary px-8 font-medium text-white transition hover:bg-forum-primaryDark"
                 >
                   Save Changes
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditProfile(false)}
-                  className="rounded-md border border-gray-300 px-8 py-2 font-medium"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-forum-border px-8 font-medium text-forum-inkStrong transition hover:bg-forum-panel"
                 >
                   Cancel
                 </button>
@@ -1198,29 +1275,38 @@ export default function Profile() {
       )}
 
       {showDeleteDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="max-w-md rounded-lg bg-white p-5 sm:p-8">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 px-4 py-6 sm:items-center">
+          <div className="w-full max-w-md rounded-[28px] border border-forum-border bg-forum-surface p-5 shadow-dialog sm:p-8">
             <div className="mb-6 flex items-center gap-3">
-              <Trash2 className="h-6 w-6 text-red-600" />
-              <h3 className="text-xl font-semibold text-red-600">
-                Are you sure you want to delete this post?
-              </h3>
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-forum-dangerSoft text-forum-danger">
+                <Trash2 className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-forum-inkStrong">
+                  Delete this post?
+                </h3>
+                <p className="mt-1 text-sm text-forum-muted">
+                  This action permanently removes the post from your profile.
+                </p>
+              </div>
             </div>
-            <div className="flex justify-end gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
-                onClick={handleDeletePost}
-                className="rounded-md bg-red-600 px-6 py-2 font-medium text-white"
-              >
-                Delete
-              </button>
-              <button
+                type="button"
                 onClick={() => {
                   setShowDeleteDialog(false);
                   setDeletePostId(null);
                 }}
-                className="rounded-md border border-gray-300 px-6 py-2 font-medium"
+                className="inline-flex h-12 items-center justify-center rounded-2xl border border-forum-border px-6 font-medium text-forum-inkStrong transition hover:bg-forum-panel"
               >
                 Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeletePost}
+                className="inline-flex h-12 items-center justify-center rounded-2xl bg-forum-danger px-6 font-medium text-white transition hover:bg-red-700"
+              >
+                Delete
               </button>
             </div>
           </div>

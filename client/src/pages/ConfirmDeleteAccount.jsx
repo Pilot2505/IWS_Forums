@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ConfirmDeleteAccount() {
@@ -19,7 +20,9 @@ export default function ConfirmDeleteAccount() {
       }
 
       try {
-        const response = await fetch(`/api/users/delete-account/verify?token=${encodeURIComponent(token)}`);
+        const response = await fetch(
+          `/api/users/delete-account/verify?token=${encodeURIComponent(token)}`,
+        );
         if (!response.ok) {
           setTokenStatus("invalid");
           return;
@@ -77,9 +80,9 @@ export default function ConfirmDeleteAccount() {
 
   if (tokenStatus === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#d4e4ec]">
-        <div className="rounded-lg bg-white p-8 shadow-sm">
-          <p className="text-[#1a2332]">Verifying deletion link...</p>
+      <div className="flex min-h-screen items-center justify-center bg-forum-bg px-4">
+        <div className="rounded-[28px] border border-forum-border bg-forum-surface p-8 shadow-dialog">
+          <p className="text-forum-inkStrong">Verifying deletion link...</p>
         </div>
       </div>
     );
@@ -87,15 +90,18 @@ export default function ConfirmDeleteAccount() {
 
   if (tokenStatus === "invalid") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#d4e4ec] px-4">
-        <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-sm">
-          <h1 className="mb-3 text-2xl font-bold text-[#1a2332]">Invalid link</h1>
-          <p className="mb-6 text-sm text-gray-600">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-forum-bg px-4">
+        <div className="w-full max-w-md rounded-[28px] border border-forum-border bg-forum-surface p-8 shadow-dialog">
+          {/* Auto-styled: invalid token state inferred from the deletion flow because Figma only provides the confirmation state. */}
+          <h1 className="mb-3 text-2xl font-semibold text-forum-inkStrong">
+            Invalid link
+          </h1>
+          <p className="mb-6 text-sm leading-6 text-forum-muted">
             This deletion link is invalid or expired.
           </p>
           <Link
             to="/"
-            className="inline-flex rounded-md bg-[#2b5a8a] px-4 py-2 font-medium text-white hover:bg-[#1e4167]"
+            className="inline-flex h-12 items-center justify-center rounded-2xl bg-forum-primary px-5 font-medium text-white transition hover:bg-forum-primaryDark"
           >
             Go home
           </Link>
@@ -105,36 +111,60 @@ export default function ConfirmDeleteAccount() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#d4e4ec] px-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-sm">
-        <h1 className="mb-3 text-2xl font-bold text-[#1a2332]">Confirm account deletion</h1>
-        <p className="mb-6 text-sm text-gray-600">
-          Enter your password to confirm that you want to delete your account. Your account will be deleted after 7 days.
-        </p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-forum-bg px-4 py-10">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-[-10rem] top-[-12rem] h-96 w-96 rounded-full bg-forum-primarySoft/60 blur-3xl" />
+        <div className="absolute bottom-[-12rem] right-[-6rem] h-80 w-80 rounded-full bg-forum-primarySoft/50 blur-3xl" />
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="password" className="mb-2 block text-sm font-semibold text-[#0a0a0a]">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              className="w-full rounded-md border border-gray-300 px-4 py-2.5 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#2b5a8a]"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+      <div className="relative z-10 w-full max-w-xl">
+        <div className="mb-8 flex items-center justify-center gap-3 text-forum-inkStrong">
+          <span className="text-sm font-semibold uppercase tracking-[0.24em] text-forum-primary">
+            Tech Pulse
+          </span>
+        </div>
+
+        <div className="rounded-[28px] border border-forum-border bg-forum-surface p-8 text-center shadow-dialog sm:p-10">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-forum-dangerSoft text-forum-danger">
+            <TriangleAlert className="h-9 w-9" />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
-          >
-            {loading ? "Confirming..." : "Confirm deletion"}
-          </button>
-        </form>
+          <h1 className="mb-4 text-4xl font-semibold tracking-tight text-forum-inkStrong">
+            Confirm account deletion
+          </h1>
+          <p className="mx-auto mb-8 max-w-md text-lg leading-9 text-forum-muted">
+            Enter your password to confirm that you want to delete your account.
+            Your account will be deleted after 7 days.
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-6 text-left">
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-2 block text-base font-semibold text-forum-inkStrong"
+              >
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                className="h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:bg-white focus:ring-2 focus:ring-forum-primary/15"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your current password"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-forum-danger px-4 text-base font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {loading ? "Confirming..." : "Confirm deletion"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ import PostCard from "../components/posts/PostCard";
 import useRequireAuth from "../hooks/useRequireAuth";
 import BookmarkButton from "../components/BookmarkButton";
 
-// Map category id -> label hiển thị
 const CATEGORY_LABELS = {
   javascript: "JavaScript",
   python: "Python",
@@ -43,7 +42,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!user) return;
-    
+
     authFetch(`/api/follow/following/${user.id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch following");
@@ -53,7 +52,6 @@ export default function Home() {
       .catch((err) => console.error("Error loading following:", err));
   }, [user]);
 
-  // Fetch posts mỗi khi user hoặc currentPage thay đổi
   useEffect(() => {
     if (!user) return;
 
@@ -150,8 +148,8 @@ export default function Home() {
 
       setFollowing((prev) =>
         prev.map((p) =>
-          p.id === Number(person.id) ? { ...p, newPosts: 0 } : p
-        )
+          p.id === Number(person.id) ? { ...p, newPosts: 0 } : p,
+        ),
       );
 
       navigate(`/profile/${encodeURIComponent(person.username)}`);
@@ -166,12 +164,12 @@ export default function Home() {
       prev.map((post) =>
         post.id === postId
           ? {
-              ...post,
-              vote_count: voteCount,
-              current_user_vote: currentUserVote,
-            }
-          : post
-      )
+            ...post,
+            vote_count: voteCount,
+            current_user_vote: currentUserVote,
+          }
+          : post,
+      ),
     );
   };
 
@@ -182,125 +180,130 @@ export default function Home() {
 
   if (!ready || !user) return null;
 
-  // Lấy label categories để hiển thị
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-  const userCategories = Array.isArray(storedUser.categories) ? storedUser.categories : [];
+  const userCategories = Array.isArray(storedUser.categories)
+    ? storedUser.categories
+    : [];
 
   return (
-    <div className="min-h-screen bg-[#D6E4F0]">
+    <div className="min-h-screen bg-forum-bg">
       <Navbar user={user} setUser={setUser} showCreatePost={true} />
 
-      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:flex-row lg:items-start lg:px-10 lg:py-10">
-        {/* Main Content */}
-        <div className="flex-1">
-          <Link
-            to="/create-post"
-            className="mb-6 inline-block rounded-lg bg-[#1E56A0] px-5 py-3 text-base font-medium text-white sm:px-6 sm:text-lg lg:mb-8 lg:px-8 lg:py-4 lg:text-xl"
-          >
-            Create a New Post
-          </Link>
+      <main className="mx-auto flex max-w-content flex-col gap-8 px-4 py-6 sm:px-6 lg:flex-row lg:items-start lg:px-10 lg:py-10">
+        <section className="min-w-0 flex-1">
+          <div className="rounded-[28px] border border-forum-border bg-forum-surface p-6 shadow-panel sm:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-3">
+                <h1 className="text-4xl font-semibold tracking-tight text-forum-inkStrong sm:text-5xl">
+                  {isRecommended ? "Recommended Posts" : "Recent Posts"}
+                </h1>
+                <p className="max-w-2xl text-lg text-forum-muted">
+                  {isRecommended
+                    ? "Curated from the topics you selected to keep your feed focused."
+                    : "Select your interests to get personalized recommendations."}
+                </p>
 
-          {/* Section title + category badges */}
-          <div className="mb-4 lg:mb-6">
-            <h2 className="text-3xl font-medium text-[#4F6F9F] sm:text-4xl lg:text-5xl">
-              {isRecommended ? "Recommended Posts" : "Recent Posts"}
-            </h2>
-
-            {isRecommended && userCategories.length > 0 && (
-              <div className="mt-3 flex items-center gap-2">
-                <span className="text-sm text-gray-500">Based on:</span>
-                {userCategories.map((cat) => (
-                  <span
-                    key={cat}
-                    className="rounded-full border border-[#1E56A0]/20 bg-[#1E56A0]/10 px-3 py-1 text-xs font-medium text-[#1E56A0]"
-                  >
-                    {CATEGORY_LABELS[cat] || cat}
-                  </span>
-                ))}
-                <Link
-                  to="/select-categories"
-                  className="ml-2 text-xs text-gray-400 underline hover:text-[#1E56A0]"
-                >
-                  Change
-                </Link>
+                {isRecommended && userCategories.length > 0 ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {userCategories.map((cat) => (
+                      <span
+                        key={cat}
+                        className="rounded-full bg-forum-primarySoft px-3 py-1 text-xs font-semibold text-forum-primary"
+                      >
+                        {CATEGORY_LABELS[cat] || cat}
+                      </span>
+                    ))}
+                    <Link
+                      to="/select-categories"
+                      className="text-sm font-medium text-forum-primary transition hover:text-forum-primaryDark"
+                    >
+                      Change interests
+                    </Link>
+                  </div>
+                ) : (
+                  <p className="text-sm text-forum-muted">
+                    <Link
+                      to="/select-categories"
+                      className="font-semibold text-forum-primary transition hover:text-forum-primaryDark"
+                    >
+                      Select your interests
+                    </Link>{" "}
+                    to personalize this feed.
+                  </p>
+                )}
               </div>
-            )}
 
-            {!isRecommended && (
-              <p className="mt-2 text-sm text-gray-500">
-                <Link
-                  to="/select-categories"
-                  className="font-medium text-[#1E56A0] hover:underline"
-                >
-                  Select your interests
-                </Link>{" "}
-                to get personalized recommendations.
-              </p>
-            )}
-
-            <div className="mt-4 flex flex-col gap-3 rounded-lg border border-[#1E56A0]/10 bg-[#F6F9FC] p-4 sm:flex-row sm:items-end sm:justify-between">
-              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
-                Sort by
-                <select
-                  value={sortBy}
-                  onChange={(e) =>
-                    handleSortChange(
-                      e.target.value,
-                      e.target.value === "upvotes" ? sortDir : "desc"
-                    )
-                  }
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
-                >
-                  <option value="date">Date</option>
-                  <option value="upvotes">Upvotes</option>
-                </select>
-              </label>
-
-              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
-                Order
-                <select
-                  value={sortDir}
-                  onChange={(e) => handleSortChange(sortBy, e.target.value)}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
-                >
-                  {sortBy === "date" ? (
-                    <>
-                      <option value="desc">Newest first</option>
-                      <option value="asc">Oldest first</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="desc">Most upvotes</option>
-                      <option value="asc">Least upvotes</option>
-                    </>
-                  )}
-                </select>
-              </label>
+              <Link
+                to="/create-post"
+                className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-2xl bg-forum-primary px-5 text-sm font-semibold text-white transition hover:bg-forum-primaryDark sm:w-fit"
+              >
+                + Create a New Post
+              </Link>
             </div>
           </div>
 
-          {/* Posts list */}
+          {/* Auto-styled: sort controls are not fully represented in Figma, so they follow the same card/filter language as the feed header. */}
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-end">
+            <label className="flex flex-col gap-2 text-sm font-medium text-forum-inkStrong">
+              Sort by
+              <select
+                value={sortBy}
+                onChange={(e) =>
+                  handleSortChange(
+                    e.target.value,
+                    e.target.value === "upvotes" ? sortDir : "desc",
+                  )
+                }
+                className="h-12 rounded-2xl border border-forum-border bg-forum-surface px-4 text-sm text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15"
+              >
+                <option value="date">Date</option>
+                <option value="upvotes">Upvotes</option>
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm font-medium text-forum-inkStrong">
+              Order
+              <select
+                value={sortDir}
+                onChange={(e) => handleSortChange(sortBy, e.target.value)}
+                className="h-12 rounded-2xl border border-forum-border bg-forum-surface px-4 text-sm text-forum-inkStrong outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15"
+              >
+                {sortBy === "date" ? (
+                  <>
+                    <option value="desc">Newest first</option>
+                    <option value="asc">Oldest first</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="desc">Most upvotes</option>
+                    <option value="asc">Least upvotes</option>
+                  </>
+                )}
+              </select>
+            </label>
+          </div>
+
           {loadingPosts ? (
-            <div className="space-y-5 sm:space-y-6 lg:space-y-8">
+            <div className="mt-6 space-y-5">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="animate-pulse rounded-lg bg-[#F6F6F6] p-6 lg:p-8"
+                  className="animate-pulse rounded-[28px] border border-forum-border bg-forum-surface p-6 shadow-panel"
                 >
-                  <div className="mb-3 h-6 w-3/4 rounded bg-gray-200" />
-                  <div className="mb-2 h-4 w-full rounded bg-gray-200" />
-                  <div className="h-4 w-5/6 rounded bg-gray-200" />
+                  <div className="mb-3 h-8 w-3/4 rounded-full bg-slate-100" />
+                  <div className="mb-2 h-4 w-full rounded-full bg-slate-100" />
+                  <div className="h-4 w-5/6 rounded-full bg-slate-100" />
                 </div>
               ))}
             </div>
           ) : posts.length === 0 ? (
-            <div className="rounded-lg bg-[#F6F6F6] p-8 text-center text-gray-500">
+            <div className="mt-6 rounded-[28px] border border-dashed border-forum-borderStrong bg-forum-surface p-10 text-center text-forum-muted">
               {isRecommended
                 ? "No posts found for your selected categories yet. Try changing your interests or check back later."
                 : "No posts yet. Be the first to create one!"}
             </div>
           ) : (
-            <div className="space-y-5 sm:space-y-6 lg:space-y-8">
+            <div className="mt-6 space-y-5">
               {posts.map((post) => (
                 <PostCard
                   key={post.id}
@@ -318,7 +321,7 @@ export default function Home() {
                             avatar: post.avatar,
                           })
                         }
-                        className="font-medium text-[#1E56A0] hover:underline"
+                        className="font-semibold text-forum-primary transition hover:text-forum-primaryDark"
                       >
                         {post.username}
                       </button>
@@ -326,16 +329,18 @@ export default function Home() {
                   }
                   meta={new Date(post.created_at).toLocaleString()}
                   readMoreTo={`/post/${post.id}`}
-                  className="border-b-[0.5px] border-r-[0.5px] border-black bg-[#F6F6F6]"
                 >
-                  <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <PostVoteControls
                       postId={post.id}
                       initialVoteCount={post.vote_count ?? 0}
                       initialCurrentUserVote={post.current_user_vote ?? 0}
                       onChange={handlePostVoteChange}
                     />
-                    <BookmarkButton postId={post.id} initialBookmarked={Boolean(post.is_bookmarked)} />
+                    <BookmarkButton
+                      postId={post.id}
+                      initialBookmarked={Boolean(post.is_bookmarked)}
+                    />
                   </div>
                 </PostCard>
               ))}
@@ -348,57 +353,79 @@ export default function Home() {
                 type="button"
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="rounded-md bg-[#1E56A0] px-6 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex h-12 items-center justify-center rounded-2xl border border-forum-border bg-forum-surface px-5 font-semibold text-forum-inkStrong transition hover:border-forum-primary/30 hover:text-forum-primary disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loadingMore ? "Loading..." : "Load More"}
               </button>
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Sidebar — Following */}
-        <div className="w-full rounded-lg bg-[#F6F6F6] p-4 sm:p-6 lg:sticky lg:top-6 lg:w-[320px] lg:max-h-[85vh] lg:flex-shrink-0 lg:overflow-y-auto lg:p-8 xl:w-[332px]">
-          <h3 className="mb-6 bg-[#F6F6F6] pb-2 text-2xl font-medium capitalize text-[#0C245E]/70 sm:text-3xl lg:sticky lg:top-0 lg:z-10 lg:mb-8 lg:text-4xl">
-            Following
-          </h3>
+        <aside className="w-full rounded-[28px] border border-forum-border bg-forum-surface p-5 shadow-panel sm:p-6 lg:sticky lg:top-28 lg:w-[360px] lg:flex-shrink-0">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="text-3xl font-semibold tracking-tight text-forum-inkStrong">
+              Following
+            </h3>
+            <span className="text-2xl text-forum-subtle">...</span>
+          </div>
 
           {following.length === 0 ? (
-            <p className="text-sm text-gray-400">You are not following anyone yet.</p>
+            <p className="text-sm leading-6 text-forum-muted">
+              You are not following anyone yet.
+            </p>
           ) : (
-            <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+            <div className="space-y-4">
               {following.map((person, index) => (
                 <div key={person.id}>
                   <div className="flex items-center gap-4">
                     <div
+                      role="button"
+                      tabIndex={0}
                       onClick={() => handleOpenProfile(person)}
-                      className={`h-12 w-12 cursor-pointer rounded-full p-[3px] transition-transform hover:scale-105 sm:h-[52px] sm:w-[52px] lg:h-[60px] lg:w-[60px]
-                        ${
-                          person.newPosts > 0
-                            ? "bg-gradient-to-tr from-blue-500 to-cyan-400"
-                            : "border-[#D6E4F0]"
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleOpenProfile(person);
                         }
-                      `}
+                      }}
+                      className={`h-12 w-12 cursor-pointer rounded-full p-[3px] transition-transform hover:scale-105 sm:h-14 sm:w-14 ${person.newPosts > 0
+                          ? "bg-gradient-to-tr from-forum-primary to-sky-400"
+                          : "bg-forum-panel"
+                        }`}
                     >
-                      <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#21005D]/10">
+                      <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-forum-surface">
                         {person.avatar ? (
                           <img
                             src={person.avatar}
+                            alt={person.username}
                             className="h-full w-full rounded-full object-cover"
                           />
                         ) : (
-                          <User className="h-8 w-8" />
+                          <User className="h-6 w-6 text-forum-primary" />
                         )}
                       </div>
                     </div>
-                    <div>
+
+                    <div className="min-w-0">
                       <p
+                        role="button"
+                        tabIndex={0}
                         onClick={() => handleOpenProfile(person)}
-                        className="cursor-pointer text-lg text-black transition-colors hover:text-[#1E56A0] sm:text-xl lg:text-2xl"
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            handleOpenProfile(person);
+                          }
+                        }}
+                        className="cursor-pointer truncate text-lg font-medium text-forum-inkStrong transition hover:text-forum-primary"
                       >
                         {person.fullname || person.username}
                       </p>
+                      <p className="truncate text-sm text-forum-muted">
+                        @{person.username}
+                      </p>
                       {person.newPosts > 0 && (
-                        <p className="text-sm text-[#0C245E]/70 sm:text-base">
+                        <p className="text-sm text-forum-primary">
                           {person.newPosts} new post
                           {person.newPosts > 1 ? "s" : ""}
                         </p>
@@ -407,14 +434,14 @@ export default function Home() {
                   </div>
 
                   {index < following.length - 1 && (
-                    <div className="mt-6 h-px bg-black/50" />
+                    <div className="mt-4 h-px bg-forum-border" />
                   )}
                 </div>
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </aside>
+      </main>
     </div>
   );
 }

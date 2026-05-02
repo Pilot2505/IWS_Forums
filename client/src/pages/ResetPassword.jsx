@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { resetPassword, verifyPasswordResetToken } from "../services/authService";
+import {
+  resetPassword,
+  verifyPasswordResetToken,
+} from "../services/authService";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -78,34 +81,47 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#d4e4ec]">
-      <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-        <h1 className="text-xl font-bold text-[#1a2332]">Tech Pulse</h1>
+    <div className="relative min-h-screen overflow-hidden bg-forum-bg">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute right-[-8rem] top-[-10rem] h-80 w-80 rounded-full bg-forum-primarySoft/60 blur-3xl" />
+        <div className="absolute bottom-[-10rem] left-[-4rem] h-96 w-96 rounded-full bg-forum-primarySoft/50 blur-3xl" />
+      </div>
+
+      <header className="relative z-10 flex items-center justify-between px-4 py-5 sm:px-8">
+        <h1 className="text-2xl font-semibold tracking-tight text-forum-primary">
+          Tech Pulse
+        </h1>
         <Link
           to="/login"
-          className="font-medium text-[#2b5a8a] transition-colors hover:text-[#1e4167]"
+          className="text-sm font-medium text-forum-inkStrong transition hover:text-forum-primary"
         >
           Login
         </Link>
       </header>
 
-      <div className="flex items-center justify-center px-4 py-8 sm:pt-8">
-        <div className="w-full max-w-md">
-          <h2 className="mb-6 text-center text-3xl font-bold text-[#0a0a0a] sm:mb-8 sm:text-4xl">
-            Create New Password
-          </h2>
+      <main className="relative z-10 flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-2xl">
+          <div className="mb-8 text-center">
+            <h2 className="text-4xl font-semibold tracking-tight text-forum-inkStrong sm:text-5xl">
+              Create New Password
+            </h2>
+            <p className="mt-4 text-lg text-forum-muted">
+              Secure your account with a strong password.
+            </p>
+          </div>
 
-          <div className="rounded-lg bg-white p-5 shadow-sm sm:p-8">
+          <div className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-dialog backdrop-blur sm:p-10">
             {checkingToken ? (
-              <p className="text-sm text-gray-600">Checking reset link...</p>
+              <p className="text-sm text-forum-muted">Checking reset link...</p>
             ) : !tokenValid ? (
               <div className="space-y-4">
-                <p className="text-sm leading-6 text-gray-600">
+                {/* Auto-styled: invalid token state inferred from the auth card pattern because Figma only shows the valid form state. */}
+                <p className="text-sm leading-6 text-forum-muted">
                   {error || "This reset link is invalid or has expired."}
                 </p>
                 <Link
                   to="/forgot-password"
-                  className="inline-flex rounded-md bg-[#2b5a8a] px-4 py-2 font-semibold text-white transition-colors hover:bg-[#1e4167]"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-forum-primary px-5 font-semibold text-white transition hover:bg-forum-primaryDark"
                 >
                   Request a new link
                 </Link>
@@ -115,7 +131,7 @@ export default function ResetPassword() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="mb-2 block text-sm font-semibold text-[#0a0a0a]"
+                    className="mb-2 block text-sm font-semibold text-forum-inkStrong"
                   >
                     New Password
                   </label>
@@ -126,13 +142,13 @@ export default function ResetPassword() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="New password"
-                      className="w-full rounded-md border border-gray-300 px-4 py-2.5 pr-20 placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#2b5a8a]"
+                      className="h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 pr-20 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:bg-white focus:ring-2 focus:ring-forum-primary/15"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-sm font-medium text-[#2b5a8a] hover:text-[#1e4167]"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-forum-primary transition hover:text-forum-primaryDark"
                     >
                       {showPassword ? "Hide" : "Show"}
                     </button>
@@ -142,7 +158,7 @@ export default function ResetPassword() {
                 <div>
                   <label
                     htmlFor="confirmPassword"
-                    className="mb-2 block text-sm font-semibold text-[#0a0a0a]"
+                    className="mb-2 block text-sm font-semibold text-forum-inkStrong"
                   >
                     Confirm Password
                   </label>
@@ -152,19 +168,20 @@ export default function ResetPassword() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter new password"
-                    className="w-full rounded-md border border-gray-300 px-4 py-2.5 placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#2b5a8a]"
+                    className="h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:bg-white focus:ring-2 focus:ring-forum-primary/15"
                     required
                   />
                 </div>
 
-                <p className="text-sm text-gray-500">
-                  Use at least 6 characters. After saving, you can sign in with your new password.
+                <p className="text-sm leading-7 text-forum-muted">
+                  Use at least 6 characters. After saving, you can sign in with
+                  your new password.
                 </p>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="mt-6 w-full rounded-md bg-[#2b5a8a] py-3 font-semibold text-white transition-colors hover:bg-[#1e4167] disabled:bg-gray-400"
+                  className="mt-4 inline-flex h-14 w-full items-center justify-center rounded-2xl bg-forum-primary text-base font-semibold text-white shadow-lift transition hover:bg-forum-primaryDark disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {loading ? "Updating..." : "Update password"}
                 </button>
@@ -172,7 +189,7 @@ export default function ResetPassword() {
             )}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

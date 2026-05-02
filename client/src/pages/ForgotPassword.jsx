@@ -31,31 +31,40 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#d4e4ec]">
-      <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-        <h1 className="text-xl font-bold text-[#1a2332]">Tech Pulse</h1>
+    <div className="relative min-h-screen overflow-hidden bg-forum-bg">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-[-8rem] top-[-10rem] h-80 w-80 rounded-full bg-forum-primarySoft/60 blur-3xl" />
+        <div className="absolute bottom-[-10rem] right-[-4rem] h-80 w-80 rounded-full bg-forum-primarySoft/50 blur-3xl" />
+      </div>
+
+      <header className="relative z-10 flex items-center justify-between px-4 py-5 sm:px-8">
+        <h1 className="text-2xl font-semibold tracking-tight text-forum-inkStrong">
+          Tech Pulse
+        </h1>
         <Link
           to="/login"
-          className="font-medium text-[#2b5a8a] transition-colors hover:text-[#1e4167]"
+          className="text-sm font-medium text-forum-primary transition hover:text-forum-primaryDark"
         >
           Back to login
         </Link>
       </header>
 
-      <div className="flex items-center justify-center px-4 py-8 sm:pt-8">
-        <div className="w-full max-w-md">
-          <h2 className="mb-6 text-center text-3xl font-bold text-[#0a0a0a] sm:mb-8 sm:text-4xl">
-            Reset Password
-          </h2>
+      <main className="relative z-10 flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-2xl">
+          <div className="mb-8 text-center">
+            <h2 className="text-4xl font-semibold tracking-tight text-forum-inkStrong sm:text-5xl">
+              Reset Password
+            </h2>
+          </div>
 
-          <div className="rounded-lg bg-white p-5 shadow-sm sm:p-8">
-            <p className="mb-5 text-sm leading-6 text-gray-600">
+          <div className="rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-dialog backdrop-blur sm:p-10">
+            <p className="mb-6 text-center text-lg leading-9 text-forum-muted">
               Enter your email or username and we will send a secure reset link.
               The link expires in 1 hour.
             </p>
 
             {sent && (
-              <div className="mb-5 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                 Email has been sent. Please check your inbox for the reset link.
               </div>
             )}
@@ -64,7 +73,7 @@ export default function ForgotPassword() {
               <div>
                 <label
                   htmlFor="identifier"
-                  className="mb-2 block text-sm font-semibold text-[#0a0a0a]"
+                  className="mb-2 block text-sm font-semibold text-forum-inkStrong"
                 >
                   Email or Username
                 </label>
@@ -73,8 +82,8 @@ export default function ForgotPassword() {
                   id="identifier"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="Email or Username"
-                  className="w-full rounded-md border border-gray-300 px-4 py-2.5 placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#2b5a8a]"
+                  placeholder="name@example.com"
+                  className="h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:bg-white focus:ring-2 focus:ring-forum-primary/15"
                   required
                 />
               </div>
@@ -82,24 +91,24 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-6 w-full rounded-md bg-[#2b5a8a] py-3 font-semibold text-white transition-colors hover:bg-[#1e4167] disabled:bg-gray-400"
+                className="mt-4 inline-flex h-14 w-full items-center justify-center rounded-2xl bg-forum-primary text-base font-semibold text-white shadow-lift transition hover:bg-forum-primaryDark disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? "Sending..." : "Send reset link"}
               </button>
             </form>
 
-            <p className="mt-5 text-center text-sm text-[#0a0a0a]">
+            <p className="mt-6 text-center text-sm text-forum-muted">
               Remembered your password?{" "}
               <Link
                 to="/login"
-                className="font-medium text-[#2b5a8a] transition-colors hover:text-[#1e4167]"
+                className="font-semibold text-forum-primary transition hover:text-forum-primaryDark"
               >
                 Login
               </Link>
             </p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

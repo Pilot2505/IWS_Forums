@@ -32,13 +32,17 @@ export default function BookmarkButton({
       onClick={handleClick}
       disabled={loading}
       aria-pressed={isBookmarked}
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-colors disabled:opacity-60 ${
+      className={`inline-flex items-center gap-2 rounded-2xl border px-3.5 py-2 text-sm font-medium transition-colors disabled:opacity-60 ${
         isBookmarked
-          ? "border-[#1E56A0]/20 bg-[#1E56A0]/10 text-[#1E56A0]"
-          : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+          ? "border-forum-primary/10 bg-forum-primary text-white shadow-lift"
+          : "border-forum-border bg-forum-surface text-forum-muted hover:border-forum-primary/20 hover:bg-forum-primarySoft/50 hover:text-forum-primary"
       } ${className}`}
     >
-      {isBookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+      {isBookmarked ? (
+        <BookmarkCheck className="h-4 w-4" />
+      ) : (
+        <Bookmark className="h-4 w-4" />
+      )}
       {loading ? "Saving..." : isBookmarked ? "Saved" : "Save"}
     </button>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, Bookmark, User } from "lucide-react";
+import { Bell, Bookmark, Plus, User } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 import DeleteAccountButton from "./DeleteAccountButton";
 import SearchBar from "./SearchBar";
@@ -20,7 +20,7 @@ export default function Navbar({ user, setUser, showCreatePost = true }) {
 
     const fetchUnreadCount = async () => {
       try {
-        const data = await getNotifications(1, false);
+        const data = await getNotifications({ limit: 1, unreadOnly: false });
         setUnreadCount(data.unreadCount || 0);
       } catch {
         setUnreadCount(0);
@@ -62,97 +62,152 @@ export default function Navbar({ user, setUser, showCreatePost = true }) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-[#F6F6F6] px-4 py-3 shadow-sm sm:px-6 lg:px-12">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Logo */}
-        <Link to="/" className="text-2xl font-semibold text-[#163172] font-['Poppins'] sm:text-3xl lg:text-4xl">
+    <header className="sticky top-0 z-50 border-b border-forum-border bg-forum-surface/95 px-4 py-4 shadow-sm backdrop-blur sm:px-6 lg:px-10">
+      <div className="mx-auto flex max-w-content flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <Link
+          to="/home"
+          className="text-3xl font-semibold tracking-tight text-forum-primary sm:text-[2.2rem]"
+        >
           Tech Pulse
         </Link>
 
-        {/* Navigation Items */}
-        <div className="flex flex-wrap items-center gap-3 self-end sm:self-auto sm:gap-5 lg:gap-6">
-          {/* Search Bar */}
-          <SearchBar />
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+          <div className="w-full lg:w-auto">
+            <SearchBar />
+          </div>
 
-          {/* shown on all pages except Create Post page */}
           {showCreatePost && (
-            <Link to="/create-post" className="text-base font-medium text-[#1E56A0] transition-colors hover:text-[#163172] sm:text-lg lg:text-2xl">
+            <Link
+              to="/create-post"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-forum-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-forum-primaryDark"
+            >
+              <Plus className="h-4 w-4" />
               Create Post
             </Link>
           )}
 
-          {/* User Profile Avatar */}
-          {user && (
-            <div ref={menuRef} className="relative">
-              <button
-                type="button"
-                onClick={() => setMenuOpen((open) => !open)}
-                className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-[#D6E4F0] bg-[#21005D]/10 transition-transform hover:scale-105 sm:h-11 sm:w-11 sm:border-4"
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                aria-label="Open account menu"
-              >
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.username}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <User className="h-5 w-5" />
-                )}
-              </button>
+          <div className="flex items-center justify-end gap-2">
+            <Link
+              to="/bookmarks"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-forum-border bg-forum-surface text-forum-muted transition hover:bg-forum-panel hover:text-forum-primary"
+              aria-label="Open saved posts"
+            >
+              <Bookmark className="h-5 w-5" />
+            </Link>
 
-              {menuOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
-                  <Link
-                    to={`/profile/${user.username}`}
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100"
-                  >
-                    <User className="h-4 w-4" />
-                    Profile
-                  </Link>
-
-                  <Link
-                    to="/bookmarks"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100"
-                  >
-                    <Bookmark className="h-4 w-4" />
-                    Bookmarks
-                  </Link>
-
-                  <Link
-                    to="/notifications"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100"
-                  >
-                    <Bell className="h-4 w-4" />
-                    Notifications
-                    {unreadCount > 0 && (
-                      <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                        {unreadCount}
-                      </span>
-                    )}
-                  </Link>
-
-                  <LogoutButton
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100"
-                  />
-
-                  <DeleteAccountButton 
-                    pendingDeletion={Boolean(user?.delete_after_at)}
-                    onDeletionChange={(value) => {
-                      const updatedUser = { ...user, delete_after_at: value };
-                      setUser(updatedUser);
-                      localStorage.setItem("user", JSON.stringify(updatedUser));
-                    }}
-                  />
-                </div>
+            <Link
+              to="/notifications"
+              className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-forum-border bg-forum-surface text-forum-muted transition hover:bg-forum-panel hover:text-forum-primary"
+              aria-label="Open notifications"
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 inline-flex min-w-[20px] items-center justify-center rounded-full bg-forum-danger px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                  {unreadCount}
+                </span>
               )}
-            </div>
-          )}
+            </Link>
+
+            {user && (
+              <div ref={menuRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((open) => !open)}
+                  className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-forum-border bg-forum-primarySoft text-forum-primary transition hover:scale-[1.02]"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  aria-label="Open account menu"
+                >
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.username}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
+                </button>
+
+                {menuOpen && (
+                  <div className="absolute right-0 z-50 mt-3 w-72 overflow-hidden rounded-[24px] border border-forum-border bg-forum-surface p-3 shadow-dialog">
+                    <div className="mb-3 flex items-center gap-3 rounded-2xl bg-forum-panel px-3 py-3">
+                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-forum-primarySoft text-forum-primary">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.username}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <User className="h-5 w-5" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-forum-inkStrong">
+                          {user.fullname || user.username}
+                        </p>
+                        <p className="truncate text-xs text-forum-muted">
+                          @{user.username}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Link
+                        to={`/profile/${user.username}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-forum-ink transition hover:bg-forum-panel"
+                      >
+                        <User className="h-4 w-4" />
+                        Profile
+                      </Link>
+
+                      <Link
+                        to="/bookmarks"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-forum-ink transition hover:bg-forum-panel"
+                      >
+                        <Bookmark className="h-4 w-4" />
+                        Bookmarks
+                      </Link>
+
+                      <Link
+                        to="/notifications"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-forum-ink transition hover:bg-forum-panel"
+                      >
+                        <Bell className="h-4 w-4" />
+                        Notifications
+                        {unreadCount > 0 && (
+                          <span className="ml-auto rounded-full bg-forum-danger px-2 py-0.5 text-[10px] font-semibold text-white">
+                            {unreadCount}
+                          </span>
+                        )}
+                      </Link>
+
+                      <LogoutButton className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium text-forum-ink transition hover:bg-forum-panel" />
+
+                      <DeleteAccountButton
+                        pendingDeletion={Boolean(user?.delete_after_at)}
+                        onDeletionChange={(value) => {
+                          const updatedUser = {
+                            ...user,
+                            delete_after_at: value,
+                          };
+                          setUser(updatedUser);
+                          localStorage.setItem(
+                            "user",
+                            JSON.stringify(updatedUser),
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

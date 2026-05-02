@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tech Pulse - Notifications</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#004883",
+                        "inverse-surface": "#2e3132",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed-dim": "#ffb953",
+                        "on-tertiary-fixed-variant": "#633f00",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#b1c8ed",
+                        "surface-bright": "#f8f9fa",
+                        "secondary-container": "#c1d9fe",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#7f5300",
+                        "surface-tint": "#0060ac",
+                        "inverse-primary": "#a4c9ff",
+                        "surface-container-high": "#e7e8e9",
+                        "tertiary-container": "#a06900",
+                        "on-secondary-container": "#485e7e",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "on-background": "#191c1d",
+                        "surface": "#f8f9fa",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-surface": "#191c1d",
+                        "surface-container": "#edeeef",
+                        "surface-container-low": "#f3f4f5",
+                        "on-secondary-fixed-variant": "#314867",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#ffddb4",
+                        "secondary-fixed": "#d4e3ff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "primary": "#005da7",
+                        "on-primary-fixed": "#001c39",
+                        "on-primary-container": "#fdfcff",
+                        "on-tertiary-container": "#fffbff",
+                        "on-surface-variant": "#414751",
+                        "surface-variant": "#e1e3e4",
+                        "surface-dim": "#d9dadb",
+                        "outline": "#717783",
+                        "on-secondary-fixed": "#001c39",
+                        "on-tertiary-fixed": "#291800",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#d4e3ff",
+                        "outline-variant": "#c1c7d3",
+                        "secondary": "#496080",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9fa",
+                        "primary-container": "#2976c7",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": [
+                            "Inter"
+                        ],
+                        "body-lg": [
+                            "Inter"
+                        ],
+                        "headline-md": [
+                            "Inter"
+                        ],
+                        "headline-lg": [
+                            "Inter"
+                        ]
+                    },
+                    "fontSize": {
+                        "label-md": [
+                            "14px",
+                            {
+                                "lineHeight": "20px",
+                                "fontWeight": "500"
+                            }
+                        ],
+                        "body-lg": [
+                            "16px",
+                            {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                            }
+                        ],
+                        "headline-md": [
+                            "24px",
+                            {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                            }
+                        ],
+                        "headline-lg": [
+                            "32px",
+                            {
+                                "lineHeight": "40px",
+                                "fontWeight": "700"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background min-h-screen text-on-surface font-body-lg text-body-lg">
+<!-- Top Navigation (JSON) -->
+<header class="bg-surface-container-lowest border-b border-surface-variant top-0 w-full z-50">
+<div class="flex justify-between items-center w-full px-lg py-md max-w-7xl mx-auto">
+<div class="flex items-center gap-md">
+<a class="text-on-surface font-headline-md text-headline-md flex items-center gap-sm" href="#">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">public</span>
+                    Tech Pulse
+                </a>
+</div>
+<div class="flex items-center gap-lg">
+<div class="hidden md:flex relative group">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="bg-surface-container-low text-on-surface text-label-md font-label-md rounded-full py-sm pl-xl pr-md w-64 border-none focus:ring-1 focus:ring-primary outline-none placeholder:text-on-surface-variant" placeholder="Search..." type="text"/>
+</div>
+<button class="bg-primary text-on-primary rounded-lg px-md py-sm font-label-md text-label-md flex items-center gap-xs hover:bg-primary-container hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Create Post
+                </button>
+<button class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant hover:opacity-80 transition-opacity">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A close up portrait of a young professional person. The person has a friendly expression and is looking directly at the camera. The lighting is bright and even, creating a clean, modern aesthetic. The background is a soft, solid neutral color, emphasizing a corporate and dependable mood." src="https://lh3.googleusercontent.com/aida/ADBb0ugROSpvnpsbPTJTNkpT2Uy8w4-k78Dk2dn6JyijuxQCO9xB4bO-Shc6Rb6hrrpnqLX8xdOoQxgntaIouIl5dqeAbJE75_qhF1p1oh2vk7F2pZMj227cf754303H5MhtlJaBXmPToo3G7nDwjZSFU403U3zog_xCa8VmyUJyp7eTxS0uG3AO7FFzN-smg26_f0Vd1jDztFrnL5vGK9CZBZVXD6R9QH2di5Zv-vDs8kDUIGUGGo0C3AisoJGD-ZA2KHC2EzfkzNy7qw"/>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Layout (Single Column Centered) -->
+<main class="max-w-3xl mx-auto px-lg py-xl">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md mb-xl">
+<div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface mb-xs">Notifications</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Updates about follows, comments, and replies.</p>
+</div>
+<button class="text-primary font-label-md text-label-md hover:underline flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+                Mark all read
+            </button>
+</div>
+<!-- Notifications Stack -->
+<div class="flex flex-col gap-sm">
+<!-- Notification Item 1: Unread -->
+<div class="bg-surface-container-lowest p-md rounded-xl flex gap-md items-start shadow-sm border border-primary-container relative overflow-hidden group hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="relative">
+<img alt="User Avatar" class="w-12 h-12 rounded-full object-cover border border-outline-variant" data-alt="A headshot of a confident woman in a modern office environment. She is smiling softly, wearing professional attire. The lighting is natural and bright, conveying a sense of warmth and reliability. The color palette features soft neutrals with a hint of blue in the background, matching the brand's aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0ugv5u7CIIiAYNtqpOwxGMAvu-D3onnbWTz1DNumWt2w1pthW08lynv3Se6BTPO3m1oZdJ2DwfC3Noi-ln0RwFwKQ9xxs6FMT7u8UPBnc23ZdlXtFCKqme1gJIKCu6YTbNcG3yfywjumRTWVqDj5ydQkx2-pFXc3P1h1vSf8q3__Pdu93n2iUjo1h0CL_g-5kphhkwZf71emZs2LU_Q4RggCZ4ZRsYqRw-oMS3mAB3lPDmNoWx3LXWQXMIbDhHqSE7p1ySHaIR_3UA"/>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px]">
+<div class="bg-primary text-on-primary rounded-full w-5 h-5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<p class="text-body-lg font-body-lg text-on-surface mb-xs">
+<span class="font-semibold">Sarah Jenkins</span> commented on your post
+                    </p>
+<div class="bg-surface-container rounded-lg p-sm mb-sm border border-outline-variant">
+<p class="text-label-md font-label-md text-on-surface-variant line-clamp-2">
+                            "The new API design patterns you outlined are incredibly insightful. I particularly liked the section on error handling."
+                        </p>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 10 minutes ago
+                    </p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<!-- Notification Item 2: Unread -->
+<div class="bg-surface-container-lowest p-md rounded-xl flex gap-md items-start shadow-sm border border-primary-container relative overflow-hidden group hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="relative">
+<img alt="User Avatar" class="w-12 h-12 rounded-full object-cover border border-outline-variant" data-alt="A portrait of a male tech professional looking thoughtful. He has short hair and a neat beard, wearing a casual dark shirt. The background is a slightly blurred office setting with cool, subtle lighting. The image feels professional, modern, and aligned with a dependable tech brand identity." src="https://lh3.googleusercontent.com/aida/ADBb0ug1X9QZKSjhaANll2QEKI7WRre77HiXitauRCW5TXeyADffbdRJJU7W0M6HKdFPpxXEaiOBhtwyzqYSj8TGu5-bWYwXeNn9f8sVQhoKp3soownN-QIpBH2J5FQ3X_RJb6wzBzF-OLMEWaO3UWcxS-WtLIgxWi3OmgIDd3xnLU1cZ5woAFWHAGmhnIuwJVwhcIqtrr7_VyoW5Fjsecq-xss5TWZn3F6Iv4z9u-WRITNu4ELtY9UCZ7b6ViuMgvL7_U9Q7Ik2fPdeeQ"/>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px]">
+<div class="bg-tertiary text-on-tertiary rounded-full w-5 h-5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">person_add</span>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<p class="text-body-lg font-body-lg text-on-surface mb-xs">
+<span class="font-semibold">David Chen</span> started following you
+                    </p>
+<p class="text-label-md font-label-md text-on-surface-variant flex items-center gap-xs mt-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 1 hour ago
+                    </p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<!-- Notification Item 3: Read -->
+<div class="bg-surface-container-lowest p-md rounded-xl flex gap-md items-start border border-outline-variant group hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="relative">
+<div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-headline-md text-headline-md border border-outline-variant">
+                        M
+                    </div>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px]">
+<div class="bg-secondary text-on-secondary rounded-full w-5 h-5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<p class="text-body-lg font-body-lg text-on-surface-variant mb-xs">
+<span class="font-semibold text-on-surface">Marcus Rodriguez</span> liked your comment
+                    </p>
+<div class="border-l-2 border-outline-variant pl-sm mb-sm ml-xs">
+<p class="text-label-md font-label-md text-on-surface-variant italic">
+                            "Great perspective on scalable microservices."
+                        </p>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 3 hours ago
+                    </p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<!-- Notification Item 4: Read with Image -->
+<div class="bg-surface-container-lowest p-md rounded-xl flex gap-md items-start border border-outline-variant group hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="relative">
+<img alt="User Avatar" class="w-12 h-12 rounded-full object-cover border border-outline-variant" data-alt="A close-up image of a person holding a modern smartphone, looking engaged. The lighting is soft and diffused, highlighting the clean design of the device. The background is a minimal, soft gray gradient, creating a professional and focused atmosphere. The color scheme is neutral with slight blue undertones, fitting a modern tech aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0ujyQo39b4zljgAegaGvRL5dIYTte7wLCMR-DetCNFoflNRtWxmy3KuE6Q9O4ZIJsqu5Q5jXcVYbKljXYLul161BYzIO5R-NLYDXQgpzKJvZJdV9Bk8KHh5iQ5jZo8kphfReaXruqda6Rdf60U0lAU-7W33OzWU_QB0RonNWRuYy6_vcqaF3W7uyiSJYbj6nzRWRhzqDGHZGXjs0CfycNlAXWMNaeHjt7MPq6bgQFUJp_PjYkxTowH1Hvi2LJu3IiKaqqtxLipAgjg"/>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px]">
+<div class="bg-primary text-on-primary rounded-full w-5 h-5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">reply</span>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<p class="text-body-lg font-body-lg text-on-surface-variant mb-xs">
+<span class="font-semibold text-on-surface">Elena Rostova</span> replied to your thread
+                    </p>
+<div class="flex gap-md mt-sm mb-sm bg-surface-container rounded-lg p-sm border border-outline-variant">
+<div class="w-16 h-16 rounded overflow-hidden flex-shrink-0">
+<img alt="Thread context" class="w-full h-full object-cover" data-alt="An abstract visualization of digital networks and data streams. Glowing lines and nodes connect in a complex pattern against a dark background. The colors are predominantly deep blues and vibrant cyans, conveying a sense of advanced technology, connectivity, and modern digital infrastructure. The aesthetic is sleek and professional." src="https://lh3.googleusercontent.com/aida/ADBb0uhJwXYNwX9ra4mv6-wXcdUKPCTAp7-Cdm7x-J4aBTTlBFkLFryODXTlnDaWM1XcQW91xiynJhjba2lag9Q-zGC0G_6fHMz3d9SNMajpp2CYKRlgo5L1Gzywuh1ZbR833aDAZInwjxDJ7VeUH-pAIeSNAg6DKXZqCXGo9KrLjW3lAf9y6cmFh8-UyznM1A5e-pp9Dcnf3mG01D-hZhdT6COKJKFBxZ3WZomfAnGeTzVLLhFYmVaoeARV5idmllNkJlz1KfaKkFVY5Q"/>
+</div>
+<div class="flex-1">
+<h4 class="text-label-md font-headline-md text-on-surface mb-xs line-clamp-1">Optimizing React Rendering Cycles</h4>
+<p class="text-label-md font-label-md text-on-surface-variant line-clamp-2">
+                                I've found that using useMemo here actually introduces more overhead than it saves in most typical use cases...
+                            </p>
+</div>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Yesterday
+                    </p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<!-- Notification Item 5: Read System Notice -->
+<div class="bg-surface-container-lowest p-md rounded-xl flex gap-md items-start border border-outline-variant group hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="relative">
+<div class="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">campaign</span>
+</div>
+</div>
+<div class="flex-1">
+<p class="text-body-lg font-body-lg text-on-surface-variant mb-xs">
+<span class="font-semibold text-on-surface">System Update</span>
+</p>
+<p class="text-body-lg font-body-lg text-on-surface-variant mb-sm">
+                        Welcome to the new Tech Pulse interface. Explore the updated features and improved navigation designed for a better experience.
+                    </p>
+<p class="text-label-md font-label-md text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 2 days ago
+                    </p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<div class="mt-lg flex justify-center">
+<button class="text-primary font-label-md text-label-md border border-primary rounded-lg px-md py-sm hover:bg-primary-container hover:text-on-primary-container transition-colors">
+                Load More
+            </button>
+</div>
+</main>
+<!-- Footer (JSON) -->
+<footer class="bg-surface-container-low border-t border-surface-variant mt-xl">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-lg py-xl max-w-7xl mx-auto gap-md">
+<div class="text-body-lg font-headline-md font-bold text-on-surface">
+                Tech Pulse
+            </div>
+<div class="text-label-md font-label-md text-on-surface-variant">
+                © 2024 Tech Pulse. All rights reserved.
+            </div>
+<div class="flex gap-md text-label-md font-label-md">
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Guidelines</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Terms</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Support</a>
+</div>
+</div>
+</footer>
+</body></html>

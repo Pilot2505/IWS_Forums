@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tech Pulse - Edit Post</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "primary": "#005da7",
+                  "tertiary-fixed": "#ffddb4",
+                  "surface-container-lowest": "#ffffff",
+                  "surface-container-low": "#f3f4f5",
+                  "on-primary": "#ffffff",
+                  "on-error": "#ffffff",
+                  "on-secondary-fixed": "#001c39",
+                  "error": "#ba1a1a",
+                  "surface-container-highest": "#e1e3e4",
+                  "error-container": "#ffdad6",
+                  "secondary": "#496080",
+                  "on-tertiary": "#ffffff",
+                  "secondary-fixed-dim": "#b1c8ed",
+                  "on-tertiary-fixed": "#291800",
+                  "tertiary-fixed-dim": "#ffb953",
+                  "surface-container": "#edeeef",
+                  "secondary-fixed": "#d4e3ff",
+                  "outline-variant": "#c1c7d3",
+                  "surface-variant": "#e1e3e4",
+                  "on-secondary-container": "#485e7e",
+                  "surface-dim": "#d9dadb",
+                  "surface-bright": "#f8f9fa",
+                  "surface-tint": "#0060ac",
+                  "primary-container": "#2976c7",
+                  "on-primary-fixed": "#001c39",
+                  "secondary-container": "#c1d9fe",
+                  "surface-container-high": "#e7e8e9",
+                  "on-tertiary-container": "#fffbff",
+                  "background": "#f8f9fa",
+                  "primary-fixed-dim": "#a4c9ff",
+                  "inverse-surface": "#2e3132",
+                  "on-secondary-fixed-variant": "#314867",
+                  "surface": "#f8f9fa",
+                  "inverse-on-surface": "#f0f1f2",
+                  "on-primary-container": "#fdfcff",
+                  "on-tertiary-fixed-variant": "#633f00",
+                  "on-primary-fixed-variant": "#004883",
+                  "on-error-container": "#93000a",
+                  "outline": "#717783",
+                  "on-secondary": "#ffffff",
+                  "primary-fixed": "#d4e3ff",
+                  "on-surface-variant": "#414751",
+                  "on-surface": "#191c1d",
+                  "inverse-primary": "#a4c9ff",
+                  "tertiary-container": "#a06900",
+                  "on-background": "#191c1d",
+                  "tertiary": "#7f5300"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.125rem",
+                  "lg": "0.25rem",
+                  "xl": "0.5rem",
+                  "full": "0.75rem"
+          },
+          "spacing": {
+                  "base": "8px",
+                  "xl": "32px",
+                  "xs": "4px",
+                  "lg": "24px",
+                  "sm": "8px",
+                  "md": "16px"
+          },
+          "fontFamily": {
+                  "label-md": [
+                          "Inter"
+                  ],
+                  "headline-lg": [
+                          "Inter"
+                  ],
+                  "headline-md": [
+                          "Inter"
+                  ],
+                  "body-lg": [
+                          "Inter"
+                  ]
+          },
+          "fontSize": {
+                  "label-md": [
+                          "14px",
+                          {
+                                  "lineHeight": "20px",
+                                  "fontWeight": "500"
+                          }
+                  ],
+                  "headline-lg": [
+                          "32px",
+                          {
+                                  "lineHeight": "40px",
+                                  "fontWeight": "700"
+                          }
+                  ],
+                  "headline-md": [
+                          "24px",
+                          {
+                                  "lineHeight": "32px",
+                                  "fontWeight": "600"
+                          }
+                  ],
+                  "body-lg": [
+                          "16px",
+                          {
+                                  "lineHeight": "24px",
+                                  "fontWeight": "400"
+                          }
+                  ]
+          }
+  },
+      },
+    }
+  </script>
+</head>
+<body class="bg-background min-h-screen font-body-lg text-body-lg text-on-background antialiased flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-surface-container-lowest shadow-sm border-b border-surface-container-highest">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:text-primary-container transition-colors" data-icon="menu">menu</span>
+<h1 class="text-xl font-bold tracking-tight text-primary font-headline-md">Tech Pulse</h1>
+</div>
+<div class="flex-1 max-w-md mx-auto hidden md:block">
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+</div>
+<input class="bg-surface-container-low border border-outline-variant text-on-surface text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2 font-label-md" placeholder="Search..." required="" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<a class="hidden sm:block text-primary font-label-md text-label-md hover:text-primary-container transition-colors" href="#">Create Post</a>
+<img alt="User avatar" class="w-8 h-8 rounded-full object-cover border border-surface-container-highest cursor-pointer hover:opacity-80 transition-opacity" data-alt="A small circular profile picture avatar for a user in a modern software application. The avatar shows a smiling young professional woman with dark hair in a well-lit office environment. Professional corporate style." src="https://lh3.googleusercontent.com/aida/ADBb0ugv5u7CIIiAYNtqpOwxGMAvu-D3onnbWTz1DNumWt2w1pthW08lynv3Se6BTPO3m1oZdJ2DwfC3Noi-ln0RwFwKQ9xxs6FMT7u8UPBnc23ZdlXtFCKqme1gJIKCu6YTbNcG3yfywjumRTWVqDj5ydQkx2-pFXc3P1h1vSf8q3__Pdu93n2iUjo1h0CL_g-5kphhkwZf71emZs2LU_Q4RggCZ4ZRsYqRw-oMS3mAB3lPDmNoWx3LXWQXMIbDhHqSE7p1ySHaIR_3UA"/>
+</div>
+</header>
+<main class="flex-1 flex justify-center max-w-7xl mx-auto w-full pt-20 pb-12 px-4 sm:px-6 lg:px-8 gap-8">
+<!-- Main Content Area -->
+<div class="flex-1 max-w-3xl flex flex-col gap-8">
+<!-- Edit Mode Container -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-highest p-6 flex flex-col gap-6">
+<h2 class="font-headline-md text-headline-md text-on-surface">Edit Post</h2>
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant">Title</label>
+<input class="bg-surface-container-low border border-outline-variant text-on-surface rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 font-body-lg" type="text" value="The Future of Distributed Systems: A Deep Dive into Event-Driven Architecture"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant">Tags (comma separated)</label>
+<input class="bg-surface-container-low border border-outline-variant text-on-surface rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 font-body-lg" type="text" value="Architecture, Backend, Cloud Native, Microservices"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant">Content</label>
+<textarea class="bg-surface-container-low border border-outline-variant text-on-surface rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 font-body-lg" rows="8">As we build more complex applications, the need for robust, scalable architectures becomes paramount. Event-driven architecture (EDA) has emerged as a powerful paradigm for managing communication between microservices, offering significant advantages in decoupling, scalability, and responsiveness.
+
+In a traditional request-response model, services directly call each other, creating tight coupling and potential bottlenecks if a downstream service fails or becomes slow. EDA flips this model on its head. Instead of direct calls, services emit events when a significant state change occurs (e.g., "Order Placed," "User Registered"). Other services, known as consumers, subscribe to these events and react accordingly.</textarea>
+</div>
+<div class="flex items-center justify-end gap-3 mt-2">
+<button class="bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md py-2 px-4 rounded-lg hover:bg-surface-container-high transition-colors">Cancel</button>
+<button class="bg-primary text-on-primary font-label-md text-label-md py-2 px-4 rounded-lg hover:bg-primary-container transition-colors shadow-sm">Save Changes</button>
+</div>
+</div>
+</div>
+<!-- Original Post Preview (Stylized) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-highest flex flex-col overflow-hidden">
+<!-- Post Header -->
+<div class="p-6 border-b border-surface-container-highest flex items-start justify-between gap-4">
+<div class="flex items-center gap-4">
+<img alt="Author Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="A small circular profile picture avatar for the author of a technical blog post. The avatar shows a young man with glasses working on a laptop in a modern coffee shop. Professional software developer style." src="https://lh3.googleusercontent.com/aida/ADBb0uhJwXYNwX9ra4mv6-wXcdUKPCTAp7-Cdm7x-J4aBTTlBFkLFryODXTlnDaWM1XcQW91xiynJhjba2lag9Q-zGC0G_6fHMz3d9SNMajpp2CYKRlgo5L1Gzywuh1ZbR833aDAZInwjxDJ7VeUH-pAIeSNAg6DKXZqCXGo9KrLjW3lAf9y6cmFh8-UyznM1A5e-pp9Dcnf3mG01D-hZhdT6COKJKFBxZ3WZomfAnGeTzVLLhFYmVaoeARV5idmllNkJlz1KfaKkFVY5Q"/>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-semibold">Alex Chen</h3>
+<p class="text-sm text-on-surface-variant">October 24, 2023</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-primary font-label-md text-label-md hover:underline cursor-pointer">Edit</button>
+<button class="text-error font-label-md text-label-md hover:underline cursor-pointer">Delete</button>
+</div>
+</div>
+<!-- Post Content -->
+<div class="p-6 flex flex-col gap-6">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">The Future of Distributed Systems: A Deep Dive into Event-Driven Architecture</h1>
+<div class="flex flex-wrap gap-2">
+<span class="bg-primary-container/10 text-primary font-label-md text-xs px-2.5 py-0.5 rounded-full border border-primary-container/20">Architecture</span>
+<span class="bg-primary-container/10 text-primary font-label-md text-xs px-2.5 py-0.5 rounded-full border border-primary-container/20">Backend</span>
+<span class="bg-primary-container/10 text-primary font-label-md text-xs px-2.5 py-0.5 rounded-full border border-primary-container/20">Cloud Native</span>
+<span class="bg-primary-container/10 text-primary font-label-md text-xs px-2.5 py-0.5 rounded-full border border-primary-container/20">Microservices</span>
+</div>
+<img alt="Featured post image" class="w-full h-auto rounded-lg border border-surface-container-highest" data-alt="A wide, highly technical diagram illustrating event-driven architecture. The diagram shows various abstract nodes representing microservices connected by flowing data streams and message queues. Designed in a modern, clean corporate tech style using deep blues and stark whites with subtle glowing accents." src="https://lh3.googleusercontent.com/aida/ADBb0ujRuZh0WgJqZdHEyj-Wrlt5NZELCwoxVlzjG5o1JefbE6KYq5-JhL0dtu7SoIiiRilVxndyZGbUydc8Um77PHwTDYwSwJUkp2PYRWkH8902l9-5Q8T1lZZpIDlpN0JW0I7DLbIvd_EHW9Erb3xBNIQa9P7lh9sVBvq7LV3Ru6_IDp3QERABefNU0wiz5ratv6c5aSs1L5o7L0wpgg6PvelAk8500mbPMwMfMOyZzNsiCJXmbbEt0B9hSSWPWfLPzxjQKQWhgKrG"/>
+<div class="text-on-surface space-y-4">
+<p>As we build more complex applications, the need for robust, scalable architectures becomes paramount. Event-driven architecture (EDA) has emerged as a powerful paradigm for managing communication between microservices, offering significant advantages in decoupling, scalability, and responsiveness.</p>
+<p>In a traditional request-response model, services directly call each other, creating tight coupling and potential bottlenecks if a downstream service fails or becomes slow. EDA flips this model on its head. Instead of direct calls, services emit events when a significant state change occurs (e.g., "Order Placed," "User Registered"). Other services, known as consumers, subscribe to these events and react accordingly.</p>
+</div>
+</div>
+<!-- Post Actions -->
+<div class="px-6 py-4 border-t border-surface-container-highest flex items-center justify-between bg-surface-container-low">
+<div class="flex items-center gap-1 border border-outline-variant rounded-full p-1 bg-surface-container-lowest">
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant"><span class="material-symbols-outlined text-sm" data-icon="arrow_upward">arrow_upward</span></button>
+<span class="font-label-md text-label-md text-on-surface px-2">128</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant"><span class="material-symbols-outlined text-sm" data-icon="arrow_downward">arrow_downward</span></button>
+</div>
+<button class="flex items-center gap-2 text-primary font-label-md text-label-md hover:bg-primary-container/10 px-3 py-1.5 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span> Saved
+            </button>
+</div>
+</article>
+</div>
+<!-- Right Sidebar: Comments -->
+<aside class="hidden lg:flex w-80 flex-col gap-6">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container-highest p-6 flex flex-col h-[calc(100vh-8rem)] sticky top-24">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">Comments (12)</h3>
+<!-- Comment Input -->
+<div class="flex flex-col gap-3 mb-6 pb-6 border-b border-surface-container-highest">
+<textarea class="bg-surface-container-low border border-outline-variant text-on-surface rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 font-body-lg resize-none" placeholder="Add a comment..." rows="3"></textarea>
+<div class="flex justify-end">
+<button class="bg-primary text-on-primary font-label-md text-label-md py-1.5 px-4 rounded-lg hover:bg-primary-container transition-colors shadow-sm text-sm">Submit</button>
+</div>
+</div>
+<!-- Comments Thread -->
+<div class="flex-1 overflow-y-auto pr-2 space-y-6">
+<!-- Comment 1 -->
+<div class="flex flex-col gap-2">
+<div class="flex items-start gap-3">
+<img alt="Commenter Avatar" class="w-8 h-8 rounded-full object-cover mt-1" data-alt="Small circular avatar of a software engineer for a comment section." src="https://lh3.googleusercontent.com/aida/ADBb0ugveizWgvVXfC8zWiqUZPBWiOfHTd6IHWiDGgokdRSjjngpJ48D4esBcQ2CyGk5KAPdh4BPLGHwHJIXSFjY7gfwSQp5KuDygwNxgzGEu_MUR5wbJ4vdlM2A2zXLnnaAjSlWFIOR-ggJLV4Ci5JUR95ombNDzppb4FaMqFuos0CzUUOOHMdUAY_m_RFX48VYF4TgvKXjfimDJLtsJoCvusG0nZMZgYuYjII2rQbfSg641f3xyIGonjQG9axepeN8Y3lE0GrN5vonsQ"/>
+<div class="flex-1">
+<div class="flex items-baseline justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Sarah Jenkins</span>
+<span class="text-xs text-on-surface-variant">2 hours ago</span>
+</div>
+<p class="text-sm text-on-surface">Great write-up! I've been looking into Kafka for exactly this reason. The decoupling benefits are huge, especially when scaling development teams independently.</p>
+<div class="flex items-center gap-4 mt-2">
+<button class="text-xs font-label-md text-primary hover:underline">Reply</button>
+</div>
+</div>
+</div>
+<!-- Nested Reply -->
+<div class="ml-11 flex items-start gap-3 mt-2">
+<img alt="Author Avatar" class="w-6 h-6 rounded-full object-cover mt-1" data-alt="Small circular avatar of the post author." src="https://lh3.googleusercontent.com/aida/ADBb0uhJwXYNwX9ra4mv6-wXcdUKPCTAp7-Cdm7x-J4aBTTlBFkLFryODXTlnDaWM1XcQW91xiynJhjba2lag9Q-zGC0G_6fHMz3d9SNMajpp2CYKRlgo5L1Gzywuh1ZbR833aDAZInwjxDJ7VeUH-pAIeSNAg6DKXZqCXGo9KrLjW3lAf9y6cmFh8-UyznM1A5e-pp9Dcnf3mG01D-hZhdT6COKJKFBxZ3WZomfAnGeTzVLLhFYmVaoeARV5idmllNkJlz1KfaKkFVY5Q"/>
+<div class="flex-1">
+<div class="flex items-baseline justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Alex Chen</span>
+<span class="text-xs text-on-surface-variant">1 hour ago</span>
+</div>
+<p class="text-sm text-on-surface">Exactly! Kafka is fantastic for this. We use it heavily in production for our core event bus.</p>
+<div class="flex items-center gap-4 mt-2">
+<button class="text-xs font-label-md text-primary hover:underline">Reply</button>
+<button class="text-xs font-label-md text-error hover:underline">Delete</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Comment 2 -->
+<div class="flex flex-col gap-2">
+<div class="flex items-start gap-3">
+<img alt="Commenter Avatar" class="w-8 h-8 rounded-full object-cover mt-1" data-alt="Small circular avatar of a tech enthusiast." src="https://lh3.googleusercontent.com/aida/ADBb0uismdaErg7rlHpBCtUTYktIN_5RsNoSCpyoWo16PaI8o8gFkXee3U1aHN-524lyTUamkIFFAV_unQ8wkWJ6a5jjYf4IpJqrTYIgPwAxzERnxAI3wPdnfd1ZTxW_FCaTwDw0pMm0BdZL-Yz9p-f13cNppQcr9lqdsYaz9P-kxc5UQuAOC4o6bfOAZ9cRMQoKv0G5yXn-YK1BR1d9eZXzguTpXvg7SDj6ZN1xLmgtX2OA8Lplzy9BbnDVnRY60JHXug37iuONa_fS"/>
+<div class="flex-1">
+<div class="flex items-baseline justify-between mb-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold">David R.</span>
+<span class="text-xs text-on-surface-variant">5 hours ago</span>
+</div>
+<p class="text-sm text-on-surface">One challenge we faced with EDA was debugging distributed traces. How do you handle tracking an event's lifecycle across multiple consumer services?</p>
+<div class="flex items-center gap-4 mt-2">
+<button class="text-xs font-label-md text-primary hover:underline">Reply</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+</body></html>

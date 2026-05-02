@@ -19,7 +19,9 @@ export default function PostVoteControls({
   const downActive = currentUserVote === -1;
 
   return (
-    <div className={`inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 shadow-sm ${className}`}>
+    <div
+      className={`inline-flex items-center gap-2 rounded-full border border-forum-border bg-forum-panel px-2 py-2 shadow-sm ${className}`}
+    >
       <button
         type="button"
         onClick={voteUp}
@@ -27,14 +29,14 @@ export default function PostVoteControls({
         aria-pressed={upActive}
         className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
           upActive
-            ? "bg-emerald-600 text-white"
-            : "bg-gray-100 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
+            ? "bg-forum-primary text-white"
+            : "bg-white text-forum-muted hover:bg-forum-primarySoft hover:text-forum-primary"
         } ${loading ? "opacity-60" : ""}`}
       >
         <ChevronUp className="h-5 w-5" />
       </button>
 
-      <span className="min-w-10 text-center text-sm font-semibold text-gray-800">
+      <span className="min-w-10 text-center text-sm font-semibold text-forum-inkStrong">
         {voteCount}
       </span>
 
@@ -45,8 +47,8 @@ export default function PostVoteControls({
         aria-pressed={downActive}
         className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
           downActive
-            ? "bg-rose-600 text-white"
-            : "bg-gray-100 text-gray-700 hover:bg-rose-50 hover:text-rose-700"
+            ? "bg-forum-danger text-white"
+            : "bg-white text-forum-muted hover:bg-forum-dangerSoft hover:text-forum-danger"
         } ${loading ? "opacity-60" : ""}`}
       >
         <ChevronDown className="h-5 w-5" />

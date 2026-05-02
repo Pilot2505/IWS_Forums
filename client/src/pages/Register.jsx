@@ -45,7 +45,7 @@ export default function Register() {
         localStorage.setItem("token", data.token);
         localStorage.setItem(
           "user",
-          JSON.stringify({ ...data.user, categories: null })
+          JSON.stringify({ ...data.user, categories: null }),
         );
         toast.success("Account created successfully!");
         navigate("/select-categories");
@@ -61,29 +61,41 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-[#d4e4ec]">
-      <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-        <h1 className="text-xl font-bold text-[#1a2332]">Tech Pulse</h1>
+    <div className="relative min-h-screen overflow-hidden bg-forum-bg">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute right-[-8rem] top-[-10rem] h-96 w-96 rounded-full bg-forum-primarySoft/60 blur-3xl" />
+        <div className="absolute bottom-[-12rem] left-[-6rem] h-80 w-80 rounded-full bg-forum-primarySoft/50 blur-3xl" />
+      </div>
+
+      <header className="relative z-10 flex items-center justify-between px-4 py-5 sm:px-8">
+        <h1 className="text-2xl font-semibold tracking-tight text-forum-inkStrong">
+          Tech Pulse
+        </h1>
         <Link
           to="/login"
-          className="text-[#2b5a8a] hover:text-[#1e4167] font-medium transition-colors"
+          className="text-sm font-medium text-forum-muted transition hover:text-forum-primary"
         >
           Login
         </Link>
       </header>
 
-      <div className="flex items-center justify-center px-4 pt-4 pb-12">
-        <div className="w-full max-w-md">
-          <h2 className="mb-6 text-center text-3xl font-bold text-[#0a0a0a] sm:mb-8 sm:text-4xl">
-            Register
-          </h2>
+      <main className="relative z-10 flex items-center justify-center px-4 pb-12 pt-4">
+        <div className="w-full max-w-xl">
+          <div className="mb-8 text-center">
+            <h2 className="text-5xl font-semibold tracking-tight text-forum-inkStrong sm:text-6xl">
+              Create an Account
+            </h2>
+            <p className="mt-4 text-lg text-forum-muted">
+              Join Tech Pulse today.
+            </p>
+          </div>
 
-          <div className="rounded-lg bg-white p-5 shadow-sm sm:p-8">
+          <div className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-dialog backdrop-blur sm:p-10">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-semibold text-[#0a0a0a] mb-2"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-forum-inkStrong"
                 >
                   Email
                 </label>
@@ -93,7 +105,7 @@ export default function Register() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="email@email.com"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
+                  className="h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:bg-white focus:ring-2 focus:ring-forum-primary/15"
                   required
                 />
               </div>
@@ -101,7 +113,7 @@ export default function Register() {
               <div>
                 <label
                   htmlFor="username"
-                  className="block text-sm font-semibold text-[#0a0a0a] mb-2"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-forum-inkStrong"
                 >
                   Username
                 </label>
@@ -110,8 +122,8 @@ export default function Register() {
                   id="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Username"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
+                  placeholder="Choose a username"
+                  className="h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:bg-white focus:ring-2 focus:ring-forum-primary/15"
                   required
                 />
               </div>
@@ -119,7 +131,7 @@ export default function Register() {
               <div>
                 <label
                   htmlFor="fullname"
-                  className="block text-sm font-semibold text-[#0a0a0a] mb-2"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-forum-inkStrong"
                 >
                   Full Name
                 </label>
@@ -129,7 +141,7 @@ export default function Register() {
                   value={fullname}
                   onChange={(e) => setFullname(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
+                  className="h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:bg-white focus:ring-2 focus:ring-forum-primary/15"
                   required
                 />
               </div>
@@ -137,7 +149,7 @@ export default function Register() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-semibold text-[#0a0a0a] mb-2"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-forum-inkStrong"
                 >
                   Password
                 </label>
@@ -147,14 +159,14 @@ export default function Register() {
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
+                    placeholder="Create a password"
+                    className="h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 pr-20 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:bg-white focus:ring-2 focus:ring-forum-primary/15"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-sm font-medium text-[#2b5a8a] hover:text-[#1e4167]"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-forum-primary transition hover:text-forum-primaryDark"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -164,7 +176,7 @@ export default function Register() {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="mb-2 block text-sm font-semibold text-[#0a0a0a]"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-forum-inkStrong"
                 >
                   Confirm Password
                 </label>
@@ -174,44 +186,44 @@ export default function Register() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter password"
-                  className="w-full rounded-md border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#2b5a8a] focus:border-transparent placeholder:text-gray-400"
+                  className="h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:bg-white focus:ring-2 focus:ring-forum-primary/15"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#0a0a0a] mb-2">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-forum-inkStrong">
                   Profile Picture (optional)
                 </label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => setAvatar(e.target.files[0])}
-                  className="w-full"
+                  className="block h-14 w-full rounded-2xl border border-forum-primarySurface bg-white/60 px-4 py-3 text-sm text-forum-muted file:mr-4 file:rounded-xl file:border-0 file:bg-forum-primarySoft file:px-4 file:py-2 file:font-semibold file:text-forum-primary hover:file:bg-forum-primarySoft/80"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#2b5a8a] hover:bg-[#1e4167] disabled:bg-gray-400 text-white font-semibold py-3 rounded-md transition-colors mt-6"
+                className="mt-4 inline-flex h-14 w-full items-center justify-center rounded-2xl bg-forum-primary text-base font-semibold text-white shadow-lift transition hover:bg-forum-primaryDark disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? "Creating account..." : "Register"}
               </button>
             </form>
 
-            <p className="text-center mt-5 text-sm text-[#0a0a0a]">
+            <p className="mt-6 border-t border-forum-border pt-5 text-center text-sm text-forum-muted">
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="text-[#2b5a8a] hover:text-[#1e4167] font-medium transition-colors"
+                className="font-semibold text-forum-primary transition hover:text-forum-primaryDark"
               >
                 Login
               </Link>
             </p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

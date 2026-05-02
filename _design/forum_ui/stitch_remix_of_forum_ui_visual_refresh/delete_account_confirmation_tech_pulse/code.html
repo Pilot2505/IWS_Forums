@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tech Pulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#7f5300",
+                        "on-secondary-container": "#485e7e",
+                        "on-primary": "#ffffff",
+                        "primary": "#005da7",
+                        "on-surface": "#191c1d",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#a4c9ff",
+                        "tertiary-fixed-dim": "#ffb953",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#a06900",
+                        "outline": "#717783",
+                        "surface-tint": "#0060ac",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-container": "#edeeef",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "tertiary-fixed": "#ffddb4",
+                        "on-primary-fixed": "#001c39",
+                        "on-secondary-fixed": "#001c39",
+                        "secondary-fixed-dim": "#b1c8ed",
+                        "surface-variant": "#e1e3e4",
+                        "surface-dim": "#d9dadb",
+                        "secondary": "#496080",
+                        "on-background": "#191c1d",
+                        "on-tertiary-fixed": "#291800",
+                        "surface-container-high": "#e7e8e9",
+                        "primary-container": "#2976c7",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-container-low": "#f3f4f5",
+                        "background": "#f8f9fa",
+                        "on-tertiary-fixed-variant": "#633f00",
+                        "on-tertiary-container": "#fffbff",
+                        "error": "#ba1a1a",
+                        "surface": "#f8f9fa",
+                        "outline-variant": "#c1c7d3",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#fdfcff",
+                        "on-secondary-fixed-variant": "#314867",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f8f9fa",
+                        "primary-fixed": "#d4e3ff",
+                        "on-surface-variant": "#414751",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#c1d9fe",
+                        "on-primary-fixed-variant": "#004883",
+                        "secondary-fixed": "#d4e3ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased relative min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 w-full flex justify-between items-center px-6 h-16 bg-white shadow-sm border-b border-slate-200">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl" data-weight="fill">terminal</span>
+<span class="text-xl font-bold text-primary tracking-tight">Tech Pulse</span>
+</div>
+<div class="flex items-center gap-4 relative">
+<button class="p-2 text-slate-600 hover:bg-slate-50 rounded-full transition-colors active:opacity-80">
+<span class="material-symbols-outlined">search</span>
+</button>
+<div class="relative cursor-pointer group">
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full border border-slate-200 object-cover" data-alt="A small, circular avatar portrait of a modern professional user. The portrait is warmly lit, showing a slight smile against a neutral, clean backdrop. The lighting is soft and studio-quality, emphasizing a professional yet approachable aesthetic typical of a corporate tech platform profile picture." src="https://lh3.googleusercontent.com/aida/ADBb0uggODV4HQIAfd2ZJ6BcjbwGCfXDvucTjnWFytUrEL0iPQcquuW4PKrOoqr38FQ_X_t9og7D21O40hieNRylo0oDEkHfCdbMOY2ff5tT_NCzCJ0JUgITOZv9vjZSax1PcMd-yvhV92hsDMtH6JGiIt3D2DEaz5lS4fzRPWLNi9HyGHv9jV99esf-ILyZcCC5qhBapGmcjdYqMugU_obuLxYnWtcEzeY0IFbYykuT03Qs6tG-Bdx_g9K4D2R8eVs2eNMzV7FvVkjWoA"/>
+<!-- Open Account Dropdown Menu -->
+<div class="absolute right-0 mt-2 w-48 bg-surface-container-lowest rounded-xl shadow-lg border border-surface-container-high py-2 z-50">
+<a class="flex items-center gap-3 px-4 py-2 hover:bg-surface-container-low transition-colors text-on-surface text-label-md" href="#">
+<span class="material-symbols-outlined text-outline">person</span> Profile
+                    </a>
+<a class="flex items-center gap-3 px-4 py-2 hover:bg-surface-container-low transition-colors text-on-surface text-label-md" href="#">
+<span class="material-symbols-outlined text-outline">bookmark</span> Bookmarks
+                    </a>
+<a class="flex items-center gap-3 px-4 py-2 hover:bg-surface-container-low transition-colors text-on-surface text-label-md" href="#">
+<span class="material-symbols-outlined text-outline">notifications</span> Notifications
+                    </a>
+<div class="border-t border-surface-container my-1"></div>
+<a class="flex items-center gap-3 px-4 py-2 hover:bg-surface-container-low transition-colors text-on-surface text-label-md" href="#">
+<span class="material-symbols-outlined text-outline">logout</span> Logout
+                    </a>
+<a class="flex items-center gap-3 px-4 py-2 hover:bg-error-container transition-colors text-error text-label-md" href="#">
+<span class="material-symbols-outlined">delete</span> Delete account
+                    </a>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 container mx-auto w-full md:grid md:grid-cols-12 gap-6 p-6">
+<!-- NavigationDrawer (Sidebar) - Hidden on Mobile -->
+<aside class="hidden md:block col-span-3">
+<div class="sticky top-[88px] h-[calc(100vh-88px)] bg-slate-50 rounded-xl overflow-hidden border border-slate-200 flex flex-col shadow-sm">
+<div class="px-6 py-4 border-b border-slate-200 bg-white">
+<h2 class="text-sm font-semibold text-slate-800 uppercase tracking-wider">Followed Users</h2>
+</div>
+<div class="flex-1 overflow-y-auto p-2">
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 font-semibold rounded-lg mb-1 transition-all" href="#">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A portrait of an inspiring tech leader, styled in a modern, clean light mode aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0uhJwXYNwX9ra4mv6-wXcdUKPCTAp7-Cdm7x-J4aBTTlBFkLFryODXTlnDaWM1XcQW91xiynJhjba2lag9Q-zGC0G_6fHMz3d9SNMajpp2CYKRlgo5L1Gzywuh1ZbR833aDAZInwjxDJ7VeUH-pAIeSNAg6DKXZqCXGo9KrLjW3lAf9y6cmFh8-UyznM1A5e-pp9Dcnf3mG01D-hZhdT6COKJKFBxZ3WZomfAnGeTzVLLhFYmVaoeARV5idmllNkJlz1KfaKkFVY5Q"/>
+<span class="text-label-md">Sarah Jenkins</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg mb-1 transition-all" href="#">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A portrait of an inspiring tech leader, styled in a modern, clean light mode aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0ujRuZh0WgJqZdHEyj-Wrlt5NZELCwoxVlzjG5o1JefbE6KYq5-JhL0dtu7SoIiiRilVxndyZGbUydc8Um77PHwTDYwSwJUkp2PYRWkH8902l9-5Q8T1lZZpIDlpN0JW0I7DLbIvd_EHW9Erb3xBNIQa9P7lh9sVBvq7LV3Ru6_IDp3QERABefNU0wiz5ratv6c5aSs1L5o7L0wpgg6PvelAk8500mbPMwMfMOyZzNsiCJXmbbEt0B9hSSWPWfLPzxjQKQWhgKrG"/>
+<span class="text-label-md">David Chen</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg mb-1 transition-all" href="#">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A portrait of an inspiring tech leader, styled in a modern, clean light mode aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0ugW6L67bjzweu5DTt_if08pbHAxGTMa52ABcUAOR3cI7l0Wy4X0SYVDOT--LcxAjWDcg_5MeZCb_KAa1rBCb6uZsOIVU1WbLhShoSjHt6FOsZz3QZFfsEdXh4J3x2TbMXMsMSH9Z_SfKz1Q2w6MGyVH5JwR0tM8vHS2SXhWp67TVwTu2ht2qRx-LbY9x3VAbKcjttzaEFsn1LJf26-d8YXPavGalM0FVxieWT-F_gFudvO11xzL_rEf63672mOlJhX6L7qmCEIUDg"/>
+<span class="text-label-md">Elena Rostova</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg mb-1 transition-all" href="#">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant font-bold text-xs">MK</div>
+<span class="text-label-md">Mike Kowalski</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-100 rounded-lg mb-1 transition-all" href="#">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A portrait of an inspiring tech leader, styled in a modern, clean light mode aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0ui5RKDMTJ3izcrJ-8GPX4M9E_pNBBhvySiuSGXBzoKiaIovPCCxpJywBjuqljWd9MBeyamZ28XO0NOA7VhV5E7ENoPeaBLAIxfMl67CR3DKFYYdQJ3RfFJ8MISvZwpmYBwJCavOiX9tLxPwMBR3CZBD_RnDoFU_Z19WB8Lx5wntETq0nNZZYSTzfILyElUrIOb3tbcMvJ5DZDU2-FscRw-GBV6vpgd9CbapPd0Wevq-5SynpFRw6BuLSJc9a3cSBm1n5e-H4u6k"/>
+<span class="text-label-md">Amanda Hugginkiss</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Feed Column -->
+<main class="col-span-12 md:col-span-6 flex flex-col gap-6 w-full">
+<!-- Post Card 1 -->
+<article class="bg-surface-container-lowest border border-surface-container rounded-xl shadow-sm overflow-hidden p-6 flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A close up portrait of a developer." src="https://lh3.googleusercontent.com/aida/ADBb0uhLXNLgH06kGsZjlpAXBGPlB1zasYP0gMLd_k_xXEbBVkZf9to4gn3TIE0NEffvoWieUL987-A6qAKv7aB6gEcFx9IKJFtocI_GN7_CUY1P6QfpVlROmgeZu0K-Ior92_fLf9ejHuId6-MZxvzeEmLzw3twg2YFSNJ8zuiWg7xfiwsuOtXnbV5tlz-4bV40fQfIJInpeG5qd_irh2ROQiG8oUdJksF8HGpWBax5uApjZfVLnUHzlGathNmchQbfOHoV2PV_deOB"/>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Alex Mercer</p>
+<p class="text-xs text-on-surface-variant">2 hours ago</p>
+</div>
+</div>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">The Future of AI in UI/UX Design</h3>
+<div class="flex gap-2 flex-wrap">
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-2 py-1 rounded text-xs font-medium">Design</span>
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-2 py-1 rounded text-xs font-medium">AI</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Exploring how generative models are reshaping the landscape of interface design, moving from static layouts to adaptive, personalized user experiences. The shift implies a new paradigm where designers become curators of intent.</p>
+<div class="flex items-center justify-between border-t border-surface-container pt-4 mt-2">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 bg-surface-container-low rounded-full px-3 py-1">
+<button class="text-outline hover:text-primary transition-colors flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_upward</span>
+</button>
+<span class="text-sm font-medium text-on-surface">1.2k</span>
+<button class="text-outline hover:text-error transition-colors flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_downward</span>
+</button>
+</div>
+<button class="flex items-center gap-2 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">chat_bubble_outline</span>
+<span class="text-sm">48</span>
+</button>
+</div>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+</article>
+<!-- Post Card 2 -->
+<article class="bg-surface-container-lowest border border-surface-container rounded-xl shadow-sm overflow-hidden p-6 flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A close up portrait of a developer." src="https://lh3.googleusercontent.com/aida/ADBb0ugveizWgvVXfC8zWiqUZPBWiOfHTd6IHWiDGgokdRSjjngpJ48D4esBcQ2CyGk5KAPdh4BPLGHwHJIXSFjY7gfwSQp5KuDygwNxgzGEu_MUR5wbJ4vdlM2A2zXLnnaAjSlWFIOR-ggJLV4Ci5JUR95ombNDzppb4FaMqFuos0CzUUOOHMdUAY_m_RFX48VYF4TgvKXjfimDJLtsJoCvusG0nZMZgYuYjII2rQbfSg641f3xyIGonjQG9axepeN8Y3lE0GrN5vonsQ"/>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Samira Wiley</p>
+<p class="text-xs text-on-surface-variant">5 hours ago</p>
+</div>
+</div>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">Optimizing React Performance in 2024</h3>
+<div class="flex gap-2 flex-wrap">
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-2 py-1 rounded text-xs font-medium">React</span>
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-2 py-1 rounded text-xs font-medium">Web Dev</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant">A deep dive into the latest techniques for reducing render times and improving core web vitals in large-scale React applications. We look at concurrent rendering and optimal memoization strategies.</p>
+<div class="flex items-center justify-between border-t border-surface-container pt-4 mt-2">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 bg-surface-container-low rounded-full px-3 py-1">
+<button class="text-outline hover:text-primary transition-colors flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_upward</span>
+</button>
+<span class="text-sm font-medium text-on-surface">856</span>
+<button class="text-outline hover:text-error transition-colors flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_downward</span>
+</button>
+</div>
+<button class="flex items-center gap-2 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">chat_bubble_outline</span>
+<span class="text-sm">112</span>
+</button>
+</div>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+</article>
+</main>
+<!-- Right Spacer (for balance, could be trending topics) -->
+<aside class="hidden lg:block col-span-3">
+<div class="sticky top-[88px] bg-surface-container-lowest rounded-xl p-6 border border-surface-container shadow-sm">
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Trending Tags</h3>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-container-low text-on-surface px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer hover:bg-surface-container transition-colors">#Frontend</span>
+<span class="bg-surface-container-low text-on-surface px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer hover:bg-surface-container transition-colors">#TypeScript</span>
+<span class="bg-surface-container-low text-on-surface px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer hover:bg-surface-container transition-colors">#SystemDesign</span>
+<span class="bg-surface-container-low text-on-surface px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer hover:bg-surface-container transition-colors">#DevOps</span>
+<span class="bg-surface-container-low text-on-surface px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer hover:bg-surface-container transition-colors">#UIUX</span>
+</div>
+</div>
+</aside>
+</div>
+<!-- BottomNavBar - Mobile Only -->
+<nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-16 z-40 pb-safe">
+<button class="flex flex-col items-center justify-center w-full h-full text-blue-600">
+<span class="material-symbols-outlined" data-weight="fill">rss_feed</span>
+<span class="text-[10px] font-medium mt-1">Feed</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full h-full text-slate-500 hover:text-slate-800">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="text-[10px] font-medium mt-1">Bookmarks</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full h-full text-slate-500 hover:text-slate-800">
+<span class="material-symbols-outlined">notifications</span>
+<span class="text-[10px] font-medium mt-1">Notifications</span>
+</button>
+</nav>
+<!-- Modal Overlay: Delete your account? -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/50 backdrop-blur-sm">
+<div class="bg-surface-container-lowest rounded-xl shadow-xl border border-surface-container max-w-sm w-full p-6 flex flex-col gap-4">
+<div class="flex items-center gap-3 text-error mb-2">
+<span class="material-symbols-outlined text-3xl">warning</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Delete your account?</h2>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                We will send a confirmation email. After you confirm and enter your password, your account will be scheduled for deletion in 7 days. </p>
+<div class="flex justify-end gap-3 mt-4">
+<button class="px-4 py-2 rounded-lg font-label-md text-label-md bg-error text-on-error hover:bg-on-error-container transition-colors shadow-sm">
+                    Yes, send email
+                </button>
+<button class="px-4 py-2 rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors border border-outline-variant">
+                    Cancel
+                </button>
+</div>
+</div>
+</div>
+</body></html>

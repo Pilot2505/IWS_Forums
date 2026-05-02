@@ -57,16 +57,23 @@ export default function Bookmarks() {
   }
 
   return (
-    <div className="min-h-screen bg-[#D6E4F0]">
+    <div className="min-h-screen bg-forum-bg">
       <Navbar user={user} setUser={setUser} showCreatePost={true} />
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
-        <div className="mb-8 flex items-end justify-between gap-4">
+        <div className="mb-8 border-b border-forum-border pb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#0C245E] sm:text-4xl">Saved Posts</h1>
-            <p className="mt-2 text-sm text-gray-600">Posts you bookmarked for later reading.</p>
+            <h1 className="text-4xl font-semibold tracking-tight text-forum-inkStrong sm:text-5xl">
+              Saved Posts
+            </h1>
+            <p className="mt-3 text-lg text-forum-muted">
+              Posts you bookmarked for later reading.
+            </p>
           </div>
-          <Link to="/home" className="text-sm font-medium text-[#1E56A0] hover:underline">
+          <Link
+            to="/home"
+            className="mt-4 inline-flex text-base font-medium text-forum-primary transition hover:text-forum-primaryDark"
+          >
             Back to feed
           </Link>
         </div>
@@ -74,15 +81,18 @@ export default function Bookmarks() {
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((item) => (
-              <div key={item} className="animate-pulse rounded-lg bg-white p-6">
-                <div className="mb-3 h-6 w-2/3 rounded bg-gray-200" />
-                <div className="mb-2 h-4 w-full rounded bg-gray-200" />
-                <div className="h-4 w-5/6 rounded bg-gray-200" />
+              <div
+                key={item}
+                className="animate-pulse rounded-[28px] border border-forum-border bg-forum-surface p-6 shadow-panel"
+              >
+                <div className="mb-3 h-6 w-2/3 rounded-full bg-slate-100" />
+                <div className="mb-2 h-4 w-full rounded-full bg-slate-100" />
+                <div className="h-4 w-5/6 rounded-full bg-slate-100" />
               </div>
             ))}
           </div>
         ) : bookmarks.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-[#1E56A0]/20 bg-white p-10 text-center text-gray-500">
+          <div className="rounded-[28px] border border-dashed border-forum-borderStrong bg-forum-surface p-10 text-center text-forum-muted shadow-panel">
             No saved posts yet.
           </div>
         ) : (
@@ -96,7 +106,7 @@ export default function Bookmarks() {
                     By{" "}
                     <Link
                       to={`/profile/${encodeURIComponent(post.username)}`}
-                      className="font-medium text-[#1E56A0] hover:underline"
+                      className="font-semibold text-forum-primary transition hover:text-forum-primaryDark"
                     >
                       {post.username}
                     </Link>
@@ -105,12 +115,18 @@ export default function Bookmarks() {
                 meta={new Date(post.created_at).toLocaleString()}
                 readMoreTo={`/post/${post.id}`}
               >
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <BookmarkButton postId={post.id} initialBookmarked={true} onChange={(nextSaved) => {
-                    if (!nextSaved) {
-                      setBookmarks((prev) => prev.filter((item) => item.id !== post.id));
-                    }
-                  }} />
+                <div className="flex flex-wrap items-center gap-3">
+                  <BookmarkButton
+                    postId={post.id}
+                    initialBookmarked={true}
+                    onChange={(nextSaved) => {
+                      if (!nextSaved) {
+                        setBookmarks((prev) =>
+                          prev.filter((item) => item.id !== post.id),
+                        );
+                      }
+                    }}
+                  />
                 </div>
               </PostCard>
             ))}
@@ -123,7 +139,7 @@ export default function Bookmarks() {
               type="button"
               onClick={handleLoadMore}
               disabled={loadingMore}
-              className="rounded-md bg-[#1E56A0] px-6 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex h-12 items-center justify-center rounded-2xl border border-forum-border bg-forum-surface px-5 font-semibold text-forum-inkStrong transition hover:border-forum-primary/30 hover:text-forum-primary disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loadingMore ? "Loading..." : "Load More"}
             </button>

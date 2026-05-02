@@ -1,0 +1,228 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>What are you interested in? - The Digital Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#2e3132",
+                        "inverse-primary": "#a4c9ff",
+                        "surface-container": "#edeeef",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#191c1d",
+                        "secondary": "#496080",
+                        "outline": "#717783",
+                        "on-primary-fixed": "#001c39",
+                        "on-primary-container": "#fdfcff",
+                        "on-tertiary-container": "#fffbff",
+                        "tertiary-container": "#a06900",
+                        "on-secondary-fixed": "#001c39",
+                        "surface-container-high": "#e7e8e9",
+                        "tertiary": "#7f5300",
+                        "on-tertiary-fixed-variant": "#633f00",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#191c1d",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "surface-container-low": "#f3f4f5",
+                        "surface-tint": "#0060ac",
+                        "on-surface-variant": "#414751",
+                        "secondary-fixed-dim": "#b1c8ed",
+                        "surface-dim": "#d9dadb",
+                        "secondary-fixed": "#d4e3ff",
+                        "tertiary-fixed": "#ffddb4",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e1e3e4",
+                        "primary-container": "#2976c7",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#e1e3e4",
+                        "background": "#f8f9fa",
+                        "outline-variant": "#c1c7d3",
+                        "on-tertiary-fixed": "#291800",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#c1d9fe",
+                        "on-secondary-container": "#485e7e",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#005da7",
+                        "on-secondary-fixed-variant": "#314867",
+                        "on-primary-fixed-variant": "#004883",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-bright": "#f8f9fa",
+                        "surface": "#f8f9fa",
+                        "primary-fixed": "#d4e3ff",
+                        "tertiary-fixed-dim": "#ffb953"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "display": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-background min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Minimal Header for Onboarding Context -->
+<header class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-[20px] py-6 px-8 flex justify-center items-center">
+<div class="text-xl font-bold tracking-tighter text-on-surface">Tech Pulse</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex items-center justify-center p-4 pt-24 pb-12 relative overflow-hidden">
+<!-- Background Decor (Muted Blue Gradient Simulation) -->
+<div class="absolute inset-0 z-0 bg-gradient-to-br from-surface to-secondary-container/20 pointer-events-none"></div>
+<!-- Central Card -->
+<div class="relative z-10 w-full max-w-3xl bg-surface-container-lowest rounded-xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] p-8 md:p-12 flex flex-col gap-10">
+<!-- Header Section -->
+<div class="text-center space-y-4">
+<h1 class="font-headline text-4xl md:text-5xl font-bold tracking-tight text-on-surface">
+                    What are you interested in?
+                </h1>
+<p class="font-body text-lg text-on-surface-variant max-w-xl mx-auto leading-relaxed">
+                    Select up to 3 categories to personalize your feed.
+                </p>
+<div class="inline-flex items-center justify-center gap-2 mt-4 px-4 py-1.5 bg-surface-container-low rounded-full">
+<span class="font-label text-sm font-medium tracking-[0.05em] text-primary">0/3</span>
+<span class="font-label text-sm tracking-[0.05em] text-on-surface-variant">selected</span>
+</div>
+</div>
+<!-- Category Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">javascript</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">JavaScript</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">code</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">Python</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">coffee</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">Java</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">terminal</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">C/C++</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">web</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">Web Development</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">smartphone</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">Mobile Development</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">database</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">Database</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">build_circle</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">DevOps</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">smart_toy</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">AI / Machine Learning</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">security</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">Cybersecurity</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">cloud</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">Cloud Computing</span>
+</button>
+<!-- Chip Item (Inactive) -->
+<button class="group flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest hover:bg-surface-container-high hover:border-transparent transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-2xl">code_blocks</span>
+</div>
+<span class="font-label text-sm font-medium text-on-surface text-center">Open Source</span>
+</button>
+</div>
+<!-- Actions Footer -->
+<div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-6 pt-6 border-t border-surface-container-high">
+<button class="text-on-surface-variant hover:text-primary font-label text-sm font-medium tracking-[0.05em] uppercase transition-colors px-4 py-2">
+                    Skip for now
+                </button>
+<button class="w-full sm:w-auto bg-gradient-to-r from-primary to-primary-container text-on-primary font-label text-base font-semibold px-8 py-3 rounded-full hover:opacity-90 transition-opacity shadow-[0px_4px_12px_rgba(0,93,167,0.2)]" disabled="">
+                    Continue
+                </button>
+</div>
+</div>
+</main>
+<!-- Hidden Images to satisfy requirements without breaking layout -->
+<div style="display:none;">
+<img alt="" data-alt="A highly detailed, modern user interface element rendered in a light mode aesthetic. It features a sophisticated palette of soft cool grays and crisp whites, establishing a clean, professional tone. The image relies on subtle tonal shifts rather than harsh borders to define depth. The overall mood is gentle yet authoritative, suitable for a premium tech forum's editorial layout." src="https://lh3.googleusercontent.com/aida/ADBb0uijl82KlWnvFYAh0gXo2YxLMmv3l3WvGC60ZBPe1HGqvsAIFyj9pzHuoWfcjNwn_vml0b2LNaQwJFEPbEiQ5kTTgGhBnLx4FO6E-D87HyqB5e9hkc7DNiZZAwJf3UWTYo9AM8LWvheePfExwCI_CtRuj3tP90s4_EJt6Y_-FIqI5MBiGToa-ormWPc1fN_LI2ruhGaL1RixIGvtRTB2ZzTMfWBQHTRH8IFP_YvcMx_k3NBgREjrSOcmy_aKsbcEVHsf_COzgAttrbY" class="">
+<img alt="" data-alt="A striking abstract background visualization suitable for a premium digital atelier. The image incorporates a soft, muted blue gradient transitioning smoothly into pristine whites. It embodies a 'paper-on-glass' aesthetic with intentional asymmetry and negative space. The lighting is bright and high-key, creating an atmosphere of modern technical elegance." src="https://lh3.googleusercontent.com/aida/ADBb0uh8k980_5wEFfAfRLl3AZr1sRCS9oJwKVPHmYdOq8FpDQZcgCaH9POxdng488CwAXKkyU1ElXMuzQWXzZJ3zEvz8IOr5esEvZG3JlQeFCIl7pMBi0-tTQeSotuyHq0H_tKquE91kq0fyRspOq_HmEciADEh1gDIU4CG459jrYhi_Oh53wsuJavY0Gtvk8w3bTU2aYiQ9wbUIF9DcSySz-YS3CqGTxmkXN27AosQLqzL5kqQKdWONMH48a6i5q4-0JuFQwvrA-qaphw" class="">
+<img alt="" data-alt="A vertical portrait style image illustrating advanced technology concepts within a minimalist gallery setting. Soft white lighting illuminates geometric forms, relying on a palette of deep blacks, pristine whites, and subtle primary blue accents. The visual style avoids clutter, using kinetic air to direct focus, achieving an editorial and soulful depth." src="https://lh3.googleusercontent.com/aida/ADBb0ugmB-2TinQghD0_3ZQxC9VZmRsXuexMHD43URWu7EDJbimhsQCjzrQJJN_y_qgDd43a4pRaN3BIniB5RuwdbdDmJH4w0pfxHd4Y_Kl_Ottml06PxNtO52c3WhJyhnktC57HE1N0GpmgdzVBM9cGZhKfB8P0FlG4UzX_1tdZLqw_K9lBNxPDQW2NwSPooHCTUTpO5aRcSacltXSyxw0WOdgCuq47hC5qSC7jSaozMXFsQ_1T0pauUJkf6Dnr6IchO4x5GUeH4Z2rgj4" class="">
+<img alt="" data-alt="A sophisticated portrait graphic designed for a high-end editorial tech platform. The visual uses glassmorphism effects, showing frosted, semi-transparent layers floating above a clean white surface. The mood is serene and technologically advanced, utilizing a strict color scheme of surface whites, container grays, and gradient blue primary tones." src="https://lh3.googleusercontent.com/aida/ADBb0ugWAp_th8rnAj3OsoFUaE1eE6kpmB7AGrZVOhU8CjvoiadZRORrDUfTFzqLKXReP1XfTLYeUba5N0LmcLatBORoolCw11oEdSG5Rm0wYD6edcNLj3lQPsqknbz5LGt8hqNZX7tAX5OUfvl14k8ggtVDPggER96GDGpJJ2cRZ5TmZUc1n3d5-GE04q5ZM6INwAxrx4SqHrCYARTDAclWkSnv019AYmnM74QipNT0Gn0jodBZYeOzeh0Nn3LPhO4kAKqPuFQI3dIE_vU">
+<img alt="" data-alt="A wide, landscape-oriented digital art piece reflecting a curated pulse of information. It showcases soft, rounded interface-like elements floating in a vast, minimalist space. The composition uses optical centering and significant negative space. Lighting is ambient and gentle, with a refined color palette of cool grays and deep on-surface text blacks." src="https://lh3.googleusercontent.com/aida/ADBb0ujB16HWv2XU1jGcgISBWxMkVhraxZotbHSzM2h683hB_kLLWaKm4avF0-0HrvpY4l9ag8VFTi_1UMsWOXpR5NEypWHT48bmYtU4KInX0vdbKOEGa_wAA_i9Bc6qEb4d1YWl9qKOkztthgMqkHqm0ApPSF1y4F_a5pTkY3CHuwG0ka3j31hNUzJPpdAIMXVwEE3wKYYhnJbhogU1EeS4sG86y1feAuMHRyLWq2yxuEtsJdngGRBOUSE32jTSy_NonN1b-eujWZy0q-s" class="">
+<img alt="" data-alt="A clean, modern landscape graphic demonstrating tonal layering. It features crisp white content cards resting on a subtly receded light gray background, illustrating physical depth without harsh lines. The aesthetic is gentle and professional, utilizing a sophisticated palette of whites and soft blues to convey technical precision." src="https://lh3.googleusercontent.com/aida/ADBb0uiN5EhU78UmxEuY6CwJ_R4HFaSnL_hKk3p1ZRlg_R9rKdA8Im0KQnEMDyG_h1TS2Z9uPNo53wqrNaLYkB9_S7bF3lOC9zfUD0hIySNEdS48Ihn3onvwobmIkhyG_UnQZqnYtL1y-FRMQ6flZg0Zzi9XVUI2z7gxGcD7ZKo4L419ZwdRNmc9DJZaCB2_UVga37ITPsnuQP34sAHv6t1SVnzn2VSq8FC8tBaonGNkyIRLlkMn2JEuFwdUq0c_ka35bVkqD3EoJAWX0FI" class="">
+<img alt="" data-alt="A long, narrow horizontal banner image depicting a sleek, modern navigation element. The visual style incorporates a 20px backdrop blur effect over a pristine white surface, creating a high-end glassmorphism aesthetic. The mood is authoritative yet accessible, using subtle linear gradients and high-contrast typography." src="https://lh3.googleusercontent.com/aida/ADBb0uimBoTIYYfiAIJozLjXH2D1IjI0kR_uTJaslIGB84SAEEzdhZTDtcR4KQSOlxvpiQx9Bcu55sryZfNy_kOLRk7wmC8Vcm-FtyEz6JoJe2UtUXncogInercJsAmpesA7gpUXFPzrJC5ZR7EtwEyA6Q82tSyP4PM_aX0wvycSN3004VZLqnYXV9Je5rP36fx6epWZf1ZikikbWbxfGqR2CsojbC57nWDL8GteAecicH2G6PViX_pnjVnVVmYLbaUiU_JH45Hl3JQCQNw" class="">
+<img alt="" data-alt="A tall, vertical digital artwork featuring abstract representations of tech categories. The design uses soft rounding and pill shapes against a clean, light mode background. The palette relies on secondary container blues and surface-variant grays. The overall style is editorial and organized, avoiding a cluttered grid-of-boxes look." src="https://lh3.googleusercontent.com/aida/ADBb0ugSBrPlQk3P6dEC_bd8WGSrdiCv6iMHaZURShjU6cjBBUZXKl8YkxItZSF6kfy752gWsGOwoO0sPFmgcSV2En7kb3yV9zJBDKEdQDlrG0M8HcjisnXwQe1AunlXzLKGkxXKxkfWNndmnxdyCqFmbdL248JA71mlndii_BiECOawTUuLaYzF3G58cRaIUYKS63-TuI6EhqDjFllgCtpog1r2MyfB1O8Sc517sDCXSklfTz0LItzDwtQo9CIyR4YX1kYItdGmNL8efBE" class="">
+<img alt="" data-alt="A landscape digital illustration of an interconnected network, styled for a premium tech forum. The imagery uses subtle ambient shadows to lift elements off a soft white background. The visual approach is minimalist, employing a strict hierarchy of cool grays and a primary blue gradient to establish a soulful, professional depth." src="https://lh3.googleusercontent.com/aida/ADBb0ujysza5GbP25erZux2U60qNmBbwX_ZugoTL5PTFVhYmyfKIaA7rxKWk-C8VLpmemc332bJCIKRCumVHC3A-VXXcuA9QUx2RV011tJ5upmvjDsfpILoMiYRNgmdAUnO5JHUzDEEvXrauH4cr27-ODpSvji9ulODY5M6t4Glf950ZPErKtprTXv23L6663T7rfdQRSAZ_a7YGmYam6_G83fTyqEuGrp_BLjjQHAy1hOzCQQJz0zytCsdqQfiQmxTJbmPkG1Tx__UMqkM" class="">
+<img alt="" data-alt="A wide digital canvas showing a sophisticated data visualization. The style is strictly light-mode, utilizing the 'no-line' rule by separating areas through subtle background color shifts. The mood is serene and analytical, with high-key lighting and a refined palette of pristine whites, cool grays, and precise primary blue accents." src="https://lh3.googleusercontent.com/aida/ADBb0uifZ6fB9fDF2O-wwHs8wydxqAnQJYsTypyYplzlEfUV-oXsFswCJNGk-sVscahPts6Eo1s9LYhlZKxzwgk-wduCpqlgJcI2rEIgPUnKV-KtnmQtIYB0eaZUMryg2D-uBx1XIHl4huQAoV_eHQAoh9XZfwec3hcoRSWLn61S5V5WVg86Foj1m7tfUxhr5uTXOAQggj_n-pLbAXfajAa3eQZP2p6vknjHS8NKTOmKwGu05IkXzWRJiZPlMqKFRh47iuJiCFIeYF1kEHg" class="">
+<img alt="" data-alt="A landscape-oriented modern graphic representing digital discourse. It features large, high-contrast typography anchoring asymmetric layouts within a minimalist, light-mode environment. The aesthetic conveys a high-end editorial experience, using kinetic air and a soft, muted blue gradient to create a sense of architectural depth." src="https://lh3.googleusercontent.com/aida/ADBb0ujbYo6UVpKvCuB6NQn911yTCveEhnm4quRZAdXLrhB0mttwD8y601MF3P-fid_XjQynRUlHDFyNQ5QQnUoRH0MGleiLF60YSuXModhra7CeHfV_DH6U-IQywE8oxnjsjYc7puyUV1Pu3AQRW2eckMVFAf7LBdVD2MOv8p70buigtWe7SfZ5GFYrHXmZ0NOjoW6clwnZOyY7oqZAhieZkQFbhmMqlDgQPqnE-OX6X8QD_A1Lz8FO3U4mmGcOMhJVL7eHHti0pGIIPQ" class="">
+<img alt="" data-alt="A portrait-oriented abstract design suitable for a sophisticated digital atelier. The image features soft, overlapping layers of pristine white and light cool gray, creating a paper-like texture. Subtle ambient shadows provide lift without harsh lines. The mood is gentle and focused, adhering to a strict light-mode aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0uht-3gSptMFe_zG4T7GdGP_OVZZhGUvErTN99ZXkfmkID3bD7MiqcszeOqfpXDrjdFA9skDsGhPM8harWSeCtNnftBAqwjMj3rFXTuUmPcvcABKggrZlN9wQgi3JpKp9SjY-ZwM3P8oVno1GqLpNw3JE-iRQoJnh8ashkcvqO81V40x12GNyjle8ONV6LXJhbvknYCXSUSmmWKZ21fruknVVduVrtQefVf30Su1T_1cQt3Kkd48EQsb2o_IJ5BGO6maM7bgV6l97uQ">
+<img alt="" data-alt="A vertical digital art piece illustrating structured technical information. The composition avoids clutter, using vast negative space and intentional asymmetry. The color scheme is restricted to surface whites, outline-variant grays at low opacity, and primary blue gradients. The overall tone is authoritative, clean, and highly professional." src="https://lh3.googleusercontent.com/aida/ADBb0ujybRj2P_aBoGKS2Du9FXPL8mb3n7LpzvzQDtvH-jV5puanT_f6h_99f8eurCm0f1puLgaWLuE7YkgQNo1FE606t9dfMx9UoeJhiXi8B2XhN2OhtL7Lra5FznBljuvAnbYIpM4KM6_Fb6IPEepceyjUwxnvhhpufEUfEGCLYGlv1QQba0S4QMjL3LwndWd0XFTE4tJT3WB5m4Q2T7seiSmZAY2HxHHcbKRC04ON5tZjBIIHBwGoRLWyA8ETjHdkBDevPOFdOLm6vMc" class="">
+<img alt="" data-alt="A portrait graphic depicting interactive digital elements in a minimalist setting. It utilizes full-radius pill shapes and subtle tonal layering against a clean background. The visual style is light, airy, and modern, relying on a palette of soft whites and secondary container blues to maintain a serene, editorial mood." src="https://lh3.googleusercontent.com/aida/ADBb0ujVZq4tzWKt-_o6JnI47SQ16nrO6ghaaEgEzBOYrjYwckXMaiR-m_9DjpcKZKf2OGQZDmWSx3azrtqMbyDoipLy8Ts53wCF-AFkLumOQhX2gV30AYDC48VvBWN8xG2ptg-E59ZJDzHK_Xmn1PrkxYgol_XfaNYDEtXfFWSjKn5gyq15H73AoohXsoaiflPyWiQqqty9udJS-8HbQPjXd4gkYx7XEXY0caA1Ai37aP8IpdudYe6eyvX1noiglgxYnFlJ6eqSF6ROSQ">
+<img alt="" data-alt="A wide digital landscape representing a curated pulse of technology. The design features a gentle, light-mode aesthetic with soft, muted blue accents. Elements are separated by vertical whitespace and tonal shifts rather than lines. The lighting is soft and even, creating a highly polished, premium technical environment." src="https://lh3.googleusercontent.com/aida/ADBb0ugWKuPWHN6EZDPYiLnCBXs8ht2JGEOt5NZZXAcZRDdisPGl0C1qUkVjOabfSVUKx1xGMyv_kO9RBZlu6cP6tXI_m7VXvFxA4r2tzxOeRLcu-3zD9-oxAC20TnJfO5znOoBupbWIr1apOjlo_-lp4nwym3qxT1-4EtwLv0AMCuY89pTILhL8Ns-vVIotK3hsiUBm50lnmzrZqvbmJogrPAFfeTkM-_bIBNgDd39J5xYQ_SWqb0-JFiU3fn-_8rdYVdk7RQBPpA5av7M" class="">
+</div>
+
+
+</body></html>

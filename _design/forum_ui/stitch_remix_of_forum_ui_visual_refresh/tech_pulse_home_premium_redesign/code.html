@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tech Pulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "background": "#f8f9fa",
+                      "tertiary-container": "#a06900",
+                      "tertiary": "#7f5300",
+                      "primary-container": "#2976c7",
+                      "on-background": "#191c1d",
+                      "on-secondary-fixed": "#001c39",
+                      "surface-container-highest": "#e1e3e4",
+                      "secondary": "#496080",
+                      "primary": "#005da7",
+                      "on-error": "#ffffff",
+                      "surface": "#f8f9fa",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#fdfcff",
+                      "on-primary-fixed": "#001c39",
+                      "primary-fixed": "#d4e3ff",
+                      "surface-container": "#edeeef",
+                      "surface-container-high": "#e7e8e9",
+                      "on-secondary-fixed-variant": "#314867",
+                      "inverse-surface": "#2e3132",
+                      "error": "#ba1a1a",
+                      "outline": "#717783",
+                      "surface-container-low": "#f3f4f5",
+                      "secondary-fixed-dim": "#b1c8ed",
+                      "on-tertiary-fixed-variant": "#633f00",
+                      "on-surface-variant": "#414751",
+                      "on-tertiary-container": "#fffbff",
+                      "surface-variant": "#e1e3e4",
+                      "secondary-container": "#c1d9fe",
+                      "tertiary-fixed": "#ffddb4",
+                      "surface-bright": "#f8f9fa",
+                      "on-secondary-container": "#485e7e",
+                      "on-primary-fixed-variant": "#004883",
+                      "tertiary-fixed-dim": "#ffb953",
+                      "surface-tint": "#0060ac",
+                      "surface-container-lowest": "#ffffff",
+                      "outline-variant": "#c1c7d3",
+                      "on-tertiary-fixed": "#291800",
+                      "surface-dim": "#d9dadb",
+                      "on-tertiary": "#ffffff",
+                      "secondary-fixed": "#d4e3ff",
+                      "inverse-primary": "#a4c9ff",
+                      "inverse-on-surface": "#f0f1f2",
+                      "primary-fixed-dim": "#a4c9ff",
+                      "on-surface": "#191c1d",
+                      "on-error-container": "#93000a",
+                      "on-primary": "#ffffff",
+                      "error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "md": "16px",
+                      "lg": "24px",
+                      "xl": "32px",
+                      "sm": "8px",
+                      "xs": "4px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-lg min-h-screen flex flex-col antialiased">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest text-primary flex justify-between items-center w-full px-xl py-md max-w-full mx-auto border-b border-surface-variant shadow-sm docked full-width top-0 z-50">
+<div class="flex items-center gap-md">
+<h1 class="text-xl font-bold tracking-tight text-primary font-headline-lg text-headline-lg">Tech Pulse</h1>
+</div>
+<div class="flex items-center gap-lg">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline-variant">search</span>
+<input class="pl-xl pr-md py-sm rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-label-md text-label-md w-64 placeholder:text-outline" placeholder="Search..." type="text"/>
+</div>
+<a class="font-label-md text-label-md text-primary font-medium hover:text-primary-container transition-colors duration-200" href="#">Create Post</a>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-outline hover:text-primary cursor-pointer transition-colors duration-200">notifications</span>
+<span class="material-symbols-outlined text-outline hover:text-primary cursor-pointer transition-colors duration-200">chat_bubble</span>
+<img alt="User profile photo" class="w-8 h-8 rounded-full object-cover border border-outline-variant cursor-pointer ml-sm" data-alt="A small circular avatar image showing a professional headshot of a smiling user against a neutral background. The lighting is soft and bright, fitting a modern light-mode UI." src="https://lh3.googleusercontent.com/aida/ADBb0ujyQo39b4zljgAegaGvRL5dIYTte7wLCMR-DetCNFoflNRtWxmy3KuE6Q9O4ZIJsqu5Q5jXcVYbKljXYLul161BYzIO5R-NLYDXQgpzKJvZJdV9Bk8KHh5iQ5jZo8kphfReaXruqda6Rdf60U0lAU-7W33OzWU_QB0RonNWRuYy6_vcqaF3W7uyiSJYbj6nzRWRhzqDGHZGXjs0CfycNlAXWMNaeHjt7MPq6bgQFUJp_PjYkxTowH1Hvi2LJu3IiKaqqtxLipAgjg"/>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-[1200px] w-full mx-auto px-lg py-xl flex gap-xl">
+<!-- Main Column -->
+<div class="flex-1 flex flex-col gap-xl">
+<div class="flex justify-between items-center bg-surface-container-lowest p-lg rounded-xl border border-surface-variant shadow-sm">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Recent Posts</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-xs">Select your interests to get personalized recommendations.</p>
+</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md px-lg py-sm rounded-lg transition-colors flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Create a New Post
+                </button>
+</div>
+<div class="flex justify-end items-center mb-sm">
+<div class="flex items-center gap-sm bg-surface-container-lowest border border-surface-variant rounded-lg px-md py-xs shadow-sm cursor-pointer hover:bg-surface-container-low transition-colors">
+<span class="font-label-md text-label-md text-on-surface-variant">Sort by:</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">Newest first</span>
+<span class="material-symbols-outlined text-outline-variant text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Post List -->
+<div class="flex flex-col gap-lg">
+<!-- Post Card 1 -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-lg flex gap-md shadow-sm hover:shadow-md transition-shadow">
+<div class="flex flex-col items-center gap-xs text-outline-variant">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined">keyboard_arrow_up</span></button>
+<span class="font-label-md text-label-md text-on-surface font-medium">342</span>
+<button class="hover:text-error transition-colors"><span class="material-symbols-outlined">keyboard_arrow_down</span></button>
+</div>
+<div class="flex-1 flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-md text-headline-md text-on-surface hover:text-primary cursor-pointer transition-colors leading-tight">The Future of AI in Web Development: Beyond Copilot</h3>
+<button class="text-outline-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">bookmark_border</span></button>
+</div>
+<div class="flex flex-wrap gap-xs">
+<span class="bg-secondary-container text-on-secondary-container font-label-md text-[12px] px-sm py-[2px] rounded-full">Artificial Intelligence</span>
+<span class="bg-secondary-container text-on-secondary-container font-label-md text-[12px] px-sm py-[2px] rounded-full">WebDev</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-xs line-clamp-2">As we move past the initial hype of code assistants, how will autonomous agents reshape the architecture and deployment of modern web applications? Exploring the next 5 years.</p>
+<div class="flex justify-between items-center mt-md pt-sm border-t border-surface-variant/50">
+<div class="flex items-center gap-sm">
+<img alt="Author" class="w-6 h-6 rounded-full object-cover" data-alt="A tiny profile picture of a tech writer, casually dressed, smiling in a brightly lit office setting." src="https://lh3.googleusercontent.com/aida/ADBb0uj2G2djKN7L8z6bTSlaUQVGPrCdIhVEpFB_H7hWgQGU-NI0Sf530kkGIdAlA9jKs9TGgr92Rayi01jfxV3jc-J5iXvqJSOeUYQQ1r5i7pwN-OrCnFw4YvdRzlk8InhJDbPup8Uo22CjEPlCcRb2rkWUOaJn__iZowm-rONpGLWstILbQUA7OSD3qdhoqvKouPDlkxSAfZ-iP7p9AqxSvnxYcooIHA8Ob5v7xMyC0GZEaBs0fM878L1HRIcvEMX95pS_kXQZdQvRZw"/>
+<span class="font-label-md text-label-md text-on-surface-variant">By <span class="font-medium text-on-surface hover:text-primary cursor-pointer">Sarah Jenkins</span></span>
+<span class="text-outline-variant text-[12px]">•</span>
+<span class="font-label-md text-[12px] text-outline-variant">2 hours ago</span>
+</div>
+<a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors flex items-center gap-xs" href="#">
+                                Read More
+                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Post Card 2 -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-lg flex gap-md shadow-sm hover:shadow-md transition-shadow">
+<div class="flex flex-col items-center gap-xs text-outline-variant">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined">keyboard_arrow_up</span></button>
+<span class="font-label-md text-label-md text-on-surface font-medium">215</span>
+<button class="hover:text-error transition-colors"><span class="material-symbols-outlined">keyboard_arrow_down</span></button>
+</div>
+<div class="flex-1 flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-md text-headline-md text-on-surface hover:text-primary cursor-pointer transition-colors leading-tight">Optimizing React Performance in 2024: A Practical Guide</h3>
+<button class="text-outline-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">bookmark_border</span></button>
+</div>
+<div class="flex flex-wrap gap-xs">
+<span class="bg-secondary-container text-on-secondary-container font-label-md text-[12px] px-sm py-[2px] rounded-full">React</span>
+<span class="bg-secondary-container text-on-secondary-container font-label-md text-[12px] px-sm py-[2px] rounded-full">Performance</span>
+<span class="bg-secondary-container text-on-secondary-container font-label-md text-[12px] px-sm py-[2px] rounded-full">JavaScript</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-xs line-clamp-2">Stop blindly using useMemo and useCallback. Let's dive deep into actual bottlenecks, React Compiler expectations, and practical profiling techniques that actually move the needle.</p>
+<div class="flex justify-between items-center mt-md pt-sm border-t border-surface-variant/50">
+<div class="flex items-center gap-sm">
+<img alt="Author" class="w-6 h-6 rounded-full object-cover" data-alt="A small, professional avatar photo of a software engineer looking focused, outdoors with soft natural lighting." src="https://lh3.googleusercontent.com/aida/ADBb0uhshAska8TxX0u8W_WHkqDNphSPC1GLcJeysKXU1BPw3Nt-X2map9x1TI595Fgetc710YY7y5Qa7lwseRMJl1_VZ1PCAjsu7VRyoUlpUkL6v4Ymwt5_R24VFBZtqkIl9hCcDrdyBymxZT_XNpMdxsDBSeozRNobfma0-z_Kh1jHDMp3GxQyC59UBTUCE5DdGU1AVc7fCe8aUI9dP-jGzG525hvhaeF5tKvBMc4iPRkMPnwwQvHyqZzIpcwnOMffgaIvRhy4XL986A"/>
+<span class="font-label-md text-label-md text-on-surface-variant">By <span class="font-medium text-on-surface hover:text-primary cursor-pointer">David Chen</span></span>
+<span class="text-outline-variant text-[12px]">•</span>
+<span class="font-label-md text-[12px] text-outline-variant">5 hours ago</span>
+</div>
+<a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors flex items-center gap-xs" href="#">
+                                Read More
+                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Post Card 3 -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-lg flex gap-md shadow-sm hover:shadow-md transition-shadow">
+<div class="flex flex-col items-center gap-xs text-outline-variant">
+<button class="hover:text-primary transition-colors text-primary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">keyboard_arrow_up</span></button>
+<span class="font-label-md text-label-md text-primary font-medium">89</span>
+<button class="hover:text-error transition-colors"><span class="material-symbols-outlined">keyboard_arrow_down</span></button>
+</div>
+<div class="flex-1 flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-md text-headline-md text-on-surface hover:text-primary cursor-pointer transition-colors leading-tight">CSS Grid vs Flexbox: When to use which?</h3>
+<button class="text-outline-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">bookmark_border</span></button>
+</div>
+<div class="flex flex-wrap gap-xs">
+<span class="bg-secondary-container text-on-secondary-container font-label-md text-[12px] px-sm py-[2px] rounded-full">CSS</span>
+<span class="bg-secondary-container text-on-secondary-container font-label-md text-[12px] px-sm py-[2px] rounded-full">Design</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-xs line-clamp-2">A visual breakdown of complex layout challenges and the definitive guide to choosing the right tool for the job. Includes interactive examples and code snippets.</p>
+<div class="flex justify-between items-center mt-md pt-sm border-t border-surface-variant/50">
+<div class="flex items-center gap-sm">
+<img alt="Author" class="w-6 h-6 rounded-full object-cover" data-alt="A small circular avatar of a designer wearing glasses, set against a minimalist light grey background." src="https://lh3.googleusercontent.com/aida/ADBb0ugveizWgvVXfC8zWiqUZPBWiOfHTd6IHWiDGgokdRSjjngpJ48D4esBcQ2CyGk5KAPdh4BPLGHwHJIXSFjY7gfwSQp5KuDygwNxgzGEu_MUR5wbJ4vdlM2A2zXLnnaAjSlWFIOR-ggJLV4Ci5JUR95ombNDzppb4FaMqFuos0CzUUOOHMdUAY_m_RFX48VYF4TgvKXjfimDJLtsJoCvusG0nZMZgYuYjII2rQbfSg641f3xyIGonjQG9axepeN8Y3lE0GrN5vonsQ"/>
+<span class="font-label-md text-label-md text-on-surface-variant">By <span class="font-medium text-on-surface hover:text-primary cursor-pointer">Elena Rodriguez</span></span>
+<span class="text-outline-variant text-[12px]">•</span>
+<span class="font-label-md text-[12px] text-outline-variant">1 day ago</span>
+</div>
+<a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors flex items-center gap-xs" href="#">
+                                Read More
+                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center mt-md">
+<button class="bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md px-xl py-sm rounded-lg hover:bg-surface-container-high transition-colors">
+                    Load More
+                </button>
+</div>
+</div>
+<!-- Right Sidebar (Following) -->
+<aside class="w-80 flex-shrink-0 hidden md:block">
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-lg shadow-sm sticky top-24">
+<div class="flex justify-between items-center mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface">Following</h2>
+<span class="material-symbols-outlined text-outline-variant cursor-pointer hover:text-primary transition-colors">more_horiz</span>
+</div>
+<div class="flex flex-col gap-md">
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="relative">
+<img alt="User" class="w-10 h-10 rounded-full object-cover border border-surface-variant" data-alt="Avatar photo of a tech enthusiast in a bright studio, looking confident. High key lighting." src="https://lh3.googleusercontent.com/aida/ADBb0ugZKF_DAkDwjJmB8zZm5dxO0RyyD6Rg-wOkjy1htFBV88kQSbBQvf2BfVu-0bW0hm5uRMyHfhlUpZMlPEKw29fzvc_PCd-dVEyv8HhPa-3RpMMCJ1DlMQiZQmPdiM8rPQLdf-KO6sDBXruknX81798FSOGxTAFzUmQCFJXL5e0U88uWnVufjRjXNp97whgJHd7-Q3h18dsFeDGdWLHNpPN3fNNWRe499dy3XOfVn66tY8KRzdIwJQhhCApIsHOxYM5mWcoHoMwy"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Alex Mercer</h4>
+<p class="font-body-lg text-[12px] text-outline line-clamp-1">Frontend Architect @ TechFlow</p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-md">
+<img alt="User" class="w-10 h-10 rounded-full object-cover border border-surface-variant" data-alt="Profile picture of a female data scientist working at a desk, softly lit modern office setting." src="https://lh3.googleusercontent.com/aida/ADBb0uismdaErg7rlHpBCtUTYktIN_5RsNoSCpyoWo16PaI8o8gFkXee3U1aHN-524lyTUamkIFFAV_unQ8wkWJ6a5jjYf4IpJqrTYIgPwAxzERnxAI3wPdnfd1ZTxW_FCaTwDw0pMm0BdZL-Yz9p-f13cNppQcr9lqdsYaz9P-kxc5UQuAOC4o6bfOAZ9cRMQoKv0G5yXn-YK1BR1d9eZXzguTpXvg7SDj6ZN1xLmgtX2OA8Lplzy9BbnDVnRY60JHXug37iuONa_fS"/>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Dr. Maya Patel</h4>
+<p class="font-body-lg text-[12px] text-outline line-clamp-1">AI Researcher</p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="relative">
+<img alt="User" class="w-10 h-10 rounded-full object-cover border border-surface-variant" data-alt="Headshot of a UI/UX designer with a creative vibe, clean white background, friendly expression." src="https://lh3.googleusercontent.com/aida/ADBb0ugROSpvnpsbPTJTNkpT2Uy8w4-k78Dk2dn6JyijuxQCO9xB4bO-Shc6Rb6hrrpnqLX8xdOoQxgntaIouIl5dqeAbJE75_qhF1p1oh2vk7F2pZMj227cf754303H5MhtlJaBXmPToo3G7nDwjZSFU403U3zog_xCa8VmyUJyp7eTxS0uG3AO7FFzN-smg26_f0Vd1jDztFrnL5vGK9CZBZVXD6R9QH2di5Zv-vDs8kDUIGUGGo0C3AisoJGD-ZA2KHC2EzfkzNy7qw"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Samir Al-Fayed</h4>
+<p class="font-body-lg text-[12px] text-outline line-clamp-1">Design Systems Lead</p>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-lg py-sm font-label-md text-label-md text-primary hover:bg-surface-container-low rounded-lg transition-colors border border-transparent hover:border-outline-variant/30">
+                    View All
+                </button>
+</div>
+</aside>
+</main>
+</body></html>

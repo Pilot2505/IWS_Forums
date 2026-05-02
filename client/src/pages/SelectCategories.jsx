@@ -1,22 +1,36 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import {
+  Binary,
+  Cloud,
+  Code2,
+  Database,
+  Globe,
+  HardDriveDownload,
+  LaptopMinimal,
+  Shield,
+  Smartphone,
+  Sparkles,
+  SquareTerminal,
+  Wrench,
+} from "lucide-react";
 import { authFetch } from "../services/api";
 import useRequireAuth from "../hooks/useRequireAuth";
 
 const CATEGORIES = [
-  { id: "javascript", label: "JavaScript" },
-  { id: "python", label: "Python" },
-  { id: "java", label: "Java" },
-  { id: "cpp", label: "C / C++" },
-  { id: "web", label: "Web Development" },
-  { id: "mobile", label: "Mobile Development" },
-  { id: "database", label: "Database" },
-  { id: "devops", label: "DevOps" },
-  { id: "ai_ml", label: "AI / Machine Learning" },
-  { id: "security", label: "Cybersecurity" },
-  { id: "cloud", label: "Cloud Computing" },
-  { id: "opensource", label: "Open Source" },
+  { id: "javascript", label: "JavaScript", icon: Code2 },
+  { id: "python", label: "Python", icon: Binary },
+  { id: "java", label: "Java", icon: SquareTerminal },
+  { id: "cpp", label: "C / C++", icon: LaptopMinimal },
+  { id: "web", label: "Web Development", icon: Globe },
+  { id: "mobile", label: "Mobile Development", icon: Smartphone },
+  { id: "database", label: "Database", icon: Database },
+  { id: "devops", label: "DevOps", icon: Wrench },
+  { id: "ai_ml", label: "AI / Machine Learning", icon: Sparkles },
+  { id: "security", label: "Cybersecurity", icon: Shield },
+  { id: "cloud", label: "Cloud Computing", icon: Cloud },
+  { id: "opensource", label: "Open Source", icon: HardDriveDownload },
 ];
 
 export default function SelectCategories() {
@@ -25,15 +39,17 @@ export default function SelectCategories() {
     redirectTo: "/login",
     requireToken: true,
   });
-  
+
   const [selected, setSelected] = useState([]);
   const [initialSelected, setInitialSelected] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   useEffect(() => {
     if (!user) return;
 
-    const savedCategories = Array.isArray(user.categories) ? user.categories : [];
+    const savedCategories = Array.isArray(user.categories)
+      ? user.categories
+      : [];
     setSelected(savedCategories);
     setInitialSelected(savedCategories);
   }, [user]);
@@ -98,44 +114,45 @@ export default function SelectCategories() {
   if (!ready || !user) return null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#d4e4ec]">
-      <header className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-        <h1 className="text-xl font-bold text-[#1a2332]">Tech Pulse</h1>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-forum-bg">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-[-8rem] top-[-10rem] h-96 w-96 rounded-full bg-forum-primarySoft/60 blur-3xl" />
+        <div className="absolute bottom-[-12rem] right-[-6rem] h-80 w-80 rounded-full bg-forum-primarySoft/50 blur-3xl" />
+      </div>
+
+      <header className="relative z-10 flex items-center justify-center px-4 py-5 sm:px-6">
+        <h1 className="text-2xl font-semibold tracking-tight text-forum-inkStrong">
+          Tech Pulse
+        </h1>
       </header>
 
-      {/* Content */}
-      <div className="flex flex-1 items-center justify-center px-4 py-8">
-        <div className="w-full max-w-2xl">
-          <div className="mb-8 text-center">
-            <h2 className="mb-2 text-3xl font-bold text-[#0a0a0a] sm:text-4xl">
-              {user?.categories && Array.isArray(user.categories) && user.categories.length > 0
-                ? "Update your interests"
-                : "What are you interested in?"}
-            </h2>
-            <p className="text-sm text-gray-600 sm:text-base">
-              Select up to <span className="font-semibold text-[#2b5a8a]">3 categories</span> to personalize your feed.
-            </p>
-          </div>
-
-          <div className="rounded-lg bg-white p-5 shadow-sm sm:p-8">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm text-gray-500">{selected.length}/3 selected</span>
-              <div className="flex gap-1">
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className={`h-2 w-8 rounded-full transition-colors ${
-                      i < selected.length ? "bg-[#2b5a8a]" : "bg-gray-200"
-                    }`}
-                  />
-                ))}
+      <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-8">
+        <div className="w-full max-w-5xl">
+          <div className="rounded-[36px] border border-white/70 bg-white/90 p-6 shadow-dialog backdrop-blur sm:p-10 lg:p-14">
+            <div className="mb-10 text-center">
+              <h2 className="mb-4 text-4xl font-semibold tracking-tight text-forum-inkStrong sm:text-5xl lg:text-6xl">
+                {user?.categories &&
+                Array.isArray(user.categories) &&
+                user.categories.length > 0
+                  ? "Update your interests"
+                  : "What are you interested in?"}
+              </h2>
+              <p className="text-lg text-forum-muted">
+                Select up to 3 categories to personalize your feed.
+              </p>
+              <div className="mx-auto mt-6 inline-flex rounded-full bg-forum-panel px-5 py-2 text-base text-forum-inkStrong">
+                <span className="font-semibold text-forum-primary">
+                  {selected.length}/3
+                </span>
+                <span className="ml-2 text-forum-muted">selected</span>
               </div>
             </div>
 
-            <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="mb-10 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
               {CATEGORIES.map((cat) => {
                 const isSelected = selected.includes(cat.id);
                 const isDisabled = !isSelected && selected.length >= 3;
+                const Icon = cat.icon;
 
                 return (
                   <button
@@ -143,44 +160,53 @@ export default function SelectCategories() {
                     type="button"
                     onClick={() => toggleCategory(cat.id)}
                     disabled={isDisabled}
-                    className={`rounded-lg border-2 px-4 py-3 text-sm font-medium transition-all
+                    className={`flex min-h-[152px] flex-col items-center justify-center rounded-[24px] border px-4 py-5 text-center transition-all
                       ${
                         isSelected
-                          ? "border-[#2b5a8a] bg-[#2b5a8a] text-white shadow-md scale-105"
+                          ? "border-forum-primary bg-forum-primarySoft text-forum-primary shadow-lift"
                           : isDisabled
-                          ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
-                          : "border-gray-300 bg-white text-gray-700 hover:border-[#2b5a8a] hover:text-[#2b5a8a]"
+                            ? "cursor-not-allowed border-forum-border bg-forum-panel text-forum-subtle"
+                            : "border-forum-border bg-forum-surface text-forum-inkStrong hover:border-forum-primary/30 hover:shadow-panel"
                       }
                     `}
                   >
-                    {cat.label}
+                    <span
+                      className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl ${
+                        isSelected
+                          ? "bg-forum-primary text-white"
+                          : "bg-forum-panel text-forum-primary"
+                      }`}
+                    >
+                      <Icon className="h-7 w-7" />
+                    </span>
+                    <span className="text-base font-medium leading-7">
+                      {cat.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Actions */}
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={loading || !canContinue}
-                className="flex-1 rounded-md bg-[#2b5a8a] py-3 font-semibold text-white transition-colors hover:bg-[#1e4167] disabled:bg-gray-400"
-              >
-                {loading ? "Saving..." : "Continue"}
-              </button>
+            <div className="flex flex-col gap-3 border-t border-forum-border pt-8 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
                 onClick={handleSkip}
                 disabled={loading}
-                className="flex-1 rounded-md border border-gray-300 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                className="inline-flex h-14 items-center justify-center rounded-2xl border border-forum-border px-6 font-medium text-forum-ink transition hover:bg-forum-panel sm:w-auto"
               >
                 Skip for now
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={loading || !canContinue}
+                className="inline-flex h-14 items-center justify-center rounded-2xl bg-forum-primary px-8 font-semibold text-white shadow-lift transition hover:bg-forum-primaryDark disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+              >
+                {loading ? "Saving..." : "Continue"}
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
