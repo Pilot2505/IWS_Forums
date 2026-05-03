@@ -36,9 +36,7 @@ export const categoriesSchema = z.object({
 });
 
 export const uploadAvatarSchema = z.object({
-  body: z.object({
-    userId: z.coerce.number().int().positive(),
-  }),
+  body: z.object({}).default({}),
 });
 
 export const usernameParamsSchema = z.object({

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, X } from "lucide-react";
 
 export default function LogoutButton({ className }) {
     const navigate = useNavigate();
@@ -48,7 +48,7 @@ export default function LogoutButton({ className }) {
 
             {showLogoutDialog && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-[#191c1d]/40 p-4 backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm sm:items-center"
                     onClick={handleClose}
                 >
                     <div
@@ -57,41 +57,55 @@ export default function LogoutButton({ className }) {
                         aria-labelledby="logout-dialog-title"
                         aria-describedby="logout-dialog-description"
                         onClick={(event) => event.stopPropagation()}
-                        className="w-full max-w-sm rounded-xl border border-[#e1e3e4] bg-white p-8 shadow-xl"
+                        className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.22)]"
                     >
-                        <div className="flex flex-col items-center text-center">
-                            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ffdad6] text-[#ba1a1a]">
-                                <LogOut className="h-6 w-6" />
+
+                        <div className="px-6 pb-5 pt-6 sm:px-7 sm:pb-6 sm:pt-7">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex min-w-0 items-start gap-4">
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1E56A0]/10 text-[#1E56A0] ring-1 ring-[#1E56A0]/10">
+                                        <LogOut className="h-5 w-5" />
+                                    </div>
+
+                                    <div className="min-w-0 space-y-2">
+                                        <h3
+                                            id="logout-dialog-title"
+                                            className="text-2xl font-semibold tracking-tight text-slate-900"
+                                        >
+                                            Log out?
+                                        </h3>
+                                        <p
+                                            id="logout-dialog-description"
+                                            className="text-sm leading-6 text-red-600"
+                                        >
+                                            Are you sure you want to log out?
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleClose}
+                                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                                    aria-label="Close logout dialog"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
                             </div>
-
-                            <h3
-                                id="logout-dialog-title"
-                                className="text-xl font-semibold text-[#191c1d]"
-                            >
-                                Log Out
-                            </h3>
-
-                            <p
-                                id="logout-dialog-description"
-                                className="mt-3 text-sm leading-6 text-[#414751]"
-                            >
-                                Are you sure you want to log out? You will need to sign back in to
-                                participate in the community.
-                            </p>
                         </div>
 
-                        <div className="mt-6 flex flex-col gap-3">
+                        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50/70 px-6 py-5 sm:flex-row sm:justify-end sm:px-7">
                             <button
                                 type="button"
                                 onClick={handleLogout}
-                                className="w-full rounded-lg bg-[#005da7] py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#2976c7]"
+                                className="inline-flex items-center justify-center rounded-2xl bg-[#1E56A0] px-5 py-3 font-medium text-white shadow-[0_16px_40px_rgba(30,86,160,0.28)] transition hover:bg-[#16487f]"
                             >
-                                Yes, Log Out
+                                Yes, log out
                             </button>
                             <button
                                 type="button"
                                 onClick={handleClose}
-                                className="w-full rounded-lg border border-[#c1c7d3] bg-white py-2.5 text-sm font-semibold text-[#191c1d] transition-colors hover:bg-[#f8f9fa]"
+                                className="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-100"
                             >
                                 Cancel
                             </button>                          

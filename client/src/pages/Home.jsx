@@ -606,18 +606,18 @@ export default function Home() {
               </div>
             </section>
 
-            <div ref={sortMenuRef} className="relative flex justify-end items-center mb-sm">
+            <div ref={sortMenuRef} className="relative mb-2 flex flex-col gap-2 items-end">
               <button
                 type="button"
                 aria-haspopup="listbox"
                 aria-expanded={showSortMenu}
                 onClick={() => setShowSortMenu((open) => !open)}
-                className="relative inline-flex w-[250px] max-w-full select-none items-center gap-2 rounded-md border border-[#d1d5db] bg-white px-4 py-2.5 shadow-sm cursor-pointer hover:bg-[#f8f9fa] transition-colors sm:w-[260px]"
-              >
-                <span className="font-label-md text-label-md text-on-surface-variant whitespace-nowrap">
+                className="relative inline-flex w-[250px] max-w-full items-center gap-2 rounded-md border border-[#c1d9fe] bg-[#eef4ff] px-3 py-2 text-sm text-[#485e7e] shadow-sm transition-colors hover:bg-[#e4efff]"
+                >
+                <span className="text-sm font-medium text-[#001c39] whitespace-nowrap">
                   Sort by:
                 </span>
-                <span className="font-label-md text-label-md text-on-surface font-medium whitespace-nowrap">
+                <span className="text-sm font-medium text-[#485e7e] whitespace-nowrap">
                   {sortLabel}
                 </span>
                 <span className="material-symbols-outlined ml-auto text-outline-variant text-[18px] leading-none shrink-0">
@@ -626,7 +626,7 @@ export default function Home() {
               </button>
 
               {showSortMenu && (
-                <div className="absolute right-0 top-full z-20 mt-2 w-[250px] overflow-hidden rounded-lg border border-[#d1d5db] bg-white shadow-lg sm:w-[260px]">
+                <div className="absolute right-0 top-full z-20 mt-2 w-[250px] overflow-hidden rounded-md border border-[#c1d9fe] bg-white shadow-md">
                   {[
                     ["date", "desc", "Newest first"],
                     ["date", "asc", "Oldest first"],

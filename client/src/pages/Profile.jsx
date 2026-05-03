@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
-import { Search, User, X, Trash2 } from "lucide-react";
+import { ChevronDown, Search, User, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { updatePost, deletePost } from "../services/postService";
 import Navbar from "../components/navigation/Navbar";
@@ -15,6 +15,14 @@ import BookmarkButton from "../components/BookmarkButton";
 import { stripHtml } from "../utils/content";
 import { normalizeTagsInput, parseTagsValue } from "../utils/postMeta";
 import { containsBlockedWord } from "../utils/moderation";
+
+const emptyEditFormData = {
+  fullname: "",
+  email: "",
+  username: "",
+  bio: "",
+};
+
 export default function Profile() {
   const { username } = useParams();
   const navigate = useNavigate();
@@ -46,7 +54,7 @@ export default function Profile() {
   const [previewImage, setPreviewImage] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletePostId, setDeletePostId] = useState(null);
-  const [editFormData, setEditFormData] = useState("");
+  const [editFormData, setEditFormData] = useState(emptyEditFormData);
   const [posts, setPosts] = useState([]);
   const [postsCount, setPostsCount] = useState(0);
   const [cursor, setCursor] = useState(null);
@@ -55,6 +63,31 @@ export default function Profile() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const sortMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target)) {
+        setShowSortMenu(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setShowSortMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
   useEffect(() => {
     if (!effectiveUsername) return;
     const fetchProfileUser = async () => {
@@ -184,6 +217,13 @@ export default function Profile() {
       setErrors({});
     }
   }, [showEditProfile, user]);
+  useEffect(() => {
+    return () => {
+      if (previewImage?.startsWith("blob:")) {
+        URL.revokeObjectURL(previewImage);
+      }
+    };
+  }, [previewImage]);
   const refetchFollowCounts = async () => {
     if (!targetUserId) return;
     const res = await authFetch(`/api/follow/follow-count/${targetUserId}`);
@@ -211,7 +251,7 @@ export default function Profile() {
       }
       const data = await res.json();
       setPosts((prev) => [...prev, ...data.posts]);
-      setPostsCount(data.totalCount ?? postsCount);
+      setPostsCount((currentCount) => data.totalCount ?? currentCount);
       setCursor(data.nextCursor ?? null);
       setHasMore(Boolean(data.hasMore));
     } finally {
@@ -222,6 +262,29 @@ export default function Profile() {
     setSortBy(nextSortBy);
     setSortDir(nextSortDir);
   };
+
+  const sortValue = `${sortBy}:${sortDir}`;
+  const sortLabelMap = {
+    "date:desc": "Newest first",
+    "date:asc": "Oldest first",
+    "upvotes:desc": "Most upvotes",
+    "upvotes:asc": "Most downvotes",
+  };
+  const sortLabel = sortLabelMap[sortValue] ?? "Newest first";
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedImage(file);
+    setPreviewImage(URL.createObjectURL(file));
+  };
+
+  const closeEditProfile = () => {
+    setShowEditProfile(false);
+    setSelectedImage(null);
+    setPreviewImage(null);
+  };
+
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -230,12 +293,16 @@ export default function Profile() {
       if (selectedImage) {
         const formData = new FormData();
         formData.append("avatar", selectedImage);
-        formData.append("userId", user.id);
         const uploadRes = await authFetch("/api/users/upload-avatar", {
           method: "POST",
           body: formData,
         });
-        const uploadData = await uploadRes.json();
+        const uploadData = await uploadRes.json().catch(() => ({}));
+
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.error || uploadData.message || "Failed to upload avatar");
+        }
+
         avatarUrl = uploadData.avatar;
       }
       const res = await authFetch("/api/users/update-profile", {
@@ -249,16 +316,21 @@ export default function Profile() {
           avatar: avatarUrl,
         }),
       });
-      const updatedUser = await res.json();
+      const updatedUser = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(
+          updatedUser.message || updatedUser.error || "Failed to update profile"
+        );
+      }
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
       setProfileUser(updatedUser);
       navigate(`/profile/${updatedUser.username}`);
       toast.success("Profile updated successfully!");
-      setShowEditProfile(false);
+      closeEditProfile();
     } catch (err) {
       console.error(err);
-      toast.error("Update failed");
+      toast.error(err.message || "Update failed");
     }
   };
   const validateForm = () => {
@@ -358,7 +430,7 @@ export default function Profile() {
     setEditorLoaded(false);
   };
   const closeConnectionsPanel = () => {
-      setConnectionsQuery("");
+    setConnectionsQuery("");
     setActiveConnectionsView(null);
   };
   const selectedConnectionsLabel =
@@ -383,9 +455,9 @@ export default function Profile() {
   const renderConnectionUser = (person, showNewPosts = false) => (
     <Link
       to={`/profile/${encodeURIComponent(person.username)}`}
-      className="flex w-full items-center gap-3 rounded-2xl px-1 py-3 transition-colors hover:bg-gray-50"
+      className="flex w-full items-center gap-3 rounded-2xl px-1 py-3 transition-colors hover:bg-[#eef4ff]"
     >
-      <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-[#1E56A0]/10 text-[#1E56A0]">
+      <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-[#d4e3ff]/50 text-[#005da7]">
         {person.avatar ? (
           <img src={person.avatar} alt={person.username} className="h-full w-full object-cover" />
         ) : (
@@ -393,13 +465,13 @@ export default function Profile() {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold text-[#0C245E]">
+        <div className="truncate text-sm font-semibold text-[#001c39]">
           {person.fullname || person.username}
         </div>
-        <div className="truncate text-xs text-gray-500">@{person.username}</div>
+        <div className="truncate text-xs text-[#485e7e]">@{person.username}</div>
       </div>
       {showNewPosts && Number(person.newPosts) > 0 && (
-        <span className="shrink-0 rounded-full bg-[#1E56A0]/10 px-2.5 py-1 text-xs font-medium text-[#1E56A0]">
+        <span className="shrink-0 rounded-full bg-[#d4e3ff]/50 px-2.5 py-1 text-xs font-medium text-[#005da7]">
           {person.newPosts} new
         </span>
       )}
@@ -410,33 +482,38 @@ export default function Profile() {
   const displayUser = isOwnProfile ? profileUser || user : profileUser;
   if (!displayUser) return null;
   return (
-    <div className="min-h-screen bg-[#C8CFD8]">
+    <div className="relative isolate min-h-screen overflow-hidden bg-[#e6ebf5] text-[#191c1d] antialiased">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+        <div className="absolute -left-24 top-10 h-64 w-64 rounded-full bg-[#d9e5ff] blur-3xl" />
+        <div className="absolute right-[-6rem] top-24 h-72 w-72 rounded-full bg-[#bfd5ff] blur-3xl" />
+        <div className="absolute bottom-[-5rem] left-1/3 h-80 w-80 rounded-full bg-[#e1ebff] blur-3xl" />
+      </div>
       <Navbar user={user} setUser={setUser} showCreatePost={true} />
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-        <div className="rounded-t-lg bg-[#ACB8C9] p-5 sm:p-6 lg:p-8">
+        <div className="rounded-t-2xl border border-[#c1d9fe] border-b-0 bg-white/80 p-5 backdrop-blur sm:p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-[#D6E4F0] bg-[#21005D]/10 sm:h-24 sm:w-24">
+              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-[#c1d9fe] bg-[#d4e3ff]/50 sm:h-24 sm:w-24">
                 {displayUser?.avatar ? (
                   <img
                     src={displayUser.avatar}
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <User className="h-12 w-12" />
+                  <User className="h-12 w-12 text-[#005da7]" />
                 )}
               </div>
               <div>
-                <h1 className="text-2xl font-semibold text-black sm:text-3xl">
+                <h1 className="text-2xl font-semibold text-[#001c39] sm:text-3xl">
                   {displayUser?.fullname}
                 </h1>
-                <p className="text-base text-gray-700 sm:text-lg">
+                <p className="text-base text-[#485e7e] sm:text-lg">
                   @{displayUser?.username}
                 </p>
                 <div className="mt-3 grid grid-cols-3 items-center gap-4 sm:flex sm:gap-8">
                   <div className="text-center px-3 py-2">
                     <div className="text-2xl font-semibold">{postsCount}</div>
-                    <div className="text-sm text-gray-700">Posts</div>
+                    <div className="text-sm text-[#485e7e]">Posts</div>
                   </div>
                   <button
                     type="button"
@@ -444,12 +521,12 @@ export default function Profile() {
                     aria-pressed={activeConnectionsView === "followers"}
                     className={`text-center transition-colors ${
                       activeConnectionsView === "followers"
-                        ? "rounded-2xl border border-[#1E56A0]/25 bg-[#1E56A0]/5 px-3 py-2 shadow-sm"
-                        : "rounded-2xl px-3 py-2 hover:bg-white/60"
+                        ? "rounded-2xl border border-[#005da7]/25 bg-[#005da7]/5 px-3 py-2 shadow-sm"
+                        : "rounded-2xl px-3 py-2 hover:bg-[#eef4ff]"
                     }`}
                   >
                     <div className="text-2xl font-semibold">{followersCount}</div>
-                    <div className="text-sm text-gray-700">Followers</div>
+                    <div className="text-sm text-[#485e7e]">Followers</div>
                   </button>
                   <button
                     type="button"
@@ -457,12 +534,12 @@ export default function Profile() {
                     aria-pressed={activeConnectionsView === "following"}
                     className={`text-center transition-colors ${
                       activeConnectionsView === "following"
-                        ? "rounded-2xl border border-[#1E56A0]/25 bg-[#1E56A0]/5 px-3 py-2 shadow-sm"
-                        : "rounded-2xl px-3 py-2 hover:bg-white/60"
+                        ? "rounded-2xl border border-[#005da7]/25 bg-[#005da7]/5 px-3 py-2 shadow-sm"
+                        : "rounded-2xl px-3 py-2 hover:bg-[#eef4ff]"
                     }`}
                   >
                     <div className="text-2xl font-semibold">{followingCount}</div>
-                    <div className="text-sm text-gray-700">Following</div>
+                    <div className="text-sm text-[#485e7e]">Following</div>
                   </button>
                 </div>
               </div>
@@ -470,7 +547,7 @@ export default function Profile() {
             {isOwnProfile ? (
               <button
                 onClick={() => setShowEditProfile(true)}
-                className="w-full rounded-md bg-[#1E56A0] px-6 py-2 font-medium text-white sm:w-auto"
+                  className="w-full rounded-md bg-[#005da7] px-6 py-2 font-medium text-white transition-colors hover:bg-[#004883] sm:w-auto"
               >
                 Edit Profile
               </button>
@@ -482,7 +559,7 @@ export default function Profile() {
               />
             )}
           </div>
-          <p className="mt-4 text-sm text-black sm:text-base">
+          <p className="mt-4 text-sm text-[#001c39] sm:text-base">
             {displayUser?.bio || "No bio yet"}
           </p>
         </div>
@@ -493,39 +570,39 @@ export default function Profile() {
               onClick={closeConnectionsPanel}
               aria-hidden="true"
             />
-            <aside className="relative z-10 flex h-full w-full max-w-xl flex-col border-l border-gray-200 bg-white shadow-2xl">
-              <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-5 sm:px-6">
+            <aside className="relative z-10 flex h-full w-full max-w-xl flex-col border-l border-[#c1d9fe] bg-white/90 shadow-2xl backdrop-blur">
+              <div className="flex items-start justify-between gap-4 border-b border-[#c1d9fe] px-5 py-5 sm:px-6">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E56A0]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#005da7]">
                     Connections panel
                   </p>
-                  <h2 className="mt-1 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
+                  <h2 className="mt-1 text-2xl font-semibold text-[#001c39] sm:text-3xl">
                     {selectedConnectionsLabel}
                   </h2>
-                  <p className="mt-1 text-sm text-gray-500">Only you can see these lists.</p>
+                  <p className="mt-1 text-sm text-[#485e7e]">Only you can see these lists.</p>
                 </div>
                 <button
                   type="button"
                   onClick={closeConnectionsPanel}
-                  className="rounded-full border border-gray-200 bg-white p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  className="rounded-full border border-[#c1d9fe] bg-white p-2 text-[#485e7e] transition-colors hover:bg-[#eef4ff] hover:text-[#001c39]"
                   aria-label="Close connections panel"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="border-b border-gray-200 px-5 py-4 sm:px-6">
-                <div className="grid grid-cols-2 gap-3 rounded-2xl bg-[#F7F9FC] p-1">
+              <div className="border-b border-[#c1d9fe] px-5 py-4 sm:px-6">
+                <div className="grid grid-cols-2 gap-3 rounded-2xl bg-[#eef4ff] p-1">
                   <button
                     type="button"
                     onClick={() => setActiveConnectionsView("followers")}
                     className={`rounded-xl px-4 py-3 text-left transition-colors ${
                       activeConnectionsView === "followers"
                         ? "bg-white shadow-sm"
-                        : "text-gray-600 hover:bg-white/70"
+                        : "text-[#485e7e] hover:bg-white/70"
                     }`}
                   >
-                    <div className="text-sm font-semibold text-[#0C245E]">Followers</div>
-                    <div className="text-xs text-gray-500">{followersCount} total</div>
+                    <div className="text-sm font-semibold text-[#001c39]">Followers</div>
+                    <div className="text-xs text-[#485e7e]">{followersCount} total</div>
                   </button>
                   <button
                     type="button"
@@ -533,21 +610,21 @@ export default function Profile() {
                     className={`rounded-xl px-4 py-3 text-left transition-colors ${
                       activeConnectionsView === "following"
                         ? "bg-white shadow-sm"
-                        : "text-gray-600 hover:bg-white/70"
+                        : "text-[#485e7e] hover:bg-white/70"
                     }`}
                   >
-                    <div className="text-sm font-semibold text-[#0C245E]">Following</div>
-                    <div className="text-xs text-gray-500">{followingCount} total</div>
+                    <div className="text-sm font-semibold text-[#001c39]">Following</div>
+                    <div className="text-xs text-[#485e7e]">{followingCount} total</div>
                   </button>
                 </div>
-                <label className="mt-4 flex items-center gap-3 rounded-2xl bg-[#F7F9FC] px-4 py-3 text-sm text-gray-500">
-                  <Search className="h-4 w-4 shrink-0 text-gray-400" />
+                <label className="mt-4 flex items-center gap-3 rounded-2xl bg-[#F7F9FC] px-4 py-3 text-sm text-[#485e7e]">
+                  <Search className="h-4 w-4 shrink-0 text-[#717783]" />
                   <input
                     type="text"
                     value={connectionsQuery}
                     onChange={(e) => setConnectionsQuery(e.target.value)}
                     placeholder={`Search ${selectedConnectionsLabel?.toLowerCase() || "connections"}`}
-                    className="w-full bg-transparent text-sm text-[#0C245E] outline-none placeholder:text-gray-400"
+                    className="w-full bg-transparent text-sm text-[#001c39] outline-none placeholder:text-[#717783]"
                   />
                 </label>
               </div>
@@ -559,19 +636,19 @@ export default function Profile() {
                 ) : connectionsLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map((item) => (
-                      <div key={item} className="animate-pulse rounded-xl border border-gray-200 bg-white px-3 py-2">
+                      <div key={item} className="animate-pulse rounded-xl border border-[#d9e5ff] bg-white/90 px-3 py-2">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-gray-200" />
+                          <div className="h-10 w-10 rounded-full bg-[#d8e3f2]" />
                           <div className="flex-1 space-y-2">
-                            <div className="h-3 w-1/2 rounded bg-gray-200" />
-                            <div className="h-3 w-1/3 rounded bg-gray-200" />
+                            <div className="h-3 w-1/2 rounded bg-[#d8e3f2]" />
+                            <div className="h-3 w-1/3 rounded bg-[#d8e3f2]" />
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : selectedConnectionsList.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-gray-300 bg-[#F7F9FC] px-4 py-8 text-sm text-gray-500">
+                  <div className="rounded-2xl border border-dashed border-[#c1d9fe] bg-[#f7f9fc] px-4 py-8 text-sm text-[#485e7e]">
                     {normalizedConnectionsQuery
                       ? "No results found."
                       : activeConnectionsView === "followers"
@@ -579,7 +656,7 @@ export default function Profile() {
                         : "You are not following anyone yet."}
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-100">
+                  <div className="divide-y divide-[#e1e8f6]">
                     {visibleConnectionsList.map((person) => (
                       <div key={person.id}>{renderConnectionUser(person, activeConnectionsView === "following")}</div>
                     ))}
@@ -589,46 +666,59 @@ export default function Profile() {
             </aside>
           </div>
         )}
-        <div className="rounded-b-lg bg-white p-5 sm:p-6 lg:p-8">
-          <h2 className="mb-6 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
+        <div className="border-t border-[#c1d9fe] px-5 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <h2 className="mb-6 text-2xl font-semibold text-[#001c39] sm:text-3xl">
             {isOwnProfile ? "Your Posts" : `${effectiveUsername}'s Posts`}
           </h2>
-          <div className="mb-6 flex flex-col gap-3 rounded-lg border border-gray-200 bg-[#F7F9FC] p-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
-                Sort by
-                <select
-                  value={sortBy}
-                  onChange={(e) =>
-                    handleSortChange(e.target.value, e.target.value === "upvotes" ? sortDir : "desc")
-                  }
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
-                >
-                  <option value="date">Date</option>
-                  <option value="upvotes">Upvotes</option>
-                </select>
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
-                Order
-                <select
-                  value={sortDir}
-                  onChange={(e) => handleSortChange(sortBy, e.target.value)}
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-black"
-                >
-                  {sortBy === "date" ? (
-                    <>
-                      <option value="desc">Newest first</option>
-                      <option value="asc">Oldest first</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="desc">Most upvotes</option>
-                      <option value="asc">Least upvotes</option>
-                    </>
-                  )}
-                </select>
-              </label>
-            </div>
+          <div ref={sortMenuRef} className="relative mb-6 flex items-center justify-end">
+            <button
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded={showSortMenu}
+              onClick={() => setShowSortMenu((open) => !open)}
+              className="relative inline-flex w-[250px] max-w-full items-center gap-2 rounded-md border border-[#c1d9fe] bg-[#eef4ff] px-3 py-2 text-sm text-[#485e7e] shadow-sm transition-colors hover:bg-[#f8f9fa]"
+            >
+              <span className="font-label-md text-label-md text-on-surface-variant whitespace-nowrap">
+                Sort by:
+              </span>
+              <span className="font-label-md text-label-md text-sm text-[#485e7e] font-medium whitespace-nowrap">
+                {sortLabel}
+              </span>
+              <ChevronDown className="ml-auto h-4 w-4 text-[#485e7e]" />
+            </button>
+
+            {showSortMenu && (
+              <div className="absolute right-0 top-full z-20 mt-2 w-[250px] overflow-hidden rounded-md border border-[#c1d9fe] bg-white shadow-md">
+                {[
+                  ["date", "desc", "Newest first"],
+                  ["date", "asc", "Oldest first"],
+                  ["upvotes", "desc", "Most upvotes"],
+                  ["upvotes", "asc", "Most downvotes"],
+                ].map(([nextSortBy, nextSortDir, label]) => {
+                  const isActive = sortBy === nextSortBy && sortDir === nextSortDir;
+
+                  return (
+                    <button
+                      key={`${nextSortBy}:${nextSortDir}`}
+                      type="button"
+                      role="option"
+                      aria-selected={isActive}
+                      onClick={() => {
+                        handleSortChange(nextSortBy, nextSortDir);
+                        setShowSortMenu(false);
+                      }}
+                      className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${
+                        isActive
+                          ? "bg-[#f3f4f5] text-[#005da7]"
+                          : "text-[#191c1d] hover:bg-[#f8f9fa]"
+                      }`}
+                    >
+                      <span>{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
           <div className="space-y-6">
             {loadingPosts ? (
@@ -636,16 +726,16 @@ export default function Profile() {
                 {[1, 2, 3].map((item) => (
                   <div
                     key={item}
-                    className="animate-pulse rounded-lg border border-gray-200 bg-white p-6"
+                    className="animate-pulse rounded-lg border border-[#d9e5ff] bg-white/90 p-6"
                   >
-                    <div className="mb-3 h-6 w-2/3 rounded bg-gray-200" />
-                    <div className="mb-2 h-4 w-full rounded bg-gray-200" />
-                    <div className="h-4 w-5/6 rounded bg-gray-200" />
+                    <div className="mb-3 h-6 w-2/3 rounded bg-[#d8e3f2]" />
+                    <div className="mb-2 h-4 w-full rounded bg-[#d8e3f2]" />
+                    <div className="h-4 w-5/6 rounded bg-[#d8e3f2]" />
                   </div>
                 ))}
               </div>
             ) : posts.length === 0 ? (
-              <div className="py-10 text-center text-lg text-gray-500">
+              <div className="py-10 text-center text-lg text-[#485e7e]">
                 No posts yet.
               </div>
             ) : (
@@ -656,7 +746,7 @@ export default function Profile() {
                     post={post}
                     meta={new Date(post.created_at).toLocaleString()}
                     readMoreTo={`/post/${post.id}`}
-                    className="border-gray-200"
+                    className="border-[#c1d9fe]"
                   >
                     {editingPost !== post.id && (
                       <div className="mb-4 flex flex-wrap items-center gap-4">
@@ -672,7 +762,7 @@ export default function Profile() {
                     {isOwnProfile && editingPost !== post.id && (
                       <div className="flex flex-wrap gap-4">
                         <button
-                          className="font-medium text-[#1E56A0]"
+                          className="font-medium text-[#005da7] transition-colors hover:text-[#004883]"
                           onClick={() => {
                             setEditingPost(post.id);
                             setEditTitle(post.title);
@@ -702,7 +792,7 @@ export default function Profile() {
                       type="button"
                       onClick={handleLoadMore}
                       disabled={loadingMore}
-                      className="rounded-md bg-[#1E56A0] px-6 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
+                      className="rounded-md bg-[#005da7] px-6 py-3 font-medium text-white transition-colors hover:bg-[#004883] disabled:cursor-not-allowed disabled:bg-[#8bb3d7]"
                     >
                       {loadingMore ? "Loading..." : "Load More"}
                     </button>
@@ -719,26 +809,26 @@ export default function Profile() {
           onClick={closeEditPostModal}
         >
           <div
-            className="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-xl bg-white p-4 shadow-2xl sm:p-6 lg:p-8"
+            className="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-xl border border-[#c1d9fe] bg-white/90 p-4 shadow-2xl backdrop-blur sm:p-6 lg:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={closeEditPostModal}
-              className="absolute right-4 top-4 text-gray-500 transition-colors hover:text-black"
+              className="absolute right-4 top-4 text-[#485e7e] transition-colors hover:text-[#001c39]"
             >
               <X className="h-6 w-6" />
             </button>
             <div className="mb-8">
-              <h3 className="text-2xl font-semibold text-[#0C245E] sm:text-3xl">
+              <h3 className="text-2xl font-semibold text-[#001c39] sm:text-3xl">
                 Edit Post
               </h3>
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-[#485e7e]">
                 Changes are applied only when you save.
               </p>
             </div>
             <div className="space-y-2">
               <div>
-                <label htmlFor="profile-post-title-editor" className="mb-1 block text-lg font-semibold text-black">
+                <label htmlFor="profile-post-title-editor" className="mb-1 block text-lg font-semibold text-[#001c39]">
                   Title
                 </label>
                 <div className="relative min-h-[112px] [&_.tox-edit-area__iframe]:max-h-[112px] [&_.tox-edit-area__iframe]:overflow-y-auto">
@@ -774,26 +864,26 @@ export default function Profile() {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-[#485e7e]">
                   Tags
                 </label>
                 <input
                   value={editTagsInput}
                   onChange={(e) => setEditTagsInput(e.target.value)}
                   placeholder="React, performance, UI"
-                  className="w-full rounded border p-3 text-base"
+                  className="w-full rounded border border-[#c1d9fe] bg-white px-3 py-3 text-base text-[#001c39] outline-none focus:border-[#005da7] focus:ring-2 focus:ring-[#005da7]/15"
                 />
-                <p className="mt-0.5 text-xs text-gray-500">
+                <p className="mt-0.5 text-xs text-[#485e7e]">
                   Add multiple tags with commas. Example: React, performance, UI.
                 </p>
               </div>
               <div>
-                <label className="mb-1 block text-lg font-semibold text-black">
+                <label className="mb-1 block text-lg font-semibold text-[#001c39]">
                   Content
                 </label>
                 <div className="relative min-h-[420px] [&_.tox-edit-area__iframe]:max-h-[420px] [&_.tox-edit-area__iframe]:overflow-y-auto sm:min-h-[560px] sm:[&_.tox-edit-area__iframe]:max-h-[560px] lg:min-h-[700px] lg:[&_.tox-edit-area__iframe]:max-h-[700px]">
                   {!editorLoaded && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md border border-gray-300 bg-gray-100 text-gray-500">
+                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md border border-[#c1d9fe] bg-[#f7f9fc] text-[#485e7e]">
                       Loading editor...
                     </div>
                   )}
@@ -890,13 +980,13 @@ export default function Profile() {
               <div className="flex justify-end gap-2 pt-1">
                 <button
                   onClick={closeEditPostModal}
-                  className="rounded-md border border-gray-300 px-6 py-2 font-medium"
+                  className="rounded-md border border-[#c1d9fe] px-6 py-2 font-medium text-[#485e7e] transition-colors hover:border-[#005da7] hover:text-[#001c39]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUpdatePost}
-                  className="rounded-md bg-[#1E56A0] px-6 py-2 font-medium text-white"
+                  className="rounded-md bg-[#005da7] px-6 py-2 font-medium text-white transition-colors hover:bg-[#004883]"
                 >
                   Save
                 </button>
@@ -907,16 +997,16 @@ export default function Profile() {
       )}
       {showEditProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-5 sm:p-6 lg:p-8">
+          <div className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[#c1d9fe] bg-white/90 p-5 shadow-2xl backdrop-blur sm:p-6 lg:p-8">
             <button
-              onClick={() => setShowEditProfile(false)}
-              className="absolute right-4 top-4"
+              onClick={closeEditProfile}
+              className="absolute right-4 top-4 text-[#485e7e] transition-colors hover:text-[#001c39]"
             >
               <X className="h-6 w-6" />
             </button>
             <div className="mb-8 text-center">
               <div className="inline-flex flex-col items-center">
-                <div className="mb-4 h-24 w-24 overflow-hidden rounded-full border">
+                <div className="mb-4 h-24 w-24 overflow-hidden rounded-full border border-[#c1d9fe]">
                   {previewImage ? (
                     <img
                       src={previewImage}
@@ -936,34 +1026,28 @@ export default function Profile() {
                   accept="image/*"
                   className="hidden"
                   id="avatarUpload"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      setSelectedImage(file);
-                      setPreviewImage(URL.createObjectURL(file));
-                    }
-                  }}
+                  onChange={handleAvatarChange}
                 />
                 <label
                   htmlFor="avatarUpload"
-                  className="cursor-pointer font-medium text-[#1E56A0]"
+                  className="cursor-pointer font-medium text-[#005da7] transition-colors hover:text-[#004883]"
                 >
                   Change Image
                 </label>
               </div>
-              <h2 className="mt-4 text-2xl font-semibold sm:text-3xl">
+              <h2 className="mt-4 text-2xl font-semibold text-[#001c39] sm:text-3xl">
                 Edit Profile
               </h2>
             </div>
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
-                <label className="font-medium sm:pt-2 sm:text-right">
+                <label className="font-medium text-[#485e7e] sm:pt-2 sm:text-right">
                   Fullname:
                 </label>
                 <div className="w-full">
                   <input
                     type="text"
-                    value={editFormData.fullname}
+                    value={editFormData.fullname || ""}
                     onChange={(e) => {
                       setEditFormData({
                         ...editFormData,
@@ -972,7 +1056,7 @@ export default function Profile() {
                       setErrors({ ...errors, fullname: "" });
                     }}
                     className={`w-full rounded-md border px-4 py-2 ${
-                      errors.fullname ? "border-red-500" : "border-gray-300"
+                      errors.fullname ? "border-red-500" : "border-[#c1d9fe]"
                     }`}
                   />
                   {errors.fullname && (
@@ -982,14 +1066,15 @@ export default function Profile() {
                   )}
                 </div>
               </div>
+
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
-                <label className="font-medium sm:pt-2 sm:text-right">
+                <label className="font-medium text-[#485e7e] sm:pt-2 sm:text-right">
                   Email:
                 </label>
                 <div className="w-full">
                   <input
                     type="email"
-                    value={editFormData.email}
+                    value={editFormData.email || ""}
                     onChange={(e) => {
                       setEditFormData({
                         ...editFormData,
@@ -998,7 +1083,7 @@ export default function Profile() {
                       setErrors({ ...errors, email: "" });
                     }}
                     className={`w-full rounded-md border px-4 py-2 ${
-                      errors.email ? "border-red-500" : "border-gray-300"
+                      errors.email ? "border-red-500" : "border-[#c1d9fe]"
                     }`}
                   />
                   {errors.email && (
@@ -1008,14 +1093,15 @@ export default function Profile() {
                   )}
                 </div>
               </div>
+
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
-                <label className="font-medium sm:pt-2 sm:text-right">
+                <label className="font-medium text-[#485e7e] sm:pt-2 sm:text-right">
                   Username:
                 </label>
                 <div className="w-full">
                   <input
                     type="text"
-                    value={editFormData.username}
+                    value={editFormData.username || ""}
                     onChange={(e) => {
                       setEditFormData({
                         ...editFormData,
@@ -1024,7 +1110,7 @@ export default function Profile() {
                       setErrors({ ...errors, username: "" });
                     }}
                     className={`w-full rounded-md border px-4 py-2 ${
-                      errors.username ? "border-red-500" : "border-gray-300"
+                      errors.username ? "border-red-500" : "border-[#c1d9fe]"
                     }`}
                   />
                   {errors.username && (
@@ -1034,18 +1120,22 @@ export default function Profile() {
                   )}
                 </div>
               </div>
+
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
-                <label className="font-medium sm:pt-2 sm:text-right">Bio:</label>
+                <label className="font-medium text-[#485e7e] sm:pt-2 sm:text-right">Bio:</label>
                 <div className="w-full">
                   <textarea
-                    value={editFormData.bio}
+                    value={editFormData.bio || ""}
                     onChange={(e) => {
-                      setEditFormData({ ...editFormData, bio: e.target.value });
+                      setEditFormData({
+                        ...editFormData,
+                        bio: e.target.value,
+                      });
                       setErrors({ ...errors, bio: "" });
                     }}
                     rows="4"
                     className={`w-full resize-none rounded-md border px-4 py-2 ${
-                      errors.bio ? "border-red-500" : "border-gray-300"
+                      errors.bio ? "border-red-500" : "border-[#c1d9fe]"
                     }`}
                   />
                   {errors.bio && (
@@ -1053,17 +1143,18 @@ export default function Profile() {
                   )}
                 </div>
               </div>
+
               <div className="flex flex-col justify-center gap-3 pt-6 sm:flex-row sm:gap-4">
                 <button
                   type="submit"
-                  className="rounded-md bg-[#1E56A0] px-8 py-2 font-medium text-white"
+                  className="rounded-md bg-[#005da7] px-8 py-2 font-medium text-white transition-colors hover:bg-[#004883]"
                 >
                   Save Changes
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowEditProfile(false)}
-                  className="rounded-md border border-gray-300 px-8 py-2 font-medium"
+                  onClick={closeEditProfile}
+                  className="rounded-md border border-[#c1d9fe] px-8 py-2 font-medium text-[#485e7e] transition-colors hover:border-[#005da7] hover:text-[#001c39]"
                 >
                   Cancel
                 </button>
@@ -1093,7 +1184,7 @@ export default function Profile() {
                   setShowDeleteDialog(false);
                   setDeletePostId(null);
                 }}
-                className="rounded-md border border-gray-300 px-6 py-2 font-medium"
+                className="rounded-md border border-[#c1d9fe] px-6 py-2 font-medium text-[#485e7e] transition-colors hover:border-[#005da7] hover:text-[#001c39]"
               >
                 Cancel
               </button>

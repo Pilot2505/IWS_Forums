@@ -97,7 +97,7 @@ export const saveUserCategories = async (req, res) => {
 
 export const uploadUserAvatar = async (req, res) => {
   try {
-    const { userId } = req.validated.body;
+    const userId = req.user.id;
 
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
