@@ -11,14 +11,14 @@ import {
   Reply,
   UserPlus,
 } from "lucide-react";
-import Navbar from "../components/navigation/Navbar";
-import useRequireAuth from "../hooks/useRequireAuth";
+import Navbar from "@/components/layout/Navbar";
+import useRequireAuth from "@/hooks/useRequireAuth";
 import {
   getNotifications,
   markAllNotificationsRead,
   markNotificationRead,
-} from "../services/notificationService";
-import { stripHtml } from "../utils/content";
+} from "@/services/notificationService";
+import { stripHtml } from "@/utils/content";
 
 const formatNotificationTime = (value) => {
   const date = new Date(value);
