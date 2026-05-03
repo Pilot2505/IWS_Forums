@@ -37,6 +37,7 @@ export default function PostDetail() {
   const navigate = useNavigate();
   const { user, setUser, ready } = useRequireAuth({
     redirectTo: "/login",
+    redirectTo: "/login",
     requireToken: true,
   });
 
