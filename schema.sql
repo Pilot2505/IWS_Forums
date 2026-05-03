@@ -108,7 +108,7 @@ INSERT INTO users (id, username, fullname, email, password, bio, avatar, categor
 (3, 'pilot', 'Quan', 'pilot250504@gmail.com', '$2a$10$LvRULigNNg6KtXNsHNbO7.rKccqoZ.FovDGCIo8Z//G4P4U5Ll1aC', '', '/avatars/avatar.jpg', JSON_ARRAY('javascript', 'web', 'ai_ml'), '2026-02-15 21:11:31'),
 (4, 'An', '', 'an@test.com', 'test123', '', '/avatars/avatar.jpg', JSON_ARRAY('devops', 'database'), '2026-02-15 21:11:31'),
 (5, 'Kien', '', 'kien@test.com', 'test123', '', 'https://i.pravatar.cc/150?img=5', JSON_ARRAY('security', 'cloud'), '2026-02-15 21:11:31'),
-(6, 'Linh', '', 'linh@test.com', 'test123', '', 'https://i.pravatar.cc/150?img=6', JSON_ARRAY('python', 'mobile'), '2026-02-15 21:11:31');
+(6, 'Linh', '', 'linh@test.com', 'test123', '', 'https://i.pravatar.cc/150?img=23', JSON_ARRAY('python', 'mobile'), '2026-02-15 21:11:31');
 
 -- =========================
 -- POSTS DATA
