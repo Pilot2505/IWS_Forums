@@ -72,12 +72,12 @@ export default function Navbar({ user, setUser, showCreatePost = true }) {
         </Link>
 
         <div className="flex items-center gap-3 sm:gap-5">
-          <SearchBar className="hidden lg:block" />
+          <SearchBar className="hidden md:block" />
 
           {showCreatePost && (
             <Link
               to="/create-post"
-              className="hidden text-sm font-medium text-[#005da7] transition-colors hover:text-[#2976c7] sm:inline-flex"
+              className="hidden text-sm font-medium text-[#005da7] transition-colors hover:text-[#2976c7] md:inline-flex"
             >
               Create Post
             </Link>

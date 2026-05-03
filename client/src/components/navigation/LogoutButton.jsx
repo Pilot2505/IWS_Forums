@@ -1,68 +1,119 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, X } from "lucide-react";
 
-export default function LogoutButton({ className}) {
+export default function LogoutButton({ className }) {
     const navigate = useNavigate();
     const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+    useEffect(() => {
+        if (!showLogoutDialog) {
+            return undefined;
+        }
+
+        const handleEscape = (event) => {
+            if (event.key === "Escape") {
+                setShowLogoutDialog(false);
+            }
+        };
+
+        document.addEventListener("keydown", handleEscape);
+        return () => document.removeEventListener("keydown", handleEscape);
+    }, [showLogoutDialog]);
 
     const handleLogout = () => {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
         setShowLogoutDialog(false);
         navigate("/login", { replace: true });
-        };
+    };
+
+    const handleClose = () => {
+        setShowLogoutDialog(false);
+    };
 
     const defaultButtonClassName =
-        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100";
+        "flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100";
 
     return (
-    <>
-        <button
-            onClick={() => setShowLogoutDialog(true)}
-            className={className || defaultButtonClassName}
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </button>
+        <>
+            <button
+                type="button"
+                onClick={() => setShowLogoutDialog(true)}
+                className={className || defaultButtonClassName}
+            >
+                <LogOut className="h-4 w-4" />
+                Logout
+            </button>
 
-        {/* Logout Confirmation Dialog */}
-        {showLogoutDialog && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-8 max-w-md">
-                    <div className="flex items-center gap-3 mb-6">
-                    <svg 
-                    className="w-6 h-6" 
-                    viewBox="0 0 24 24" 
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+            {showLogoutDialog && (
+                <div
+                    className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm sm:items-center"
+                    onClick={handleClose}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="logout-dialog-title"
+                        aria-describedby="logout-dialog-description"
+                        onClick={(event) => event.stopPropagation()}
+                        className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.22)]"
                     >
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <path d="M16 17l5-5-5-5" />
-                    <path d="M21 12H9" />
-                    </svg>
-                    <h3 className="text-xl font-medium text-red-600">Are you sure you want to log out?</h3>
-                    </div>
-                    <div className="flex gap-4 justify-center">
-                        <button
-                            onClick={handleLogout}
-                            className="bg-[#1E56A0] text-white px-6 py-2 rounded-md font-medium"
-                        >
-                            Yes. Log Out
-                        </button>
-                        <button
-                            onClick={() => setShowLogoutDialog(false)}
-                            className="bg-gray-200 border border-gray-300 px-6 py-2 rounded-md font-medium"
-                        >
-                            Cancel
-                        </button>
+                        <div className="h-1.5 bg-gradient-to-r from-[#1E56A0] via-[#4f8bd6] to-[#7cc3ff]" />
+
+                        <div className="px-6 pb-5 pt-6 sm:px-7 sm:pb-6 sm:pt-7">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex min-w-0 items-start gap-4">
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1E56A0]/10 text-[#1E56A0] ring-1 ring-[#1E56A0]/10">
+                                        <LogOut className="h-5 w-5" />
+                                    </div>
+
+                                    <div className="min-w-0 space-y-2">
+                                        <h3
+                                            id="logout-dialog-title"
+                                            className="text-2xl font-semibold tracking-tight text-slate-900"
+                                        >
+                                            Log out?
+                                        </h3>
+                                        <p
+                                            id="logout-dialog-description"
+                                            className="text-sm leading-6 text-red-600"
+                                        >
+                                            Are you sure you want to log out?
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleClose}
+                                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                                    aria-label="Close logout dialog"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50/70 px-6 py-5 sm:flex-row sm:justify-end sm:px-7">
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                className="inline-flex items-center justify-center rounded-2xl bg-[#1E56A0] px-5 py-3 font-medium text-white shadow-[0_16px_40px_rgba(30,86,160,0.28)] transition hover:bg-[#16487f]"
+                            >
+                                Yes, log out
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleClose}
+                                className="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-100"
+                            >
+                                Cancel
+                            </button>                          
+                        </div>
                     </div>
                 </div>
-            </div>
-        )}
-    </>
-  );
+            )}
+        </>
+    );
 }
