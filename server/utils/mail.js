@@ -1,11 +1,18 @@
 import nodemailer from "nodemailer";
 
 const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpRejectUnauthorized =
+  process.env.SMTP_REJECT_UNAUTHORIZED !== undefined
+    ? process.env.SMTP_REJECT_UNAUTHORIZED !== "false"
+    : process.env.NODE_ENV === "production";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: smtpPort,
   secure: smtpPort === 465,
+  tls: {
+    rejectUnauthorized: smtpRejectUnauthorized,
+  },
   auth: process.env.SMTP_USER
     ? {
         user: process.env.SMTP_USER,
