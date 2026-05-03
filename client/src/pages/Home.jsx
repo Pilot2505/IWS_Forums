@@ -284,9 +284,9 @@ function FollowingItem({ person, onOpenProfile }) {
     >
       <div className="relative shrink-0">
         <div
-          className={`rounded-full p-[2px] transition-all ${
+          className={`rounded-full p-[3px] transition-all ${
             hasNewPosts
-              ? "bg-gradient-to-tr from-[#005da7] via-[#2976c7] to-[#c1d9fe] shadow-[0_0_0_1px_rgba(0,93,167,0.15)]"
+              ? "bg-gradient-to-tr from-[#005da7] via-[#2976c7] to-[#c1d9fe] shadow-[0_0_14px_rgba(0,93,167,0.2)]"
               : "bg-[#e1e3e4]"
           }`}
         >
