@@ -137,19 +137,29 @@ export default function CreatePost() {
                       overflow: hidden !important;
                     }
                     .mce-content-body[data-mce-placeholder]:not(.mce-visualblocks)::before {
-                      left: 16px;
+                      left: 32px !important;
+                      color: #717783;
+                      font-size: 1rem;
+                      font-weight: 400 !important;
                     }
                     body {
-                      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                      display: flex;
-                      align-items: center;
-                      box-sizing: border-box;
-                      font-size: 18px;
-                      font-weight: 500;
-                      line-height: 1.25;
+                      font-family: Inter, system-ui, sans-serif;
+                      font-size: 1rem;
+                      font-weight: 400 !important;
+                      line-height: 1.5;
                       color: #191c1d;
-                      padding: 6px 16px;
-                      white-space: nowrap;
+                      padding: 10px 32px;
+                    }
+                    body,
+                    p,
+                    div,
+                    span,
+                    li {
+                      font-weight: 400 !important;
+                    }
+                    strong,
+                    b {
+                      font-weight: 600 !important;
                     }
                     p {
                       margin: 0;
