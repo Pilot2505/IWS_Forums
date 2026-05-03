@@ -1,4 +1,4 @@
-import useRequireAuth from "../hooks/useRequireAuth";
+import useRequireAuth from "@/hooks/useRequireAuth";
 
 export default function Index() {
   useRequireAuth({

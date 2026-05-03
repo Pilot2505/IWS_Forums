@@ -2,19 +2,19 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { ChevronDown, Search, User, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { updatePost, deletePost } from "../services/postService";
-import Navbar from "../components/navigation/Navbar";
-import FollowButton from "../components/FollowButton";
-import PostVoteControls from "../components/PostVoteControls";
-import PostCard from "../components/posts/PostCard";
+import { updatePost, deletePost } from "@/services/postService";
+import Navbar from "@/components/layout/Navbar";
+import FollowButton from "@/components/social/FollowButton";
+import PostVoteControls from "@/components/posts/PostVoteControls";
+import PostCard from "@/components/posts/PostCard";
 import { Editor } from "@tinymce/tinymce-react";
-import { authFetch } from "../services/api";
-import { uploadEmbeddedImages } from "../utils/editorImages";
-import useRequireAuth from "../hooks/useRequireAuth";
-import BookmarkButton from "../components/BookmarkButton";
-import { stripHtml } from "../utils/content";
-import { normalizeTagsInput, parseTagsValue } from "../utils/postMeta";
-import { containsBlockedWord } from "../utils/moderation";
+import { authFetch } from "@/services/api";
+import { uploadEmbeddedImages } from "@/utils/editorImages";
+import useRequireAuth from "@/hooks/useRequireAuth";
+import BookmarkButton from "@/components/posts/BookmarkButton";
+import { stripHtml } from "@/utils/content";
+import { normalizeTagsInput, parseTagsValue } from "@/utils/postMeta";
+import { containsBlockedWord } from "@/utils/moderation";
 
 const emptyEditFormData = {
   fullname: "",

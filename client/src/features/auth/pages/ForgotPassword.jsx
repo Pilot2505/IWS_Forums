@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { requestPasswordReset } from "../services/authService";
+import { requestPasswordReset } from "@/services/authService";
 
 const fieldLabelClassName =
   "text-xs font-semibold uppercase tracking-wide text-[#314867]";

@@ -15,8 +15,8 @@ import {
   Terminal,
   Workflow,
 } from "lucide-react";
-import { authFetch } from "../services/api";
-import useRequireAuth from "../hooks/useRequireAuth";
+import { authFetch } from "@/services/api";
+import useRequireAuth from "@/hooks/useRequireAuth";
 
 const MAX_SELECTIONS = 3;
 

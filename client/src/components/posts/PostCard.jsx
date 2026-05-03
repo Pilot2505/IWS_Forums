@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { stripHtml } from "../../utils/content";
-import { formatTagLabel, getMatchingInterestTags, parseTagsValue } from "../../utils/postMeta";
+import { stripHtml } from "@/utils/content";
+import { formatTagLabel, getMatchingInterestTags, parseTagsValue } from "@/utils/postMeta";
 
 function getStoredInterestCategories() {
     if (typeof window === "undefined") {

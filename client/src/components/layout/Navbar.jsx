@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Bell, Bookmark, User } from "lucide-react";
-import LogoutButton from "./LogoutButton";
-import DeleteAccountButton from "./DeleteAccountButton";
-import SearchBar from "./SearchBar";
-import { getNotifications } from "../../services/notificationService";
+import LogoutButton from "@/components/account/LogoutButton";
+import DeleteAccountButton from "@/components/account/DeleteAccountButton";
+import SearchBar from "@/components/navigation/SearchBar";
+import { getNotifications } from "@/services/notificationService";
 
 export default function Navbar({
   user,

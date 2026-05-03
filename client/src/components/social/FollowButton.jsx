@@ -1,4 +1,4 @@
-import useFollow from "../hooks/useFollow";
+import useFollow from "@/hooks/useFollow";
 
 export default function FollowButton({ currentUserId, targetUserId, onChange, className = "" }) {
   const { isFollowing, toggleFollow, loading } =

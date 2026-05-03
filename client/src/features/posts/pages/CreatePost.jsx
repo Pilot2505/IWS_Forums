@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Editor } from "@tinymce/tinymce-react";
 import { Tag } from "lucide-react";
-import Navbar from "../components/navigation/Navbar";
-import { authFetch } from "../services/api";
-import { stripHtml } from "../utils/content";
-import { containsBlockedWord } from "../utils/moderation";
-import { uploadEmbeddedImages } from "../utils/editorImages";
-import useRequireAuth from "../hooks/useRequireAuth";
-import { formatTagLabel, normalizeTagsInput } from "../utils/postMeta";
+import Navbar from "@/components/layout/Navbar";
+import { authFetch } from "@/services/api";
+import { stripHtml } from "@/utils/content";
+import { containsBlockedWord } from "@/utils/moderation";
+import { uploadEmbeddedImages } from "@/utils/editorImages";
+import useRequireAuth from "@/hooks/useRequireAuth";
+import { formatTagLabel, normalizeTagsInput } from "@/utils/postMeta";
 
 export default function CreatePost() {
   const navigate = useNavigate();
