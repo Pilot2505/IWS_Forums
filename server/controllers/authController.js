@@ -98,7 +98,7 @@ export const handleLogin = async (req, res) => {
   try {
     const user = await findUserByIdentifier(
       identifier,
-      "id, email, username, fullname, avatar, password, delete_after_at"
+      "id, email, username, fullname, avatar, categories, password, delete_after_at"
     );
 
     if (!user) {
@@ -123,6 +123,7 @@ export const handleLogin = async (req, res) => {
         username: user.username,
         fullname: user.fullname,
         avatar: user.avatar || null,
+        categories: Array.isArray(user.categories) ? user.categories : [],
         delete_after_at: user.delete_after_at || null,
       },
     });
