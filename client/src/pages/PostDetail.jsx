@@ -56,7 +56,6 @@ export default function PostDetail() {
   const [editTagsInput, setEditTagsInput] = useState("");
 
   useEffect(() => {
-    // Fetch post
     authFetch(`/api/posts/${id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Post not found");
@@ -73,7 +72,6 @@ export default function PostDetail() {
         navigate("/");
       });
 
-    // Fetch comments
     authFetch(`/api/posts/${id}/comments`)
       .then((res) => res.json())
       .then((data) => {
@@ -158,7 +156,7 @@ export default function PostDetail() {
 
     if (containsBlockedWord(trimmedTitle) || containsBlockedWord(editContent)) {
       toast.error(
-        "This post contains language that violates community standards. Please edit it!"
+        "This post contains language that violates community standards. Please edit it!",
       );
       return;
     }
@@ -190,11 +188,11 @@ export default function PostDetail() {
     setPost((prev) =>
       prev
         ? {
-            ...prev,
-            vote_count: voteCount,
-            current_user_vote: currentUserVote,
-          }
-        : prev
+          ...prev,
+          vote_count: voteCount,
+          current_user_vote: currentUserVote,
+        }
+        : prev,
     );
   };
 
@@ -213,13 +211,34 @@ export default function PostDetail() {
       if (!res.ok) throw new Error("Not allowed");
 
       setComments((prev) =>
-        prev.filter((c) => c.id !== commentId && c.parent_id !== commentId)
+        prev.filter((c) => c.id !== commentId && c.parent_id !== commentId),
       );
 
       toast.success("Comment deleted!");
     } catch (err) {
       toast.error("You cannot delete this comment");
     }
+  };
+
+  const maxLevel = 3;
+
+  const formatCommentTime = (dateString) => {
+    const createdDate = new Date(dateString);
+    const now = new Date();
+
+    const isSameDay =
+      createdDate.getDate() === now.getDate() &&
+      createdDate.getMonth() === now.getMonth() &&
+      createdDate.getFullYear() === now.getFullYear();
+
+    if (isSameDay) {
+      return createdDate.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    return createdDate.toLocaleDateString("vi-VN");
   };
 
   function CommentItem({
@@ -233,36 +252,42 @@ export default function PostDetail() {
   }) {
     return (
       <div
-        className={`border-t p-3 pt-4 ${
-          replyTo === c.id ? "rounded-md bg-[#21005D]/5" : ""
-        }`}
+        className={`rounded-2xl p-4 transition ${replyTo === c.id ? "bg-forum-primarySoft/30" : "bg-transparent"
+          }`}
       >
         <div className="flex items-start gap-3">
           <Link
             to={`/profile/${c.username}`}
-            className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#D6E4F0] bg-[#21005D]/10 transition-transform hover:scale-105"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-forum-border bg-forum-primarySoft text-forum-primary transition-transform hover:scale-105"
           >
             {c.avatar ? (
-              <img src={c.avatar} className="h-full w-full object-cover" />
+              <img
+                src={c.avatar}
+                alt={c.username}
+                className="h-full w-full object-cover"
+              />
             ) : (
               <User className="h-4 w-4" />
             )}
           </Link>
 
           <div className="flex-1">
-            <div className="mb-1 flex items-center gap-2">
-              <span className="font-medium text-black">{c.username}</span>
-              <span className="text-sm text-gray-500">
-                • {formatCommentTime(c.created_at)}
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="font-medium text-forum-inkStrong">
+                {c.username}
+              </span>
+              <span className="text-sm text-forum-subtle">
+                {formatCommentTime(c.created_at)}
               </span>
             </div>
 
-            <p className="text-sm text-gray-700">{c.content}</p>
+            <p className="text-sm leading-7 text-forum-muted">{c.content}</p>
 
             {level < maxLevel && (
               <button
+                type="button"
                 onClick={() => setReplyTo(c.id)}
-                className="mt-2 text-sm font-medium text-[#1E56A0]"
+                className="mt-3 text-sm font-semibold text-forum-primary transition hover:text-forum-primaryDark"
               >
                 Reply
               </button>
@@ -270,8 +295,9 @@ export default function PostDetail() {
 
             {(c.user_id === user.id || post.user_id === user.id) && (
               <button
+                type="button"
                 onClick={() => handleDeleteComment(c.id)}
-                className="ml-2 text-sm text-red-500"
+                className="ml-3 text-sm font-medium text-red-600 transition hover:text-red-700"
               >
                 Delete
               </button>
@@ -283,7 +309,6 @@ export default function PostDetail() {
   }
 
   const replyingComment = comments.find((c) => c.id === replyTo);
-  const maxLevel = 3;
 
   const renderComments = (parentId = null, level = 0) => {
     if (level > maxLevel) return null;
@@ -293,7 +318,11 @@ export default function PostDetail() {
       .map((c) => (
         <div
           key={c.id}
-          className={level > 0 ? "ml-8 mt-4 border-l-2 border-gray-200 pl-4" : ""}
+          className={
+            level > 0
+              ? "ml-5 mt-4 border-l border-forum-border pl-4 sm:ml-8"
+              : ""
+          }
         >
           <CommentItem
             c={c}
@@ -310,29 +339,6 @@ export default function PostDetail() {
       ));
   };
 
-  const formatCommentTime = (dateString) => {
-    const createdDate = new Date(dateString);
-    const now = new Date();
-
-    const isSameDay =
-      createdDate.getDate() === now.getDate() &&
-      createdDate.getMonth() === now.getMonth() &&
-      createdDate.getFullYear() === now.getFullYear();
-
-    if (isSameDay) {
-      // Show time if comment was created today
-      return createdDate.toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } else {
-      // Show date if comment was created on a different day
-      return createdDate.toLocaleDateString("vi-VN");
-    }
-
-    return createdDate.toLocaleDateString("vi-VN");
-  };
-
   if (!ready || !user || !post) return null;
 
   const tags = parseTagsValue(post.tags);
@@ -345,274 +351,337 @@ export default function PostDetail() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#C8CFD8]">
+    <div className="min-h-screen bg-forum-bg">
       <Navbar user={user} setUser={setUser} showCreatePost={true} />
 
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:items-start lg:gap-8 lg:px-10 lg:py-10">
-        {/* Post Content */}
-        <div className="flex-1 rounded-lg bg-white p-5 sm:p-8 lg:p-12">
-          <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <main className="mx-auto flex max-w-content flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:items-start lg:px-10 lg:py-10">
+        <section className="min-w-0 flex-1 rounded-[28px] border border-forum-border bg-forum-surface p-5 shadow-panel sm:p-8">
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             {isEditing ? (
-              <div className="space-y-2">
+              <div className="flex-1 space-y-5">
                 <div>
-                  <label htmlFor="post-detail-title-editor" className="mb-1 block text-lg font-semibold text-black">
+                  <label
+                    htmlFor="post-detail-title-editor"
+                    className="mb-3 block text-xl font-semibold text-forum-inkStrong"
+                  >
                     Title
                   </label>
-                  <div className="relative min-h-[112px] [&_.tox-edit-area__iframe]:max-h-[112px] [&_.tox-edit-area__iframe]:overflow-y-auto">
-                    <Editor
-                      id="post-detail-title-editor"
-                      tinymceScriptSrc="/tinymce/tinymce.min.js"
-                      value={editTitle}
-                      onEditorChange={(newTitle) => setEditTitle(newTitle)}
-                      init={{
-                        license_key: "gpl",
-                        promotion: false,
-                        branding: false,
-                        menubar: false,
-                        statusbar: false,
-                        placeholder: "Format your title here",
-                        height: 100,
-                        forced_root_block: false,
-                        toolbar: "bold italic underline strikethrough",
-                        plugins: [],
-                        toolbar_sticky: false,
-                        skin_url: "/tinymce/skins/ui/oxide",
-                        valid_elements: "b,strong,i,em,u,s,br",
-                        element_format: "html",
-                        entity_encoding: "raw",
-                        content_style: `
-                          body {
-                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                            font-size: 1rem;
-                          }
-                        `,
-                      }}
-                    />
+                  <div className="overflow-hidden rounded-2xl border border-forum-border bg-white shadow-sm">
+                    <div className="relative min-h-[112px] [&_.tox]:border-0 [&_.tox-editor-header]:border-b [&_.tox-editor-header]:border-forum-border [&_.tox-edit-area__iframe]:max-h-[112px] [&_.tox-edit-area__iframe]:overflow-y-auto">
+                      <Editor
+                        id="post-detail-title-editor"
+                        tinymceScriptSrc="/tinymce/tinymce.min.js"
+                        value={editTitle}
+                        onEditorChange={(newTitle) => setEditTitle(newTitle)}
+                        init={{
+                          license_key: "gpl",
+                          promotion: false,
+                          branding: false,
+                          menubar: false,
+                          statusbar: false,
+                          placeholder: "Format your title here",
+                          height: 100,
+                          forced_root_block: false,
+                          toolbar: "bold italic underline strikethrough",
+                          plugins: [],
+                          toolbar_sticky: false,
+                          skin_url: "/tinymce/skins/ui/oxide",
+                          valid_elements: "b,strong,i,em,u,s,br",
+                          element_format: "html",
+                          entity_encoding: "raw",
+                          content_style: `
+                            html {
+                              overflow-y: auto !important; 
+                            }
+                            body {
+                              font-family: Inter, system-ui, sans-serif;
+                              font-size: 1rem;
+                              color: #191c1d;
+                              margin: 8px;
+                            }
+                            p {
+                              margin: 0; 
+                            }
+                          `,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                  <label className="mb-3 flex items-center gap-2 text-lg font-semibold text-forum-inkStrong">
+                    <Tag className="h-4 w-4" />
                     Tags
                   </label>
                   <input
                     value={editTagsInput}
                     onChange={(e) => setEditTagsInput(e.target.value)}
                     placeholder="React, performance, UI"
-                    className="w-full rounded border p-3 text-base"
+                    className="h-14 w-full rounded-2xl border border-forum-border bg-white px-4 text-base text-forum-inkStrong placeholder:text-forum-subtle outline-none transition focus:border-forum-primary focus:ring-2 focus:ring-forum-primary/15"
                   />
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    Add multiple tags with commas. Example: React, performance, UI.
+                  <p className="mt-3 text-sm leading-6 text-forum-muted">
+                    Add multiple tags with commas. Example: React, performance,
+                    UI.
                   </p>
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-lg font-semibold text-black">
+                  <label className="mb-3 block text-xl font-semibold text-forum-inkStrong">
                     Content
                   </label>
-                  <Editor
-                    tinymceScriptSrc="/tinymce/tinymce.min.js"
-                    value={editContent}
-                    onEditorChange={(newContent) => setEditContent(newContent)}
-                    init={{
-                      license_key: "gpl",
-                      promotion: false,
-                      branding: false,
-                      height:
-                        window.innerWidth < 640
-                          ? 320
-                          : window.innerWidth < 1024
-                          ? 380
-                          : 400,
-                      menubar: true,
-                      plugins: ["lists", "link", "image", "code", "table"],
-                      toolbar:
-                        "undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code",
-                    }}
-                  />
+                  <div className="overflow-hidden rounded-2xl border border-forum-border bg-white shadow-sm">
+                    <Editor
+                      tinymceScriptSrc="/tinymce/tinymce.min.js"
+                      value={editContent}
+                      onEditorChange={(newContent) =>
+                        setEditContent(newContent)
+                      }
+                      init={{
+                        license_key: "gpl",
+                        promotion: false,
+                        branding: false,
+                        height:
+                          window.innerWidth < 640
+                            ? 320
+                            : window.innerWidth < 1024
+                              ? 380
+                              : 400,
+                        menubar: true,
+                        plugins: ["lists", "link", "image", "code", "table"],
+                        toolbar:
+                          "undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code",
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="flex gap-2 pt-1">
+
+                <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
                   <button
-                    onClick={handleUpdatePost}
-                    disabled={!stripHtml(editTitle).trim() || !editContent.trim()}
-                    className="rounded bg-[#1E56A0] px-6 py-2 text-white disabled:opacity-50"
-                  >
-                    Save
-                  </button>
-                  <button
+                    type="button"
                     onClick={() => setIsEditing(false)}
-                    className="rounded border px-6 py-2"
+                    className="inline-flex h-12 items-center justify-center rounded-2xl border border-forum-border px-5 font-medium text-forum-inkStrong transition hover:bg-forum-panel"
                   >
                     Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleUpdatePost}
+                    disabled={
+                      !stripHtml(editTitle).trim() || !editContent.trim()
+                    }
+                    className="inline-flex h-12 items-center justify-center rounded-2xl bg-blue-600 px-5 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    Save
                   </button>
                 </div>
               </div>
             ) : (
-              <h1 className="mb-4 text-3xl font-bold text-black sm:text-4xl lg:mb-6 lg:text-5xl">
-                <span dangerouslySetInnerHTML={{ __html: post.title }} />
-              </h1>
+              <div className="flex-1">
+                <h1 className="text-4xl font-semibold tracking-tight text-forum-inkStrong sm:text-5xl">
+                  <span dangerouslySetInnerHTML={{ __html: post.title }} />
+                </h1>
+              </div>
             )}
 
-            <div className="flex gap-4">
-              {post.user_id === user.id && (
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="text-lg font-medium text-[#1E56A0] sm:text-xl"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => {
-                      setDeletePostId(post.id);
-                      setShowDeleteDialog(true);
-                    }}
-                    className="text-lg font-medium text-red-600 sm:text-xl"
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
+            {post.user_id === user.id && !isEditing && (
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="rounded-2xl border border-forum-border px-4 py-2 text-sm font-semibold text-forum-primary transition hover:bg-forum-primarySoft/40"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeletePostId(post.id);
+                    setShowDeleteDialog(true);
+                  }}
+                  className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Link
-              to={`/profile/${post.username}`}
-              className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-4 border-[#D6E4F0] bg-[#21005D]/10 transition-transform hover:scale-105"
-            >
-              {post.avatar ? (
-                <img src={post.avatar} className="h-full w-full object-cover" />
-              ) : (
-                <User className="h-6 w-6" />
-              )}
-            </Link>
-
-            <div className="flex-1">
-              <p className="text-lg text-black sm:text-xl">
-                By{" "}
+          {!isEditing && (
+            <>
+              <div className="mb-6 flex flex-col gap-4 rounded-[24px] border border-forum-border bg-forum-panel/60 p-5 sm:flex-row sm:items-center">
                 <Link
                   to={`/profile/${post.username}`}
-                  className="font-medium text-[#1E56A0]"
+                  className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-forum-border bg-forum-primarySoft text-forum-primary transition-transform hover:scale-105"
                 >
-                  {post.username}
+                  {post.avatar ? (
+                    <img
+                      src={post.avatar}
+                      alt={post.username}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-6 w-6" />
+                  )}
                 </Link>
-              </p>
-              <p className="text-sm text-gray-600">
-                {new Date(post.created_at).toLocaleString("en-GB")}
-              </p>
-            </div>
 
-            <FollowButton currentUserId={user.id} targetUserId={post.user_id} />
-          </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-lg text-forum-muted">
+                    By{" "}
+                    <Link
+                      to={`/profile/${post.username}`}
+                      className="font-semibold text-forum-primary transition hover:text-forum-primaryDark"
+                    >
+                      {post.username}
+                    </Link>
+                  </p>
+                  <p className="text-sm text-forum-subtle">
+                    {new Date(post.created_at).toLocaleString("en-GB")}
+                  </p>
+                </div>
 
-          <div className="mb-8 flex flex-wrap items-center gap-4">
-            <PostVoteControls
-              postId={post.id}
-              initialVoteCount={post.vote_count ?? 0}
-              initialCurrentUserVote={post.current_user_vote ?? 0}
-              onChange={handlePostVoteChange}
-            />
-            <BookmarkButton postId={post.id} initialBookmarked={Boolean(post.is_bookmarked)} />
-          </div>
+                <FollowButton
+                  currentUserId={user.id}
+                  targetUserId={post.user_id}
+                />
+              </div>
 
-          {tags.length > 0 && (
-            <div className="mb-6 flex flex-wrap items-center gap-2">
-              {orderedTags.map((tag) => {
-                const isMatched = matchingTagSet.has(tag);
+              <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <PostVoteControls
+                  postId={post.id}
+                  initialVoteCount={post.vote_count ?? 0}
+                  initialCurrentUserVote={post.current_user_vote ?? 0}
+                  onChange={handlePostVoteChange}
+                />
+                <BookmarkButton
+                  postId={post.id}
+                  initialBookmarked={Boolean(post.is_bookmarked)}
+                />
+              </div>
 
-                return (
-                  <span
-                    key={tag}
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      isMatched
-                        ? "border border-[#1E56A0]/20 bg-[#1E56A0]/10 text-[#1E56A0]"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    #{formatTagLabel(tag)}
-                  </span>
-                );
-              })}
-            </div>
+              {tags.length > 0 && (
+                <div className="mb-6 flex flex-wrap items-center gap-2">
+                  {orderedTags.map((tag) => {
+                    const isMatched = matchingTagSet.has(tag);
+
+                    return (
+                      <span
+                        key={tag}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${isMatched
+                            ? "bg-forum-primarySoft text-forum-primary"
+                            : "bg-forum-panel text-forum-muted"
+                          }`}
+                      >
+                        #{formatTagLabel(tag)}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div
+                className="prose prose-slate max-w-none text-base leading-8 text-forum-ink sm:text-lg"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
+            </>
           )}
+        </section>
 
-          <div
-            className="text-base leading-relaxed text-black sm:text-lg"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-        </div>
-
-        {/* Comments Sidebar */}
-        <div className="w-full lg:sticky lg:top-6 lg:w-[360px] lg:flex-shrink-0 xl:w-[400px]">
-          <div className="rounded-lg bg-white p-4 sm:p-6">
-            <h3 className="mb-6 text-xl font-semibold sm:text-2xl">
-              Comments{" "}
-              <span className="text-gray-500">{comments.length} Comments</span>
-            </h3>
+        <aside className="w-full lg:sticky lg:top-28 lg:w-[380px] lg:flex-shrink-0">
+          <div className="rounded-[28px] border border-forum-border bg-forum-surface p-5 shadow-panel sm:p-6">
+            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-forum-inkStrong sm:text-3xl">
+              Responses{" "}
+              <span className="text-forum-subtle">({comments.length})</span>
+            </h2>
 
             <form onSubmit={handleSubmitComment} className="mb-6">
               {replyTo && replyingComment && (
-                <div className="mb-3 flex items-center justify-between rounded bg-[#21005D]/5 px-3 py-2 text-sm text-gray-500">
+                <div className="mb-4 flex items-center justify-between rounded-2xl bg-forum-primarySoft/30 px-4 py-3 text-sm text-forum-muted">
                   <span>
                     Replying to{" "}
-                    <span className="font-medium text-[#1E56A0]">
+                    <span className="font-semibold text-forum-primary">
                       {replyingComment.username}
                     </span>
                   </span>
                   <button
                     type="button"
                     onClick={() => setReplyTo(null)}
-                    className="text-sm font-medium text-gray-500"
+                    className="font-semibold text-forum-primary"
                   >
                     Cancel
                   </button>
                 </div>
               )}
 
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Write your comment here..."
-                className="h-24 w-full resize-none rounded-lg border border-gray-300 p-4 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E56A0]"
-              />
-
-              <button
-                type="submit"
-                className="ml-auto mt-2 block rounded-lg bg-[#1E56A0] px-6 py-2 font-medium text-white"
-              >
-                Submit Comment
-              </button>
+              <div className="overflow-hidden rounded-2xl border border-forum-border bg-white shadow-sm">
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Write your thoughts?"
+                  className="h-28 w-full resize-none border-0 px-4 py-4 text-sm text-forum-inkStrong placeholder:text-forum-subtle outline-none"
+                />
+                <div className="flex items-center justify-end border-t border-forum-border px-4 py-3">
+                  <button
+                    type="submit"
+                    className="inline-flex h-11 items-center justify-center rounded-xl bg-forum-primary px-4 text-sm font-semibold text-white transition hover:bg-forum-primaryDark"
+                  >
+                    Submit Comment
+                  </button>
+                </div>
+              </div>
             </form>
 
-            {renderComments(null)}
+            <div className="space-y-2">{renderComments(null)}</div>
           </div>
-        </div>
-      </div>
+        </aside>
+      </main>
 
-      {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="max-w-md rounded-lg bg-white p-5 sm:p-8">
-            <div className="mb-6 flex items-center gap-3">
-              <Trash2 className="h-6 w-6 text-red-600" />
-              <h3 className="text-xl font-semibold text-red-600">
-                Are you sure you want to delete this post?
-              </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
+          {/* Lớp nền đen mờ + hiệu ứng blur */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+            onClick={() => {
+              setShowDeleteDialog(false);
+              setDeletePostId(null);
+            }}
+          ></div>
+
+          {/* Hộp thoại chính */}
+          <div className="relative w-full max-w-md transform overflow-hidden rounded-[24px] bg-white text-left align-middle shadow-2xl transition-all border border-gray-100">
+            {/* Nội dung bên trên */}
+            <div className="px-6 pb-6 pt-8 sm:p-8 sm:pb-6">
+              <div className="sm:flex sm:items-start">
+                <div className="mx-auto flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-12 sm:w-12">
+                  <Trash2 className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="mt-5 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Delete this post?
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                    This action cannot be undone. This will permanently remove your post and its discussion from the feed.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-end gap-4">
+
+            {/* Khu vực nút bấm bên dưới */}
+            <div className="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse sm:px-8">
               <button
+                type="button"
                 onClick={handleDeletePost}
-                className="rounded-md bg-red-600 px-6 py-2 font-medium text-white"
+                className="inline-flex w-full justify-center rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 sm:ml-3 sm:w-auto"
               >
                 Delete
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setShowDeleteDialog(false);
                   setDeletePostId(null);
                 }}
-                className="rounded-md border border-gray-300 px-6 py-2 font-medium"
+                className="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 transition-colors hover:bg-gray-50 sm:mt-0 sm:w-auto"
               >
                 Cancel
               </button>
