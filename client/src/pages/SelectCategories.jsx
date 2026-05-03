@@ -76,7 +76,7 @@ export default function SelectCategories() {
     JSON.stringify(normalizeCategories(initialSelected));
 
   const hasExistingCategories = Array.isArray(user?.categories) && user.categories.length > 0;
-  const canContinue = selected.length > 0 && (hasChanges || hasExistingCategories);
+  const canContinue = hasChanges || hasExistingCategories;
   const isMaxedOut = selected.length >= MAX_SELECTIONS;
 
   const handleSkip = () => {

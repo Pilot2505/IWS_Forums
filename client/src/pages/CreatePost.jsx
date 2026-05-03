@@ -137,7 +137,7 @@ export default function CreatePost() {
                       overflow: hidden !important;
                     }
                     .mce-content-body[data-mce-placeholder]:not(.mce-visualblocks)::before {
-                      left: 24px;
+                      left: 32px !important;
                       color: #717783;
                       font-size: 1rem;
                       font-weight: 400 !important;
@@ -148,7 +148,7 @@ export default function CreatePost() {
                       font-weight: 400 !important;
                       line-height: 1.5;
                       color: #191c1d;
-                      padding: 10px 24px;
+                      padding: 10px 32px;
                     }
                     body,
                     p,
