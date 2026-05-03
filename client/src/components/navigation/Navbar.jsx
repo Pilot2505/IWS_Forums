@@ -63,7 +63,7 @@ export default function Navbar({ user, setUser, showCreatePost = true }) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#e1e3e4] bg-white shadow-sm">
-      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <Link
           to="/"
           className="text-2xl font-bold tracking-tight text-[#005da7]"
@@ -71,7 +71,7 @@ export default function Navbar({ user, setUser, showCreatePost = true }) {
           Tech Pulse
         </Link>
 
-        <div className="flex items-center gap-4 sm:gap-5">
+        <div className="flex items-center gap-3 sm:gap-5">
           <SearchBar className="hidden lg:block" />
 
           {showCreatePost && (

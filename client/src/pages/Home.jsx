@@ -274,6 +274,8 @@ function FeedPostCard({
 }
 
 function FollowingItem({ person, onOpenProfile }) {
+  const hasNewPosts = person.newPosts > 0;
+
   return (
     <button
       type="button"
@@ -281,16 +283,24 @@ function FollowingItem({ person, onOpenProfile }) {
       className="group flex w-full items-center gap-3 text-left"
     >
       <div className="relative shrink-0">
-        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[#e1e3e4] bg-[#f3f4f5]">
-          {person.avatar ? (
-            <img
-              src={person.avatar}
-              alt={person.fullname || person.username}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <User className="h-5 w-5 text-[#717783]" />
-          )}
+        <div
+          className={`rounded-full p-[2px] transition-all ${
+            hasNewPosts
+              ? "bg-gradient-to-tr from-[#005da7] via-[#2976c7] to-[#c1d9fe] shadow-[0_0_0_1px_rgba(0,93,167,0.15)]"
+              : "bg-[#e1e3e4]"
+          }`}
+        >
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#f3f4f5]">
+            {person.avatar ? (
+              <img
+                src={person.avatar}
+                alt={person.fullname || person.username}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <User className="h-5 w-5 text-[#717783]" />
+            )}
+          </div>
         </div>
       </div>
 

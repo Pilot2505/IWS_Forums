@@ -24,7 +24,7 @@ export default function SearchBar({ className = "" }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search..."
-        className="w-full rounded-lg border border-[#c1c7d3] bg-white py-2 pl-10 pr-4 text-sm text-[#191c1d] placeholder:text-[#717783] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#005da7]"
+        className="w-full rounded-lg border border-[#c1c7d3] bg-[#f8f9fa] py-2 pl-10 pr-4 text-sm text-[#191c1d] placeholder:text-[#717783] transition-colors duration-150 hover:bg-[#f3f4f5] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#005da7]"
       />
     </form>
   );
