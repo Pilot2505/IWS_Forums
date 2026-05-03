@@ -1,19 +1,19 @@
 import { Routes, Route } from "react-router-dom";
-import Index from "@/features/home/pages/Index";
-import Register from "@/features/auth/pages/Register";
-import Login from "@/features/auth/pages/Login";
-import ForgotPassword from "@/features/auth/pages/ForgotPassword";
-import ResetPassword from "@/features/auth/pages/ResetPassword";
-import Home from "@/features/home/pages/Home";
-import PostDetail from "@/features/posts/pages/PostDetail";
-import CreatePost from "@/features/posts/pages/CreatePost";
-import Profile from "@/features/profile/pages/Profile";
-import SearchResult from "@/features/search/pages/SearchResult";
-import Bookmarks from "@/features/bookmarks/pages/Bookmarks";
-import Notifications from "@/features/notifications/pages/Notifications";
-import SelectCategories from "@/features/onboarding/pages/SelectCategories";
-import ConfirmDeleteAccount from "@/features/auth/pages/ConfirmDeleteAccount";
-import NotFound from "@/features/errors/pages/NotFound";
+import Index from "@/pages/home/Index";
+import Register from "@/pages/auth/Register";
+import Login from "@/pages/auth/Login";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
+import Home from "@/pages/home/Home";
+import PostDetail from "@/pages/posts/PostDetail";
+import CreatePost from "@/pages/posts/CreatePost";
+import Profile from "@/pages/profile/Profile";
+import SearchResult from "@/pages/search/SearchResult";
+import Bookmarks from "@/pages/bookmarks/Bookmarks";
+import Notifications from "@/pages/notifications/Notifications";
+import SelectCategories from "@/pages/onboarding/SelectCategories";
+import ConfirmDeleteAccount from "@/pages/auth/ConfirmDeleteAccount";
+import NotFound from "@/pages/errors/NotFound";
 
 export default function AppRoutes() {
   return (
