@@ -5,7 +5,7 @@ import { toggleBookmark } from "../services/bookmarkService";
 export default function BookmarkButton({
   postId,
   initialBookmarked = false,
-  onChange,
+  onZChange,
   className = "",
 }) {
   const [isBookmarked, setIsBookmarked] = useState(Boolean(initialBookmarked));

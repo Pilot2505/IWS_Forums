@@ -181,7 +181,7 @@ export const verifyDeleteAccountToken = async (req, res) => {
 
     const [rows] = await pool.execute(
       `
-      SELECT id
+      SELECT id, username, fullname, avatar
       FROM users
       WHERE delete_token_hash = ?
         AND delete_token_expires_at > UTC_TIMESTAMP()
@@ -194,7 +194,10 @@ export const verifyDeleteAccountToken = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
 
-    res.json({ message: "Token valid" });
+    res.json({
+      message: "Token valid",
+      user: rows[0],
+    });
   } catch (err) {
     console.error("Verify delete token error:", err);
     res.status(500).json({ message: "Internal server error" });
