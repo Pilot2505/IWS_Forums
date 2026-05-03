@@ -15,7 +15,6 @@ import BookmarkButton from "../components/BookmarkButton";
 import { stripHtml } from "../utils/content";
 import { normalizeTagsInput, parseTagsValue } from "../utils/postMeta";
 import { containsBlockedWord } from "../utils/moderation";
-
 export default function Profile() {
   const { username } = useParams();
   const navigate = useNavigate();
@@ -24,15 +23,12 @@ export default function Profile() {
     redirectTo: "/login",
     requireToken: true,
   });
-
   const isOwnProfile = user && (!username || username === user.username);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [errors, setErrors] = useState({});
-
   const [profileUser, setProfileUser] = useState(null);
   const effectiveUsername = username || user?.username;
   const targetUserId = profileUser?.id || (isOwnProfile ? user?.id : null);
-
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [followersList, setFollowersList] = useState([]);
@@ -41,20 +37,16 @@ export default function Profile() {
   const [connectionsError, setConnectionsError] = useState("");
   const [activeConnectionsView, setActiveConnectionsView] = useState(null);
   const [connectionsQuery, setConnectionsQuery] = useState("");
-
   const [editingPost, setEditingPost] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editTagsInput, setEditTagsInput] = useState("");
   const [editContent, setEditContent] = useState("");
   const [editorLoaded, setEditorLoaded] = useState(false);
-
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
-
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletePostId, setDeletePostId] = useState(null);
   const [editFormData, setEditFormData] = useState("");
-
   const [posts, setPosts] = useState([]);
   const [postsCount, setPostsCount] = useState(0);
   const [cursor, setCursor] = useState(null);
@@ -63,32 +55,25 @@ export default function Profile() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
-
   useEffect(() => {
     if (!effectiveUsername) return;
-
     const fetchProfileUser = async () => {
       const res = await authFetch(`/api/users/${effectiveUsername}`);
       const data = await res.json();
       setProfileUser(data);
     };
-
     fetchProfileUser();
   }, [effectiveUsername]);
-
   useEffect(() => {
     if (!targetUserId) return;
-
     const fetchFollowCounts = async () => {
       const res = await authFetch(`/api/follow/follow-count/${targetUserId}`);
       const data = await res.json();
       setFollowersCount(data.followers);
       setFollowingCount(data.following);
     };
-
     fetchFollowCounts();
   }, [targetUserId]);
-
   useEffect(() => {
     if (!isOwnProfile || !targetUserId) {
       setFollowersList([]);
@@ -98,39 +83,30 @@ export default function Profile() {
       setActiveConnectionsView(null);
       return undefined;
     }
-
     let cancelled = false;
-
     const fetchFollowLists = async () => {
       setConnectionsLoading(true);
       setConnectionsError("");
-
       try {
         const [followersRes, followingRes] = await Promise.all([
           authFetch(`/api/follow/followers/${targetUserId}`),
           authFetch(`/api/follow/following/${targetUserId}`),
         ]);
-
         if (!followersRes.ok) {
           throw new Error("Failed to fetch followers");
         }
-
         if (!followingRes.ok) {
           throw new Error("Failed to fetch following");
         }
-
         const [followersData, followingData] = await Promise.all([
           followersRes.json(),
           followingRes.json(),
         ]);
-
         if (cancelled) return;
-
         setFollowersList(followersData || []);
         setFollowingList(followingData || []);
       } catch (err) {
         if (cancelled) return;
-
         console.error("Error loading follow lists:", err);
         setConnectionsError("Unable to load your followers and following right now.");
       } finally {
@@ -139,26 +115,20 @@ export default function Profile() {
         }
       }
     };
-
     fetchFollowLists();
-
     return () => {
       cancelled = true;
     };
   }, [isOwnProfile, targetUserId]);
-
   useEffect(() => {
     if (!activeConnectionsView) {
       setConnectionsQuery("");
       return;
     }
-
     setConnectionsQuery("");
   }, [activeConnectionsView]);
-
   useEffect(() => {
     if (!effectiveUsername) return;
-
     const fetchPosts = async () => {
       setLoadingPosts(true);
       try {
@@ -170,13 +140,11 @@ export default function Profile() {
         const res = await authFetch(
           `/api/posts/user/${encodeURIComponent(effectiveUsername)}?${params.toString()}`
         );
-
         if (!res.ok) {
           const text = await res.text();
           console.error("Server error:", text);
           return;
         }
-
         const data = await res.json();
         setPosts(data.posts);
         setPostsCount(data.totalCount ?? data.posts.length);
@@ -186,17 +154,14 @@ export default function Profile() {
         setLoadingPosts(false);
       }
     };
-
     setPosts([]);
     setPostsCount(0);
     setCursor(null);
     setHasMore(false);
     fetchPosts();
   }, [effectiveUsername, sortBy, sortDir]);
-
   useEffect(() => {
     if (!user || !targetUserId || isOwnProfile) return;
-
     authFetch("/api/follow/seen", {
       method: "PUT",
       headers: {
@@ -208,7 +173,6 @@ export default function Profile() {
       }),
     }).catch((err) => console.error("Failed to mark as seen:", err));
   }, [user, targetUserId, isOwnProfile]);
-
   useEffect(() => {
     if (showEditProfile && user) {
       setEditFormData({
@@ -217,23 +181,18 @@ export default function Profile() {
         username: user.username || "",
         bio: user.bio || "",
       });
-
       setErrors({});
     }
   }, [showEditProfile, user]);
-
   const refetchFollowCounts = async () => {
     if (!targetUserId) return;
-
     const res = await authFetch(`/api/follow/follow-count/${targetUserId}`);
     const data = await res.json();
     setFollowersCount(data.followers);
     setFollowingCount(data.following);
   };
-
   const handleLoadMore = async () => {
     if (!effectiveUsername || !cursor || loadingMore) return;
-
     setLoadingMore(true);
     try {
       const params = new URLSearchParams({
@@ -245,13 +204,11 @@ export default function Profile() {
       const res = await authFetch(
         `/api/posts/user/${encodeURIComponent(effectiveUsername)}?${params.toString()}`
       );
-
       if (!res.ok) {
         const text = await res.text();
         console.error("Server error:", text);
         return;
       }
-
       const data = await res.json();
       setPosts((prev) => [...prev, ...data.posts]);
       setPostsCount(data.totalCount ?? postsCount);
@@ -261,34 +218,26 @@ export default function Profile() {
       setLoadingMore(false);
     }
   };
-
   const handleSortChange = (nextSortBy, nextSortDir) => {
     setSortBy(nextSortBy);
     setSortDir(nextSortDir);
   };
-
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     try {
       let avatarUrl = user.avatar;
-
       if (selectedImage) {
         const formData = new FormData();
         formData.append("avatar", selectedImage);
         formData.append("userId", user.id);
-
         const uploadRes = await authFetch("/api/users/upload-avatar", {
           method: "POST",
           body: formData,
         });
-
         const uploadData = await uploadRes.json();
         avatarUrl = uploadData.avatar;
       }
-
       const res = await authFetch("/api/users/update-profile", {
         method: "PUT",
         headers: {
@@ -300,14 +249,11 @@ export default function Profile() {
           avatar: avatarUrl,
         }),
       });
-
       const updatedUser = await res.json();
-
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
       setProfileUser(updatedUser);
       navigate(`/profile/${updatedUser.username}`);
-
       toast.success("Profile updated successfully!");
       setShowEditProfile(false);
     } catch (err) {
@@ -315,46 +261,34 @@ export default function Profile() {
       toast.error("Update failed");
     }
   };
-
   const validateForm = () => {
     const newErrors = {};
-
     if (!editFormData.fullname.trim()) {
       newErrors.fullname = "Fullname is required";
     }
-
     if (!editFormData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^\S+@\S+\.\S+$/.test(editFormData.email)) {
       newErrors.email = "Invalid email format";
     }
-
     if (!editFormData.username.trim()) {
       newErrors.username = "Username is required";
     } else if (editFormData.username.length < 3) {
       newErrors.username = "Username must be at least 3 characters";
     }
-
     if (editFormData.bio.length > 150) {
       newErrors.bio = "Bio must be less than 150 characters";
     }
-
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
-
   const handleDeletePost = async () => {
     if (!deletePostId) return;
-
     try {
       await deletePost(deletePostId);
-
       toast.success("Post deleted successfully!");
-
       setPosts((prev) => prev.filter((p) => p.id !== deletePostId));
       setPostsCount((prev) => Math.max(0, prev - 1));
-
       setShowDeleteDialog(false);
       setDeletePostId(null);
     } catch (err) {
@@ -362,7 +296,6 @@ export default function Profile() {
       toast.error(err.message);
     }
   };
-
   const handlePostVoteChange = ({ postId, voteCount, currentUserVote }) => {
     setPosts((prev) =>
       prev.map((post) =>
@@ -376,33 +309,25 @@ export default function Profile() {
       )
     );
   };
-
   const handleUpdatePost = async () => {
     const trimmedTitle = stripHtml(editTitle).trim();
-
     if (!trimmedTitle) {
       toast.error("Title is required");
       return;
     }
-
     if (!editContent.trim() || editContent === "<p><br></p>") {
       toast.error("Content is required");
       return;
     }
-
     if (containsBlockedWord(trimmedTitle) || containsBlockedWord(editContent)) {
       toast.error("This post contains language that violates community standards. Please edit it!");
       return;
     }
-
     if (!editingPost) return;
-
     try {
       const content = await uploadEmbeddedImages(editContent);
       const nextTags = normalizeTagsInput(editTagsInput);
-
       const updatedPost = await updatePost(editingPost, editTitle, content, nextTags);
-
       setPosts((prev) =>
         prev.map((p) =>
           p.id === editingPost
@@ -418,43 +343,36 @@ export default function Profile() {
             : p
         )
       );
-
       setEditingPost(null);
       setEditTitle("");
       setEditTagsInput("");
       setEditContent("");
       setEditorLoaded(false);
-
       toast.success("Post updated!");
     } catch (err) {
       toast.error(err.message);
     }
   };
-
   const closeEditPostModal = () => {
     setEditingPost(null);
     setEditorLoaded(false);
   };
-
   const closeConnectionsPanel = () => {
       setConnectionsQuery("");
     setActiveConnectionsView(null);
   };
-
   const selectedConnectionsLabel =
     activeConnectionsView === "followers"
       ? "Followers"
       : activeConnectionsView === "following"
         ? "Following"
         : null;
-
   const selectedConnectionsList =
     activeConnectionsView === "followers"
       ? followersList
       : activeConnectionsView === "following"
         ? followingList
         : [];
-
   const normalizedConnectionsQuery = connectionsQuery.trim().toLowerCase();
   const visibleConnectionsList = normalizedConnectionsQuery
     ? selectedConnectionsList.filter((person) => {
@@ -462,7 +380,6 @@ export default function Profile() {
         return haystack.includes(normalizedConnectionsQuery);
       })
     : selectedConnectionsList;
-
   const renderConnectionUser = (person, showNewPosts = false) => (
     <Link
       to={`/profile/${encodeURIComponent(person.username)}`}
@@ -475,14 +392,12 @@ export default function Profile() {
           <User className="h-5 w-5" />
         )}
       </div>
-
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-semibold text-[#0C245E]">
           {person.fullname || person.username}
         </div>
         <div className="truncate text-xs text-gray-500">@{person.username}</div>
       </div>
-
       {showNewPosts && Number(person.newPosts) > 0 && (
         <span className="shrink-0 rounded-full bg-[#1E56A0]/10 px-2.5 py-1 text-xs font-medium text-[#1E56A0]">
           {person.newPosts} new
@@ -490,16 +405,13 @@ export default function Profile() {
       )}
     </Link>
   );
-
   if (!ready || !user) return null;
   
   const displayUser = isOwnProfile ? profileUser || user : profileUser;
   if (!displayUser) return null;
-
   return (
     <div className="min-h-screen bg-[#C8CFD8]">
       <Navbar user={user} setUser={setUser} showCreatePost={true} />
-
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
         <div className="rounded-t-lg bg-[#ACB8C9] p-5 sm:p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -514,7 +426,6 @@ export default function Profile() {
                   <User className="h-12 w-12" />
                 )}
               </div>
-
               <div>
                 <h1 className="text-2xl font-semibold text-black sm:text-3xl">
                   {displayUser?.fullname}
@@ -522,9 +433,8 @@ export default function Profile() {
                 <p className="text-base text-gray-700 sm:text-lg">
                   @{displayUser?.username}
                 </p>
-
-                <div className="mt-3 grid grid-cols-3 gap-4 sm:flex sm:gap-8">
-                  <div className="text-center">
+                <div className="mt-3 grid grid-cols-3 items-center gap-4 sm:flex sm:gap-8">
+                  <div className="text-center px-3 py-2">
                     <div className="text-2xl font-semibold">{postsCount}</div>
                     <div className="text-sm text-gray-700">Posts</div>
                   </div>
@@ -557,7 +467,6 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-
             {isOwnProfile ? (
               <button
                 onClick={() => setShowEditProfile(true)}
@@ -573,12 +482,10 @@ export default function Profile() {
               />
             )}
           </div>
-
           <p className="mt-4 text-sm text-black sm:text-base">
             {displayUser?.bio || "No bio yet"}
           </p>
         </div>
-
         {isOwnProfile && activeConnectionsView && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             <div
@@ -586,7 +493,6 @@ export default function Profile() {
               onClick={closeConnectionsPanel}
               aria-hidden="true"
             />
-
             <aside className="relative z-10 flex h-full w-full max-w-xl flex-col border-l border-gray-200 bg-white shadow-2xl">
               <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-5 sm:px-6">
                 <div>
@@ -598,7 +504,6 @@ export default function Profile() {
                   </h2>
                   <p className="mt-1 text-sm text-gray-500">Only you can see these lists.</p>
                 </div>
-
                 <button
                   type="button"
                   onClick={closeConnectionsPanel}
@@ -608,7 +513,6 @@ export default function Profile() {
                   <X className="h-5 w-5" />
                 </button>
               </div>
-
               <div className="border-b border-gray-200 px-5 py-4 sm:px-6">
                 <div className="grid grid-cols-2 gap-3 rounded-2xl bg-[#F7F9FC] p-1">
                   <button
@@ -623,7 +527,6 @@ export default function Profile() {
                     <div className="text-sm font-semibold text-[#0C245E]">Followers</div>
                     <div className="text-xs text-gray-500">{followersCount} total</div>
                   </button>
-
                   <button
                     type="button"
                     onClick={() => setActiveConnectionsView("following")}
@@ -637,7 +540,6 @@ export default function Profile() {
                     <div className="text-xs text-gray-500">{followingCount} total</div>
                   </button>
                 </div>
-
                 <label className="mt-4 flex items-center gap-3 rounded-2xl bg-[#F7F9FC] px-4 py-3 text-sm text-gray-500">
                   <Search className="h-4 w-4 shrink-0 text-gray-400" />
                   <input
@@ -649,7 +551,6 @@ export default function Profile() {
                   />
                 </label>
               </div>
-
               <div className="flex-1 overflow-y-auto p-5 sm:p-6">
                 {connectionsError ? (
                   <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -688,12 +589,10 @@ export default function Profile() {
             </aside>
           </div>
         )}
-
         <div className="rounded-b-lg bg-white p-5 sm:p-6 lg:p-8">
           <h2 className="mb-6 text-2xl font-semibold text-[#0C245E] sm:text-3xl">
             {isOwnProfile ? "Your Posts" : `${effectiveUsername}'s Posts`}
           </h2>
-
           <div className="mb-6 flex flex-col gap-3 rounded-lg border border-gray-200 bg-[#F7F9FC] p-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
@@ -709,7 +608,6 @@ export default function Profile() {
                   <option value="upvotes">Upvotes</option>
                 </select>
               </label>
-
               <label className="flex flex-col gap-2 text-sm font-medium text-[#0C245E]">
                 Order
                 <select
@@ -732,7 +630,6 @@ export default function Profile() {
               </label>
             </div>
           </div>
-
           <div className="space-y-6">
             {loadingPosts ? (
               <div className="space-y-4">
@@ -772,7 +669,6 @@ export default function Profile() {
                         <BookmarkButton postId={post.id} initialBookmarked={Boolean(post.is_bookmarked)} />
                       </div>
                     )}
-
                     {isOwnProfile && editingPost !== post.id && (
                       <div className="flex flex-wrap gap-4">
                         <button
@@ -800,7 +696,6 @@ export default function Profile() {
                     )}
                   </PostCard>
                 ))}
-
                 {hasMore && (
                   <div className="flex justify-center pt-2">
                     <button
@@ -818,7 +713,6 @@ export default function Profile() {
           </div>
         </div>
       </div>
-
       {editingPost && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 py-6"
@@ -834,7 +728,6 @@ export default function Profile() {
             >
               <X className="h-6 w-6" />
             </button>
-
             <div className="mb-8">
               <h3 className="text-2xl font-semibold text-[#0C245E] sm:text-3xl">
                 Edit Post
@@ -843,7 +736,6 @@ export default function Profile() {
                 Changes are applied only when you save.
               </p>
             </div>
-
             <div className="space-y-2">
               <div>
                 <label htmlFor="profile-post-title-editor" className="mb-1 block text-lg font-semibold text-black">
@@ -881,7 +773,6 @@ export default function Profile() {
                   />
                 </div>
               </div>
-
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   Tags
@@ -896,7 +787,6 @@ export default function Profile() {
                   Add multiple tags with commas. Example: React, performance, UI.
                 </p>
               </div>
-
               <div>
                 <label className="mb-1 block text-lg font-semibold text-black">
                   Content
@@ -938,13 +828,11 @@ export default function Profile() {
                         const input = document.createElement("input");
                         input.type = "file";
                         input.accept = "image/*";
-
                         input.onchange = () => {
                           const file = input.files?.[0];
                           if (!file) {
                             return;
                           }
-
                           const reader = new FileReader();
                           reader.onload = () => {
                             const image = new Image();
@@ -958,7 +846,6 @@ export default function Profile() {
                                       (image.height * maxWidth) / image.width
                                     )
                                   : image.height;
-
                               callback(reader.result, {
                                 title: file.name,
                                 width: String(width),
@@ -970,7 +857,6 @@ export default function Profile() {
                           };
                           reader.readAsDataURL(file);
                         };
-
                         input.click();
                       },
                       image_title: true,
@@ -1001,7 +887,6 @@ export default function Profile() {
                   />
                 </div>
               </div>
-
               <div className="flex justify-end gap-2 pt-1">
                 <button
                   onClick={closeEditPostModal}
@@ -1020,7 +905,6 @@ export default function Profile() {
           </div>
         </div>
       )}
-
       {showEditProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
           <div className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-5 sm:p-6 lg:p-8">
@@ -1030,7 +914,6 @@ export default function Profile() {
             >
               <X className="h-6 w-6" />
             </button>
-
             <div className="mb-8 text-center">
               <div className="inline-flex flex-col items-center">
                 <div className="mb-4 h-24 w-24 overflow-hidden rounded-full border">
@@ -1048,7 +931,6 @@ export default function Profile() {
                     <User className="m-auto h-12 w-12" />
                   )}
                 </div>
-
                 <input
                   type="file"
                   accept="image/*"
@@ -1062,7 +944,6 @@ export default function Profile() {
                     }
                   }}
                 />
-
                 <label
                   htmlFor="avatarUpload"
                   className="cursor-pointer font-medium text-[#1E56A0]"
@@ -1074,7 +955,6 @@ export default function Profile() {
                 Edit Profile
               </h2>
             </div>
-
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
                 <label className="font-medium sm:pt-2 sm:text-right">
@@ -1102,7 +982,6 @@ export default function Profile() {
                   )}
                 </div>
               </div>
-
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
                 <label className="font-medium sm:pt-2 sm:text-right">
                   Email:
@@ -1129,7 +1008,6 @@ export default function Profile() {
                   )}
                 </div>
               </div>
-
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
                 <label className="font-medium sm:pt-2 sm:text-right">
                   Username:
@@ -1156,7 +1034,6 @@ export default function Profile() {
                   )}
                 </div>
               </div>
-
               <div className="grid gap-2 sm:grid-cols-[120px,1fr] sm:items-start sm:gap-4">
                 <label className="font-medium sm:pt-2 sm:text-right">Bio:</label>
                 <div className="w-full">
@@ -1176,7 +1053,6 @@ export default function Profile() {
                   )}
                 </div>
               </div>
-
               <div className="flex flex-col justify-center gap-3 pt-6 sm:flex-row sm:gap-4">
                 <button
                   type="submit"
@@ -1196,7 +1072,6 @@ export default function Profile() {
           </div>
         </div>
       )}
-
       {showDeleteDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="max-w-md rounded-lg bg-white p-5 sm:p-8">
