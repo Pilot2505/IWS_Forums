@@ -2,22 +2,22 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { Tag, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import Navbar from "../components/navigation/Navbar";
-import { updatePost, deletePost } from "../services/postService";
-import FollowButton from "../components/FollowButton";
+import Navbar from "@/components/layout/Navbar";
+import { updatePost, deletePost } from "@/services/postService";
+import FollowButton from "@/components/social/FollowButton";
 import { Editor } from "@tinymce/tinymce-react";
-import { authFetch } from "../services/api";
-import { containsBlockedWord, cleanBlockedWords } from "../utils/moderation";
-import PostVoteControls from "../components/PostVoteControls";
-import useRequireAuth from "../hooks/useRequireAuth";
-import BookmarkButton from "../components/BookmarkButton";
-import { stripHtml } from "../utils/content";
+import { authFetch } from "@/services/api";
+import { containsBlockedWord, cleanBlockedWords } from "@/utils/moderation";
+import PostVoteControls from "@/components/posts/PostVoteControls";
+import useRequireAuth from "@/hooks/useRequireAuth";
+import BookmarkButton from "@/components/posts/BookmarkButton";
+import { stripHtml } from "@/utils/content";
 import {
   formatTagLabel,
   getMatchingInterestTags,
   normalizeTagsInput,
   parseTagsValue,
-} from "../utils/postMeta";
+} from "@/utils/postMeta";
 
 function getStoredInterestCategories() {
   if (typeof window === "undefined") {
@@ -36,7 +36,6 @@ export default function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, setUser, ready } = useRequireAuth({
-    redirectTo: "/login",
     redirectTo: "/login",
     requireToken: true,
   });
@@ -287,7 +286,7 @@ export default function PostDetail() {
               <button
                 type="button"
                 onClick={() => setReplyTo(c.id)}
-                className="mt-3 text-sm font-semibold text-forum-primary transition hover:text-forum-primaryDark"
+                className="mt-3 text-sm font-semibold text-[#005da7] transition-colors hover:text-[#004883]"
               >
                 Reply
               </button>
@@ -457,16 +456,16 @@ export default function PostDetail() {
                 </div>
 
                 <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="inline-flex h-12 items-center justify-center rounded-2xl border border-forum-border px-5 font-medium text-forum-inkStrong transition hover:bg-forum-panel"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleUpdatePost}
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#005da7] px-5 font-medium text-[#005da7] transition-colors hover:bg-[#005da7]/5 hover:text-[#004883]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUpdatePost}
                     disabled={
                       !stripHtml(editTitle).trim() || !editContent.trim()
                     }
@@ -489,7 +488,7 @@ export default function PostDetail() {
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  className="rounded-2xl border border-forum-border px-4 py-2 text-sm font-semibold text-forum-primary transition hover:bg-forum-primarySoft/40"
+                  className="rounded-2xl border border-[#005da7] px-4 py-2 text-sm font-semibold text-[#005da7] transition-colors hover:bg-[#005da7]/5 hover:text-[#004883]"
                 >
                   Edit
                 </button>
@@ -606,7 +605,7 @@ export default function PostDetail() {
                   <button
                     type="button"
                     onClick={() => setReplyTo(null)}
-                    className="font-semibold text-forum-primary"
+                    className="font-semibold text-[#005da7] transition-colors hover:text-[#004883]"
                   >
                     Cancel
                   </button>
@@ -623,7 +622,7 @@ export default function PostDetail() {
                 <div className="flex items-center justify-end border-t border-forum-border px-4 py-3">
                   <button
                     type="submit"
-                    className="inline-flex h-11 items-center justify-center rounded-xl bg-forum-primary px-4 text-sm font-semibold text-white transition hover:bg-forum-primaryDark"
+                    className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#005da7] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#004883] sm:w-auto"
                   >
                     Submit Comment
                   </button>

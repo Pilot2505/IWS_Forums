@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Navbar from "../components/navigation/Navbar";
-import useRequireAuth from "../hooks/useRequireAuth";
-import { getBookmarks, toggleBookmark } from "../services/bookmarkService";
-import { stripHtml } from "../utils/content";
-import { formatTagLabel, parseTagsValue } from "../utils/postMeta";
+import Navbar from "@/components/layout/Navbar";
+import useRequireAuth from "@/hooks/useRequireAuth";
+import { getBookmarks, toggleBookmark } from "@/services/bookmarkService";
+import { stripHtml } from "@/utils/content";
+import { formatTagLabel, parseTagsValue } from "@/utils/postMeta";
 
 function formatSavedDate(value) {
   const date = new Date(value);

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, ChevronDown, ChevronUp, Search } from "lucide-react";
-import Navbar from "../components/navigation/Navbar";
-import { authFetch } from "../services/api";
-import useRequireAuth from "../hooks/useRequireAuth";
-import useVote from "../hooks/useVote";
-import { formatTagLabel, getMatchingInterestTags, parseTagsValue } from "../utils/postMeta";
-import { stripHtml } from "../utils/content";
+import Navbar from "@/components/layout/Navbar";
+import { authFetch } from "@/services/api";
+import useRequireAuth from "@/hooks/useRequireAuth";
+import useVote from "@/hooks/useVote";
+import { formatTagLabel, getMatchingInterestTags, parseTagsValue } from "@/utils/postMeta";
+import { stripHtml } from "@/utils/content";
 
 const DEFAULT_SORT_BY = "date";
 const DEFAULT_SORT_DIR = "desc";
