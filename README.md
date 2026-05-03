@@ -57,6 +57,8 @@ SMTP_FROM="Tech Pulse <pilot250504@gmail.com>"
 CLIENT_URL=http://localhost:8080
 ```
 
+If your SMTP server uses a self-signed certificate in development, add `SMTP_REJECT_UNAUTHORIZED=false` to your `.env` file.
+
 ## Run the App Locally
 
 Open two terminals.
