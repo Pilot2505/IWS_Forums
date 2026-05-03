@@ -9,17 +9,17 @@ import {
   MoreHorizontal,
   User,
 } from "lucide-react";
-import Navbar from "../components/navigation/Navbar";
-import { authFetch } from "../services/api";
-import useRequireAuth from "../hooks/useRequireAuth";
-import useVote from "../hooks/useVote";
-import { toggleBookmark } from "../services/bookmarkService";
-import { stripHtml } from "../utils/content";
+import Navbar from "@/components/layout/Navbar";
+import { authFetch } from "@/services/api";
+import useRequireAuth from "@/hooks/useRequireAuth";
+import useVote from "@/hooks/useVote";
+import { toggleBookmark } from "@/services/bookmarkService";
+import { stripHtml } from "@/utils/content";
 import {
   formatTagLabel,
   getMatchingInterestTags,
   parseTagsValue,
-} from "../utils/postMeta";
+} from "@/utils/postMeta";
 
 // Map category id -> label hiển thị
 const CATEGORY_LABELS = {

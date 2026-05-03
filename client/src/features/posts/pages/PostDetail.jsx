@@ -2,22 +2,22 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { Tag, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import Navbar from "../components/navigation/Navbar";
-import { updatePost, deletePost } from "../services/postService";
-import FollowButton from "../components/FollowButton";
+import Navbar from "@/components/layout/Navbar";
+import { updatePost, deletePost } from "@/services/postService";
+import FollowButton from "@/components/social/FollowButton";
 import { Editor } from "@tinymce/tinymce-react";
-import { authFetch } from "../services/api";
-import { containsBlockedWord, cleanBlockedWords } from "../utils/moderation";
-import PostVoteControls from "../components/PostVoteControls";
-import useRequireAuth from "../hooks/useRequireAuth";
-import BookmarkButton from "../components/BookmarkButton";
-import { stripHtml } from "../utils/content";
+import { authFetch } from "@/services/api";
+import { containsBlockedWord, cleanBlockedWords } from "@/utils/moderation";
+import PostVoteControls from "@/components/posts/PostVoteControls";
+import useRequireAuth from "@/hooks/useRequireAuth";
+import BookmarkButton from "@/components/posts/BookmarkButton";
+import { stripHtml } from "@/utils/content";
 import {
   formatTagLabel,
   getMatchingInterestTags,
   normalizeTagsInput,
   parseTagsValue,
-} from "../utils/postMeta";
+} from "@/utils/postMeta";
 
 function getStoredInterestCategories() {
   if (typeof window === "undefined") {
@@ -36,7 +36,6 @@ export default function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, setUser, ready } = useRequireAuth({
-    redirectTo: "/login",
     redirectTo: "/login",
     requireToken: true,
   });

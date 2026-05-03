@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Bookmark, BookmarkCheck } from "lucide-react";
-import { toggleBookmark } from "../services/bookmarkService";
+import { toggleBookmark } from "@/services/bookmarkService";
 
 export default function BookmarkButton({
   postId,
   initialBookmarked = false,
-  onZChange,
+  onChange,
   className = "",
 }) {
   const [isBookmarked, setIsBookmarked] = useState(Boolean(initialBookmarked));

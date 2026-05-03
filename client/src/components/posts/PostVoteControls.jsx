@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import useVote from "../hooks/useVote";
+import useVote from "@/hooks/useVote";
 
 export default function PostVoteControls({
   postId,
