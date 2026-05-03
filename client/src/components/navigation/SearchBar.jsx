@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 
-export default function SearchBar() {
+export default function SearchBar({ className = "" }) {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
@@ -15,22 +15,17 @@ export default function SearchBar() {
   };
 
   return (
-    <form onSubmit={handleSearch} className="flex items-center gap-2">
-      <div className="relative">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search posts, tags..."
-          className="pl-4 pr-10 py-1.5 rounded-full border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E56A0] w-40 sm:w-56"
-        />
-        <button
-          type="submit"
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#1E56A0]"
-        >
-          <Search className="w-4 h-4" />
-        </button>
-      </div>
+    <form onSubmit={handleSearch} className={`relative w-64 ${className}`}>
+      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#717783]">
+        <Search className="h-4 w-4" />
+      </span>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search..."
+        className="w-full rounded-lg border border-[#c1c7d3] bg-white py-2 pl-10 pr-4 text-sm text-[#191c1d] placeholder:text-[#717783] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#005da7]"
+      />
     </form>
   );
 }
