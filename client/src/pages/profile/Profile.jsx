@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
-import { ChevronDown, Search, User, X, Trash2 } from "lucide-react";
+import { ChevronDown, Search, User, X } from "lucide-react";
 import { toast } from "sonner";
 import { updatePost, deletePost } from "@/services/postService";
 import Navbar from "@/components/layout/Navbar";
 import FollowButton from "@/components/social/FollowButton";
 import PostVoteControls from "@/components/posts/PostVoteControls";
 import PostCard from "@/components/posts/PostCard";
+import DeletePostConfirmationDialog from "@/components/posts/DeletePostConfirmationDialog";
 import { Editor } from "@tinymce/tinymce-react";
 import { authFetch } from "@/services/api";
 import { uploadEmbeddedImages } from "@/utils/editorImages";
@@ -547,7 +548,7 @@ export default function Profile() {
             {isOwnProfile ? (
               <button
                 onClick={() => setShowEditProfile(true)}
-                  className="w-full rounded-md bg-[#005da7] px-6 py-2 font-medium text-white transition-colors hover:bg-[#004883] sm:w-auto"
+                className="w-full rounded-md bg-[#005da7] px-6 py-2 font-medium text-white transition-colors hover:bg-[#004883] sm:w-auto"
               >
                 Edit Profile
               </button>
@@ -831,36 +832,46 @@ export default function Profile() {
                 <label htmlFor="profile-post-title-editor" className="mb-1 block text-lg font-semibold text-[#001c39]">
                   Title
                 </label>
-                <div className="relative min-h-[112px] [&_.tox-edit-area__iframe]:max-h-[112px] [&_.tox-edit-area__iframe]:overflow-y-auto">
-                  <Editor
-                    id="profile-post-title-editor"
-                    value={editTitle}
-                    onEditorChange={(newTitle) => setEditTitle(newTitle)}
-                    tinymceScriptSrc="/tinymce/tinymce.min.js"
-                    init={{
-                      license_key: "gpl",
-                      promotion: false,
-                      branding: false,
-                      menubar: false,
-                      statusbar: false,
-                      placeholder: "Format your title here",
-                      height: 100,
-                      forced_root_block: false,
-                      toolbar: "bold italic underline strikethrough",
-                      plugins: [],
-                      toolbar_sticky: false,
-                      skin_url: "/tinymce/skins/ui/oxide",
-                      valid_elements: "b,strong,i,em,u,s,br",
-                      element_format: "html",
-                      entity_encoding: "raw",
-                      content_style: `
-                        body {
-                          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                          font-size: 1rem;
-                        }
-                      `,
-                    }}
-                  />
+                <div className="overflow-hidden rounded-2xl border border-forum-border bg-white shadow-sm">
+                  <div className="relative min-h-[112px] [&_.tox]:border-0 [&_.tox-editor-header]:border-b [&_.tox-editor-header]:border-forum-border [&_.tox-edit-area__iframe]:max-h-[112px] [&_.tox-edit-area__iframe]:overflow-y-auto">
+                    <Editor
+                      id="profile-post-title-editor"
+                      tinymceScriptSrc="/tinymce/tinymce.min.js"
+                      value={editTitle}
+                      onEditorChange={(newTitle) => setEditTitle(newTitle)}
+                      init={{
+                        license_key: "gpl",
+                        promotion: false,
+                        branding: false,
+                        menubar: false,
+                        statusbar: false,
+                        placeholder: "Format your title here",
+                        height: 100,
+                        forced_root_block: false,
+                        toolbar: "bold italic underline strikethrough",
+                        plugins: [],
+                        toolbar_sticky: false,
+                        skin_url: "/tinymce/skins/ui/oxide",
+                        valid_elements: "b,strong,i,em,u,s,br",
+                        element_format: "html",
+                        entity_encoding: "raw",
+                        content_style: `
+                          html {
+                            overflow-y: auto !important; 
+                          }
+                          body {
+                            font-family: Inter, system-ui, sans-serif;
+                            font-size: 1rem;
+                            color: #191c1d;
+                            margin: 8px;
+                          }
+                          p {
+                            margin: 0; 
+                          }
+                        `,
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
               <div>
@@ -1163,35 +1174,16 @@ export default function Profile() {
           </div>
         </div>
       )}
-      {showDeleteDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="max-w-md rounded-lg bg-white p-5 sm:p-8">
-            <div className="mb-6 flex items-center gap-3">
-              <Trash2 className="h-6 w-6 text-red-600" />
-              <h3 className="text-xl font-semibold text-red-600">
-                Are you sure you want to delete this post?
-              </h3>
-            </div>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={handleDeletePost}
-                className="rounded-md bg-red-600 px-6 py-2 font-medium text-white"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setDeletePostId(null);
-                }}
-                className="rounded-md border border-[#c1d9fe] px-6 py-2 font-medium text-[#485e7e] transition-colors hover:border-[#005da7] hover:text-[#001c39]"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeletePostConfirmationDialog
+        open={showDeleteDialog}
+        title="Delete this post?"
+        message="This action cannot be undone. This will permanently remove your post and its discussion from the feed."
+        onConfirm={handleDeletePost}
+        onCancel={() => {
+          setShowDeleteDialog(false);
+          setDeletePostId(null);
+        }}
+      />
     </div>
   );
 }
