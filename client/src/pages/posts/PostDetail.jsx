@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { Tag, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { containsBlockedWord, cleanBlockedWords } from "@/utils/moderation";
 import PostVoteControls from "@/components/posts/PostVoteControls";
 import useRequireAuth from "@/hooks/useRequireAuth";
 import BookmarkButton from "@/components/posts/BookmarkButton";
+import DeletePostConfirmationDialog from "@/components/posts/DeletePostConfirmationDialog";
 import { stripHtml } from "@/utils/content";
 import {
   formatTagLabel,
@@ -32,6 +33,248 @@ function getStoredInterestCategories() {
   }
 }
 
+function formatCommentTime(dateString) {
+  const createdDate = new Date(dateString);
+  const now = new Date();
+
+  const isSameDay =
+    createdDate.getDate() === now.getDate() &&
+    createdDate.getMonth() === now.getMonth() &&
+    createdDate.getFullYear() === now.getFullYear();
+
+  if (isSameDay) {
+    return createdDate.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  return createdDate.toLocaleDateString("vi-VN");
+}
+
+function buildCommentLookup(commentList) {
+  return new Map(commentList.map((comment) => [comment.id, comment]));
+}
+
+function isTopLevelComment(comment, commentLookup) {
+  if (!comment.parent_id) {
+    return true;
+  }
+
+  return !commentLookup.get(comment.parent_id);
+}
+
+function getCommentRootId(comment, commentLookup) {
+  if (isTopLevelComment(comment, commentLookup)) {
+    return comment.id;
+  }
+
+  let current = comment;
+
+  while (current?.parent_id) {
+    const parent = commentLookup.get(current.parent_id);
+
+    if (!parent) {
+      break;
+    }
+
+    if (isTopLevelComment(parent, commentLookup)) {
+      return parent.id;
+    }
+
+    current = parent;
+  }
+
+  return current?.id ?? comment.id;
+}
+
+function isCommentInBranch(commentId, ancestorId, commentLookup) {
+  if (commentId === ancestorId) {
+    return true;
+  }
+
+  let current = commentLookup.get(commentId);
+
+  while (current?.parent_id) {
+    if (current.parent_id === ancestorId) {
+      return true;
+    }
+
+    current = commentLookup.get(current.parent_id);
+  }
+
+  return false;
+}
+
+function getReplyTargetUsername(comment, commentLookup) {
+  if (!comment.parent_id) {
+    return null;
+  }
+
+  return commentLookup.get(comment.parent_id)?.username ?? null;
+}
+
+function CommentItem({
+  c,
+  user,
+  post,
+  handleRequestDeleteComment,
+  handleStartReply,
+  handleSubmitReply,
+  onCancelReply,
+  replyingToUsername,
+  replyComment,
+  setReplyComment,
+  replyTo,
+  isNestedReply = false,
+}) {
+  const isReplying = replyTo === c.id;
+  const replyBoxRef = useRef(null);
+  const cancelTriggeredByPointerDownRef = useRef(false);
+
+  useEffect(() => {
+    if (!isReplying) {
+      return undefined;
+    }
+
+    const handleDocumentPointerDown = (event) => {
+      const replyBox = replyBoxRef.current;
+
+      if (!replyBox || replyBox.contains(event.target)) {
+        return;
+      }
+
+      const closed = onCancelReply?.();
+
+      if (!closed) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    document.addEventListener("pointerdown", handleDocumentPointerDown, true);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleDocumentPointerDown, true);
+    };
+  }, [isReplying, onCancelReply]);
+
+  return (
+    <div
+      className={`rounded-2xl p-4 transition ${replyTo === c.id ? "bg-forum-primarySoft/30" : "bg-transparent"
+        }`}
+    >
+      <div className="flex items-start gap-3">
+        <Link
+          to={`/profile/${c.username}`}
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-forum-border bg-forum-primarySoft text-forum-primary transition-transform hover:scale-105"
+        >
+          {c.avatar ? (
+            <img
+              src={c.avatar}
+              alt={c.username}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <User className="h-4 w-4" />
+          )}
+        </Link>
+
+        <div className="flex-1">
+          <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="font-medium text-forum-inkStrong">
+              {c.username}
+            </span>
+            {replyingToUsername && (
+              <span className="text-xs font-medium text-[#717783] sm:text-sm">
+                Replying to @{replyingToUsername}
+              </span>
+            )}
+            <span className="text-sm text-forum-subtle">
+              {formatCommentTime(c.created_at)}
+            </span>
+          </div>
+
+          <p className="text-sm leading-7 text-forum-muted">{c.content}</p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <button
+              type="button"
+              onClick={() => handleStartReply(c.id)}
+              className="text-sm font-semibold text-[#005da7] transition-colors hover:text-[#004883]"
+            >
+              Reply
+            </button>
+
+            {(c.user_id === user.id || post.user_id === user.id) && (
+              <button
+                type="button"
+                onClick={() => handleRequestDeleteComment(c.id)}
+                className="text-sm font-medium text-red-600 transition hover:text-red-700"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+
+          {isReplying && (
+            <form
+              onSubmit={(event) => handleSubmitReply(event, c.id)}
+              className={`mt-4 ${isNestedReply ? "-ml-5 w-[calc(100%+1.25rem)] sm:-ml-8 sm:w-[calc(100%+2rem)]" : ""}`}
+            >
+              <div
+                ref={replyBoxRef}
+                className="overflow-hidden rounded-2xl border border-forum-border bg-white shadow-sm"
+              >
+                <div className="flex flex-col gap-2 border-b border-forum-border px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#314867] sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-3 sm:gap-y-2">
+                  <span className="min-w-0 flex-1 break-words text-left leading-5">
+                    Replying to {c.username}
+                  </span>
+                  <button
+                    type="button"
+                    onPointerDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      cancelTriggeredByPointerDownRef.current = true;
+                      onCancelReply?.();
+                    }}
+                    onClick={(event) => {
+                      if (cancelTriggeredByPointerDownRef.current) {
+                        cancelTriggeredByPointerDownRef.current = false;
+                        return;
+                      }
+
+                      event.preventDefault();
+                      onCancelReply?.();
+                    }}
+                    className="w-full rounded-lg px-3 py-2 text-left text-[#005da7] transition-colors hover:bg-[#eef4ff] hover:text-[#004883] sm:w-auto sm:flex-shrink-0 sm:px-0 sm:py-0 sm:text-right sm:hover:bg-transparent"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <textarea
+                  value={replyComment}
+                  onChange={(event) => setReplyComment(event.target.value)}
+                  placeholder={`Reply to ${c.username}`}
+                  className="h-24 w-full resize-none border-0 px-4 py-4 text-sm text-forum-inkStrong placeholder:text-forum-subtle outline-none sm:h-28"
+                />
+                <div className="flex items-center justify-end border-t border-forum-border px-4 py-3">
+                  <button
+                    type="submit"
+                    className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-[#005da7] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#004883] sm:w-auto"
+                  >
+                    Submit Reply
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -42,8 +285,11 @@ export default function PostDetail() {
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletePostId, setDeletePostId] = useState(null);
+  const [showDeleteCommentDialog, setShowDeleteCommentDialog] = useState(false);
+  const [deleteCommentId, setDeleteCommentId] = useState(null);
 
   const [comment, setComment] = useState("");
+  const [replyComment, setReplyComment] = useState("");
   const [replyTo, setReplyTo] = useState(null);
 
   const [post, setPost] = useState(null);
@@ -109,12 +355,83 @@ export default function PostDetail() {
       const newComment = await res.json();
       setComments((prev) => [...prev, newComment]);
       setComment("");
-      setReplyTo(null);
 
       if (cleanedCommentText !== trimmedComment) {
         toast.success("Comment submitted with filtered content.");
       } else {
         toast.success("Comment added!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleStartReply = (commentId) => {
+    setReplyTo(commentId);
+    setReplyComment("");
+  };
+
+  const handleRequestDeleteComment = (commentId) => {
+    setDeleteCommentId(commentId);
+    setShowDeleteCommentDialog(true);
+  };
+
+  const handleCancelDeleteComment = () => {
+    setShowDeleteCommentDialog(false);
+    setDeleteCommentId(null);
+  };
+
+  const handleCancelReply = () => {
+    if (replyComment.trim()) {
+      const shouldDiscard = window.confirm("Discard this reply?");
+
+      if (!shouldDiscard) {
+        return false;
+      }
+    }
+
+    setReplyTo(null);
+    setReplyComment("");
+    return true;
+  };
+
+  const handleSubmitReply = async (e, parentId) => {
+    e.preventDefault();
+
+    const trimmedReply = replyComment.trim();
+
+    if (!trimmedReply) {
+      toast.error("Reply cannot be empty!");
+      return;
+    }
+
+    const cleanedReplyText = cleanBlockedWords(trimmedReply);
+
+    try {
+      const res = await authFetch(`/api/posts/${id}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: cleanedReplyText,
+          user_id: user.id,
+          parent_id: parentId,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to comment");
+
+      const newComment = await res.json();
+      setComments((prev) => [...prev, newComment]);
+      setReplyComment("");
+      setReplyTo(null);
+
+      if (cleanedReplyText !== trimmedReply) {
+        toast.success("Reply submitted with filtered content.");
+      } else {
+        toast.success("Reply added!");
       }
     } catch (err) {
       console.error(err);
@@ -195,11 +512,11 @@ export default function PostDetail() {
     );
   };
 
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Delete this comment?")) return;
+  const handleDeleteComment = async () => {
+    if (!deleteCommentId) return;
 
     try {
-      const res = await authFetch(`/api/posts/comments/${commentId}`, {
+      const res = await authFetch(`/api/posts/comments/${deleteCommentId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -209,9 +526,18 @@ export default function PostDetail() {
 
       if (!res.ok) throw new Error("Not allowed");
 
+      const commentLookup = buildCommentLookup(comments);
+
       setComments((prev) =>
-        prev.filter((c) => c.id !== commentId && c.parent_id !== commentId),
+        prev.filter((candidate) => !isCommentInBranch(candidate.id, deleteCommentId, commentLookup)),
       );
+
+      if (replyTo && isCommentInBranch(replyTo, deleteCommentId, commentLookup)) {
+        setReplyTo(null);
+        setReplyComment("");
+      }
+
+      handleCancelDeleteComment();
 
       toast.success("Comment deleted!");
     } catch (err) {
@@ -219,124 +545,71 @@ export default function PostDetail() {
     }
   };
 
-  const maxLevel = 3;
-
-  const formatCommentTime = (dateString) => {
-    const createdDate = new Date(dateString);
-    const now = new Date();
-
-    const isSameDay =
-      createdDate.getDate() === now.getDate() &&
-      createdDate.getMonth() === now.getMonth() &&
-      createdDate.getFullYear() === now.getFullYear();
-
-    if (isSameDay) {
-      return createdDate.toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+  const commentLookup = buildCommentLookup(comments);
+  const commentToDelete = deleteCommentId ? commentLookup.get(deleteCommentId) : null;
+  const topLevelComments = comments.filter((comment) => isTopLevelComment(comment, commentLookup));
+  const repliesByRootId = comments.reduce((groups, comment) => {
+    if (isTopLevelComment(comment, commentLookup)) {
+      return groups;
     }
 
-    return createdDate.toLocaleDateString("vi-VN");
-  };
+    const rootId = getCommentRootId(comment, commentLookup);
 
-  function CommentItem({
-    c,
-    user,
-    post,
-    handleDeleteComment,
-    setReplyTo,
-    replyTo,
-    level,
-  }) {
-    return (
-      <div
-        className={`rounded-2xl p-4 transition ${replyTo === c.id ? "bg-forum-primarySoft/30" : "bg-transparent"
-          }`}
-      >
-        <div className="flex items-start gap-3">
-          <Link
-            to={`/profile/${c.username}`}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-forum-border bg-forum-primarySoft text-forum-primary transition-transform hover:scale-105"
-          >
-            {c.avatar ? (
-              <img
-                src={c.avatar}
-                alt={c.username}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <User className="h-4 w-4" />
-            )}
-          </Link>
+    if (!groups[rootId]) {
+      groups[rootId] = [];
+    }
 
-          <div className="flex-1">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="font-medium text-forum-inkStrong">
-                {c.username}
-              </span>
-              <span className="text-sm text-forum-subtle">
-                {formatCommentTime(c.created_at)}
-              </span>
-            </div>
+    groups[rootId].push(comment);
+    return groups;
+  }, {});
 
-            <p className="text-sm leading-7 text-forum-muted">{c.content}</p>
+  const renderCommentThreads = () =>
+    topLevelComments.map((rootComment) => {
+      const replies = repliesByRootId[rootComment.id] || [];
 
-            {level < maxLevel && (
-              <button
-                type="button"
-                onClick={() => setReplyTo(c.id)}
-                className="mt-3 text-sm font-semibold text-[#005da7] transition-colors hover:text-[#004883]"
-              >
-                Reply
-              </button>
-            )}
-
-            {(c.user_id === user.id || post.user_id === user.id) && (
-              <button
-                type="button"
-                onClick={() => handleDeleteComment(c.id)}
-                className="ml-3 text-sm font-medium text-red-600 transition hover:text-red-700"
-              >
-                Delete
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const replyingComment = comments.find((c) => c.id === replyTo);
-
-  const renderComments = (parentId = null, level = 0) => {
-    if (level > maxLevel) return null;
-
-    return comments
-      .filter((c) => c.parent_id === parentId)
-      .map((c) => (
-        <div
-          key={c.id}
-          className={
-            level > 0
-              ? "ml-5 mt-4 border-l border-forum-border pl-4 sm:ml-8"
-              : ""
-          }
-        >
+      return (
+        <div key={rootComment.id} className="space-y-4">
           <CommentItem
-            c={c}
+            c={rootComment}
             user={user}
             post={post}
-            handleDeleteComment={handleDeleteComment}
-            setReplyTo={setReplyTo}
+            handleRequestDeleteComment={handleRequestDeleteComment}
+            handleStartReply={handleStartReply}
+            handleSubmitReply={handleSubmitReply}
+            onCancelReply={handleCancelReply}
+            replyingToUsername={null}
+            replyComment={replyComment}
+            setReplyComment={setReplyComment}
             replyTo={replyTo}
-            level={level}
+            isNestedReply={false}
           />
 
-          {level < maxLevel && renderComments(c.id, level + 1)}
+          {replies.length > 0 && (
+            <div className="ml-5 mt-4 border-l border-forum-border pl-4 sm:ml-8">
+              <div className="space-y-4">
+                {replies.map((reply) => (
+                  <CommentItem
+                    key={reply.id}
+                    c={reply}
+                    user={user}
+                    post={post}
+                    handleRequestDeleteComment={handleRequestDeleteComment}
+                    handleStartReply={handleStartReply}
+                    handleSubmitReply={handleSubmitReply}
+                    onCancelReply={handleCancelReply}
+                    replyingToUsername={getReplyTargetUsername(reply, commentLookup)}
+                    replyComment={replyComment}
+                    setReplyComment={setReplyComment}
+                    replyTo={replyTo}
+                    isNestedReply={true}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      ));
-  };
+      );
+    });
 
   if (!ready || !user || !post) return null;
 
@@ -442,14 +715,39 @@ export default function PostDetail() {
                         branding: false,
                         height:
                           window.innerWidth < 640
-                            ? 320
+                            ? 420
                             : window.innerWidth < 1024
-                              ? 380
-                              : 400,
+                              ? 500
+                              : 580,
                         menubar: true,
                         plugins: ["lists", "link", "image", "code", "table"],
                         toolbar:
                           "undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code",
+                        content_style: `
+                          body {
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                            font-size: 1rem;
+                            color: #191c1d;
+                            margin: 8px;
+                          }
+                          p {
+                            margin: 0 0 0.75em;
+                          }
+                          p:last-child {
+                            margin-bottom: 0;
+                          }
+                          img {
+                            display: block;
+                            max-width: 100%;
+                            height: auto;
+                          }
+                          @media (max-width: 640px) {
+                            img {
+                              max-height: 260px;
+                              width: auto;
+                            }
+                          }
+                        `,
                       }}
                     />
                   </div>
@@ -586,32 +884,14 @@ export default function PostDetail() {
           )}
         </section>
 
-        <aside className="w-full lg:sticky lg:top-28 lg:w-[380px] lg:flex-shrink-0">
-          <div className="rounded-[28px] border border-forum-border bg-forum-surface p-5 shadow-panel sm:p-6">
+        <aside className="w-full lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] lg:w-[380px] lg:flex-shrink-0">
+          <div className="flex h-full flex-col rounded-[28px] border border-forum-border bg-forum-surface p-5 shadow-panel sm:p-6 lg:overflow-hidden">
             <h2 className="mb-6 text-2xl font-semibold tracking-tight text-forum-inkStrong sm:text-3xl">
               Responses{" "}
               <span className="text-forum-subtle">({comments.length})</span>
             </h2>
 
             <form onSubmit={handleSubmitComment} className="mb-6">
-              {replyTo && replyingComment && (
-                <div className="mb-4 flex items-center justify-between rounded-2xl bg-forum-primarySoft/30 px-4 py-3 text-sm text-forum-muted">
-                  <span>
-                    Replying to{" "}
-                    <span className="font-semibold text-forum-primary">
-                      {replyingComment.username}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setReplyTo(null)}
-                    className="font-semibold text-[#005da7] transition-colors hover:text-[#004883]"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
-
               <div className="overflow-hidden rounded-2xl border border-forum-border bg-white shadow-sm">
                 <textarea
                   value={comment}
@@ -630,25 +910,30 @@ export default function PostDetail() {
               </div>
             </form>
 
-            <div className="space-y-2">{renderComments(null)}</div>
+            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+              {renderCommentThreads()}
+            </div>
           </div>
         </aside>
       </main>
 
-      {showDeleteDialog && (
+      <DeletePostConfirmationDialog
+        open={showDeleteDialog}
+        onConfirm={handleDeletePost}
+        onCancel={() => {
+          setShowDeleteDialog(false);
+          setDeletePostId(null);
+        }}
+      />
+
+      {showDeleteCommentDialog && deleteCommentId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-          {/* Lớp nền đen mờ + hiệu ứng blur */}
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-            onClick={() => {
-              setShowDeleteDialog(false);
-              setDeletePostId(null);
-            }}
+            onClick={handleCancelDeleteComment}
           ></div>
 
-          {/* Hộp thoại chính */}
-          <div className="relative w-full max-w-md transform overflow-hidden rounded-[24px] bg-white text-left align-middle shadow-2xl transition-all border border-gray-100">
-            {/* Nội dung bên trên */}
+          <div className="relative w-full max-w-md transform overflow-hidden rounded-[24px] border border-gray-100 bg-white text-left align-middle shadow-2xl transition-all">
             <div className="px-6 pb-6 pt-8 sm:p-8 sm:pb-6">
               <div className="sm:flex sm:items-start">
                 <div className="mx-auto flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-12 sm:w-12">
@@ -656,31 +941,45 @@ export default function PostDetail() {
                 </div>
                 <div className="mt-5 text-center sm:ml-4 sm:mt-0 sm:text-left">
                   <h3 className="text-xl font-bold text-gray-900">
-                    Delete this post?
+                    Delete this comment?
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                    This action cannot be undone. This will permanently remove your post and its discussion from the feed.
+                    {commentToDelete ? (
+                      commentToDelete.user_id === user.id ? (
+                        <>
+                          <span className="font-semibold text-gray-700">
+                            Your comment
+                          </span>{" "}
+                          and any replies under it will be removed permanently.
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-semibold text-gray-700">
+                            @{commentToDelete.username}'s comment
+                          </span>{" "}
+                          and any replies under it will be removed permanently.
+                        </>
+                      )
+                    ) : (
+                      "This action cannot be undone. The comment and any replies under it will be removed permanently."
+                    )}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Khu vực nút bấm bên dưới */}
-            <div className="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse sm:px-8">
+            <div className="bg-gray-50 px-6 py-4 sm:flex sm:flex-row sm:justify-end sm:gap-3 sm:px-8">
               <button
                 type="button"
-                onClick={handleDeletePost}
-                className="inline-flex w-full justify-center rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 sm:ml-3 sm:w-auto"
+                onClick={handleDeleteComment}
+                className="inline-flex w-full justify-center rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 sm:w-auto"
               >
                 Delete
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setDeletePostId(null);
-                }}
-                className="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 transition-colors hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                onClick={handleCancelDeleteComment}
+                className="inline-flex w-full justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 transition-colors hover:bg-gray-50 sm:w-auto"
               >
                 Cancel
               </button>

@@ -153,7 +153,7 @@ export default function ResetPassword() {
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                 <div className="rounded-xl border border-[#d6e7fb] bg-[#f5faff] px-4 py-3 text-sm leading-6 text-[#29507a]">
-                  Use at least 6 characters. After saving, you can sign in with your new password.
+                  Use at least 6 characters and choose a password different from your current one.
                 </div>
 
                 <div className="flex flex-col gap-2">
