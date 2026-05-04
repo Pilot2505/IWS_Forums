@@ -29,7 +29,7 @@ const findUserByPasswordResetToken = async (token) => {
 
   const [rows] = await pool.execute(
     `
-    SELECT id
+    SELECT id, password
     FROM users
     WHERE password_reset_token_hash = ?
       AND password_reset_token_expires_at > UTC_TIMESTAMP()
@@ -207,6 +207,12 @@ export const handleResetPassword = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    const isSameAsCurrentPassword = await bcrypt.compare(password, user.password);
+
+    if (isSameAsCurrentPassword) {
+      return res.status(400).json({ message: "New password must be different from your current password" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

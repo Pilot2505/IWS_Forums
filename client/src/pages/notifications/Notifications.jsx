@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   CheckCheck,
@@ -257,6 +257,7 @@ export default function Notifications() {
     requireToken: true,
   });
 
+  const loadMoreRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -288,8 +289,41 @@ export default function Notifications() {
     void fetchNotifications();
   }, [ready, user]);
 
+  useEffect(() => {
+    if (!hasMore || loading || loadingMore || notifications.length === 0) {
+      return undefined;
+    }
+
+    const target = loadMoreRef.current;
+
+    if (!target) {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+
+        if (entry?.isIntersecting) {
+          void handleLoadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "160px",
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(target);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, loading, loadingMore, notifications.length, cursor]);
+
   const handleLoadMore = async () => {
-    if (!cursor || loadingMore) {
+    if (!cursor || loadingMore || !hasMore) {
       return;
     }
 
@@ -397,15 +431,11 @@ export default function Notifications() {
         )}
 
         {hasMore && notifications.length > 0 && (
-          <div className="mt-6 flex justify-center">
-            <button
-              type="button"
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-              className="inline-flex items-center justify-center rounded-lg border border-[#c1c7d3] bg-white px-6 py-3 text-sm font-medium text-[#005da7] transition-colors hover:bg-[#f3f4f5] disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {loadingMore ? "Loading more notifications..." : "Load More"}
-            </button>
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <div ref={loadMoreRef} className="h-1 w-full" aria-hidden="true" />
+            {loadingMore && (
+              <p className="text-sm font-medium text-[#717783]">Loading more notifications...</p>
+            )}
           </div>
         )}
       </main>
