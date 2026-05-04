@@ -288,7 +288,7 @@ export default function CreatePost() {
                   autosave_ask_before_unload: false,
                   content_style: `
                     body {
-                      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                       font-size: 16px;
                       font-weight: 400;
                       line-height: 1.7;

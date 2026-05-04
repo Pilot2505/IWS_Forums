@@ -11,6 +11,7 @@ import { containsBlockedWord, cleanBlockedWords } from "@/utils/moderation";
 import PostVoteControls from "@/components/posts/PostVoteControls";
 import useRequireAuth from "@/hooks/useRequireAuth";
 import BookmarkButton from "@/components/posts/BookmarkButton";
+import DeletePostConfirmationDialog from "@/components/posts/DeletePostConfirmationDialog";
 import { stripHtml } from "@/utils/content";
 import {
   formatTagLabel,
@@ -117,7 +118,7 @@ function CommentItem({
   c,
   user,
   post,
-  handleDeleteComment,
+  handleRequestDeleteComment,
   handleStartReply,
   handleSubmitReply,
   onCancelReply,
@@ -208,7 +209,7 @@ function CommentItem({
             {(c.user_id === user.id || post.user_id === user.id) && (
               <button
                 type="button"
-                onClick={() => handleDeleteComment(c.id)}
+                onClick={() => handleRequestDeleteComment(c.id)}
                 className="text-sm font-medium text-red-600 transition hover:text-red-700"
               >
                 Delete
@@ -284,6 +285,8 @@ export default function PostDetail() {
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletePostId, setDeletePostId] = useState(null);
+  const [showDeleteCommentDialog, setShowDeleteCommentDialog] = useState(false);
+  const [deleteCommentId, setDeleteCommentId] = useState(null);
 
   const [comment, setComment] = useState("");
   const [replyComment, setReplyComment] = useState("");
@@ -367,6 +370,16 @@ export default function PostDetail() {
   const handleStartReply = (commentId) => {
     setReplyTo(commentId);
     setReplyComment("");
+  };
+
+  const handleRequestDeleteComment = (commentId) => {
+    setDeleteCommentId(commentId);
+    setShowDeleteCommentDialog(true);
+  };
+
+  const handleCancelDeleteComment = () => {
+    setShowDeleteCommentDialog(false);
+    setDeleteCommentId(null);
   };
 
   const handleCancelReply = () => {
@@ -499,11 +512,11 @@ export default function PostDetail() {
     );
   };
 
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Delete this comment?")) return;
+  const handleDeleteComment = async () => {
+    if (!deleteCommentId) return;
 
     try {
-      const res = await authFetch(`/api/posts/comments/${commentId}`, {
+      const res = await authFetch(`/api/posts/comments/${deleteCommentId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -516,13 +529,15 @@ export default function PostDetail() {
       const commentLookup = buildCommentLookup(comments);
 
       setComments((prev) =>
-        prev.filter((candidate) => !isCommentInBranch(candidate.id, commentId, commentLookup)),
+        prev.filter((candidate) => !isCommentInBranch(candidate.id, deleteCommentId, commentLookup)),
       );
 
-      if (replyTo && isCommentInBranch(replyTo, commentId, commentLookup)) {
+      if (replyTo && isCommentInBranch(replyTo, deleteCommentId, commentLookup)) {
         setReplyTo(null);
         setReplyComment("");
       }
+
+      handleCancelDeleteComment();
 
       toast.success("Comment deleted!");
     } catch (err) {
@@ -531,6 +546,7 @@ export default function PostDetail() {
   };
 
   const commentLookup = buildCommentLookup(comments);
+  const commentToDelete = deleteCommentId ? commentLookup.get(deleteCommentId) : null;
   const topLevelComments = comments.filter((comment) => isTopLevelComment(comment, commentLookup));
   const repliesByRootId = comments.reduce((groups, comment) => {
     if (isTopLevelComment(comment, commentLookup)) {
@@ -557,7 +573,7 @@ export default function PostDetail() {
             c={rootComment}
             user={user}
             post={post}
-            handleDeleteComment={handleDeleteComment}
+            handleRequestDeleteComment={handleRequestDeleteComment}
             handleStartReply={handleStartReply}
             handleSubmitReply={handleSubmitReply}
             onCancelReply={handleCancelReply}
@@ -577,7 +593,7 @@ export default function PostDetail() {
                     c={reply}
                     user={user}
                     post={post}
-                    handleDeleteComment={handleDeleteComment}
+                    handleRequestDeleteComment={handleRequestDeleteComment}
                     handleStartReply={handleStartReply}
                     handleSubmitReply={handleSubmitReply}
                     onCancelReply={handleCancelReply}
@@ -699,14 +715,39 @@ export default function PostDetail() {
                         branding: false,
                         height:
                           window.innerWidth < 640
-                            ? 320
+                            ? 420
                             : window.innerWidth < 1024
-                              ? 380
-                              : 400,
+                              ? 500
+                              : 580,
                         menubar: true,
                         plugins: ["lists", "link", "image", "code", "table"],
                         toolbar:
                           "undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code",
+                        content_style: `
+                          body {
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                            font-size: 1rem;
+                            color: #191c1d;
+                            margin: 8px;
+                          }
+                          p {
+                            margin: 0 0 0.75em;
+                          }
+                          p:last-child {
+                            margin-bottom: 0;
+                          }
+                          img {
+                            display: block;
+                            max-width: 100%;
+                            height: auto;
+                          }
+                          @media (max-width: 640px) {
+                            img {
+                              max-height: 260px;
+                              width: auto;
+                            }
+                          }
+                        `,
                       }}
                     />
                   </div>
@@ -876,20 +917,23 @@ export default function PostDetail() {
         </aside>
       </main>
 
-      {showDeleteDialog && (
+      <DeletePostConfirmationDialog
+        open={showDeleteDialog}
+        onConfirm={handleDeletePost}
+        onCancel={() => {
+          setShowDeleteDialog(false);
+          setDeletePostId(null);
+        }}
+      />
+
+      {showDeleteCommentDialog && deleteCommentId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-          {/* Lớp nền đen mờ + hiệu ứng blur */}
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-            onClick={() => {
-              setShowDeleteDialog(false);
-              setDeletePostId(null);
-            }}
+            onClick={handleCancelDeleteComment}
           ></div>
 
-          {/* Hộp thoại chính */}
-          <div className="relative w-full max-w-md transform overflow-hidden rounded-[24px] bg-white text-left align-middle shadow-2xl transition-all border border-gray-100">
-            {/* Nội dung bên trên */}
+          <div className="relative w-full max-w-md transform overflow-hidden rounded-[24px] border border-gray-100 bg-white text-left align-middle shadow-2xl transition-all">
             <div className="px-6 pb-6 pt-8 sm:p-8 sm:pb-6">
               <div className="sm:flex sm:items-start">
                 <div className="mx-auto flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-12 sm:w-12">
@@ -897,31 +941,45 @@ export default function PostDetail() {
                 </div>
                 <div className="mt-5 text-center sm:ml-4 sm:mt-0 sm:text-left">
                   <h3 className="text-xl font-bold text-gray-900">
-                    Delete this post?
+                    Delete this comment?
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                    This action cannot be undone. This will permanently remove your post and its discussion from the feed.
+                    {commentToDelete ? (
+                      commentToDelete.user_id === user.id ? (
+                        <>
+                          <span className="font-semibold text-gray-700">
+                            Your comment
+                          </span>{" "}
+                          and any replies under it will be removed permanently.
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-semibold text-gray-700">
+                            @{commentToDelete.username}'s comment
+                          </span>{" "}
+                          and any replies under it will be removed permanently.
+                        </>
+                      )
+                    ) : (
+                      "This action cannot be undone. The comment and any replies under it will be removed permanently."
+                    )}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Khu vực nút bấm bên dưới */}
-            <div className="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse sm:px-8">
+            <div className="bg-gray-50 px-6 py-4 sm:flex sm:flex-row sm:justify-end sm:gap-3 sm:px-8">
               <button
                 type="button"
-                onClick={handleDeletePost}
-                className="inline-flex w-full justify-center rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 sm:ml-3 sm:w-auto"
+                onClick={handleDeleteComment}
+                className="inline-flex w-full justify-center rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 sm:w-auto"
               >
                 Delete
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  setDeletePostId(null);
-                }}
-                className="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 transition-colors hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                onClick={handleCancelDeleteComment}
+                className="inline-flex w-full justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 transition-colors hover:bg-gray-50 sm:w-auto"
               >
                 Cancel
               </button>
