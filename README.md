@@ -45,6 +45,16 @@ DB_USER=root
 DB_PASSWORD=root
 DB_NAME=IWS
 
+JWT_SECRET=
+REFRESH_TOKEN_SECRET=
+JWT_EXPIRES_IN=1h
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=...
+SMTP_USER=...
+SMTP_PASS=...
+SMTP_FROM=...
+CLIENT_URL=...
 ```
 
 If your SMTP server uses a self-signed certificate in development, add `SMTP_REJECT_UNAUTHORIZED=false` to your `.env` file.
